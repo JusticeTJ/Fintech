@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<!--
+================================================================================
+  NOVA FINANCE — USER DASHBOARD (REFACTORED)
+  File:    dashboard.html
+  Purpose: The single authenticated-user control centre for the Nova Finance
+           fintech platform.
+
+  REFACTOR SUMMARY (changes made per the brief):
+  ------------------------------------------------
+  1.  "Send Money" and "Receive Money" are merged into a single "Transactions"
+      page. The new panel (panel-transactions) shows Send Money at the top and
+      Receive Money below it, each with a clear header.
+  2.  "Airtime & Data" and "Pay Bills" are merged into a single "Pay Bills"
+      page. The primary Pay Bills section sits at the top, with Airtime and
+      Data modules placed underneath as clearly-labelled subsections.
+  3.  "Quick Loans" and "Smart Savings" are merged into a single "OWealth"
+      page. Loans appear at the top, Savings directly below, each with its
+      own header.
+  4.  A virtual card component has been added to the Overview page, styled
+      with the brand's navy + gold palette and realistic card design elements.
+  5.  A "Virtual Card" section has been added to the Profile page, allowing
+      users to view card details (CVC, number, PIN) and block/manage the card.
+  6.  The Marketplace browse layout has been redesigned with product
+      categories ("Phones & Accessories", "Laptops & Accessories",
+      "Electronics"), "Previous"/"Next" navigation buttons under each row,
+      and reduced left-hand padding/margin for a more compact alignment.
+
+  All original logic (toasts, PIN modal, transaction tables, filters, CSV
+  export, etc.) has been preserved exactly as written. Only the navigation,
+  panel structure, and the specific new features listed above have been
+  changed. No external frameworks were introduced — this remains pure
+  vanilla HTML/CSS/JS with Bootstrap Icons as the only external resource.
+================================================================================
+-->
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Dashboard — Nova Finance</title>
+
+  <!-- Google Fonts: Sora + Figtree (brand fonts) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Figtree:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+  <!-- Bootstrap Icons (the ONLY external UI library used) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        rel="stylesheet">
+
+  <!-- Our own fully self-contained stylesheet -->
+  <link rel="stylesheet" href="Css/dashboard1.css">
+
+  <!-- Favicon link -->
+     <link rel="icon" type="image/png" href="favicon.png">
+</head>
+
+<body>
+
+  <!-- ================================================================
+       ACCESSIBILITY: Skip to main content link
+  ================================================================ -->
+  <a href="#dashContent" class="skip-link">Skip to dashboard content</a>
+
+
+  <!-- ================================================================
+       APP SHELL
+  ================================================================ -->
+  <div class="app-shell" id="appShell">
+
+    <!-- Mobile sidebar overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+
+
+    <!-- ============================================================
+         LEFT SIDEBAR — navigation menu
+         UPDATED: "Send Money" + "Receive Money" → "Transactions"
+                  "Airtime & Data" removed (merged into Pay Bills)
+                  "Quick Loans" + "Smart Savings" → "OWealth"
+    ============================================================ -->
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Dashboard navigation">
+
+      <!-- Brand row -->
+      <!-- FIX: Replaced SVG logo with cover.png image as requested -->
+      <!-- ERROR: Was using inline SVG logo -->
+      <!-- FIX: Now uses cover.png from image folder for visual consistency -->
+      <div class="sidebar-brand">
+        <a href="../index.html" class="brand-link" aria-label="Go to Nova Finance homepage">
+          <!-- Image logo using cover.png from image folder -->
+          <img class="brand-logo" src="images/vector/cover.png" alt="Nova Finance Logo" />
+          <span class="brand-text">NOVA<small>Finance</small></span>
+        </a>
+        <button type="button" class="sidebar-close-btn" id="sidebarCloseBtn"
+                aria-label="Close navigation menu">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <!-- Logged-in user mini card -->
+      <!-- FIX: Replaced text abbreviation "CO" with person-sq-2-min.jpg image -->
+      <!-- ERROR: Was using text abbreviation "CO" for avatar -->
+      <!-- FIX: Now uses person-sq-2-min.jpg from image folder for visual avatar -->
+      <div class="sidebar-user-card" aria-label="Logged in as Chukwuemeka Okafor">
+        <img class="avatar avatar-md" src="images/Birthday.jpg" alt="Chukwuemeka Okafor" />
+        <div class="sidebar-user-meta">
+          <strong>Chukwuemeka Okafor</strong>
+          <span class="badge badge-success badge-pill">
+            <i class="bi bi-patch-check-fill" aria-hidden="true"></i> Verified
+          </span>
+        </div>
+      </div>
+
+      <!-- Main navigation list — UPDATED to match the new merged panels -->
+      <ul class="sidebar-nav" role="list">
+
+        <li>
+          <button type="button" class="sidebar-nav-link is-active"
+                  data-panel="panel-overview" aria-current="page">
+            <i class="bi bi-grid-fill nav-icon" aria-hidden="true"></i>
+            <span class="nav-text">Overview</span>
+          </button>
+        </li>
+
+        <!-- Merged "Send Money" + "Receive Money" → "Transactions" -->
+        <li>
+          <button type="button" class="sidebar-nav-link" data-panel="panel-transactions">
+            <i class="bi bi-arrow-left-right nav-icon" aria-hidden="true"></i>
+            <span class="nav-text">Transactions</span>
+          </button>
+        </li>
+
+        <!-- Merged "Pay Bills" + "Airtime & Data" → "Pay Bills" -->
+        <li>
+          <button type="button" class="sidebar-nav-link" data-panel="panel-bills">
+            <i class="bi bi-receipt nav-icon" aria-hidden="true"></i>
+            <span class="nav-text">Pay Bills</span>
+          </button>
+        </li>
+
+        <li>
+          <button type="button" class="sidebar-nav-link" data-panel="panel-marketplace">
+            <i class="bi bi-shop-window nav-icon" aria-hidden="true"></i>
+            <span class="nav-text">Marketplace</span>
+            <span class="nav-badge" aria-label="2 pending orders">2</span>
+          </button>
+        </li>
+
+        <li>
+          <button type="button" class="sidebar-nav-link" data-panel="panel-insurance">
+            <i class="bi bi-shield-fill-check nav-icon" aria-hidden="true"></i>
+            <span class="nav-text">Insurance</span>
+          </button>
+        </li>
+
+        <!-- Merged "Quick Loans" + "Smart Savings" → "OWealth" -->
+        <li>
+          <button type="button" class="sidebar-nav-link" data-panel="panel-owealth">
+            <i class="bi bi-graph-up-arrow nav-icon" aria-hidden="true"></i>
+            <span class="nav-text">OWealth</span>
+          </button>
+        </li>
+
+        <li>
+          <button type="button" class="sidebar-nav-link" data-panel="panel-history">
+            <i class="bi bi-clock-history nav-icon" aria-hidden="true"></i>
+            <span class="nav-text">History</span>
+          </button>
+        </li>
+
+        <li>
+          <button type="button" class="sidebar-nav-link" data-panel="panel-profile">
+            <i class="bi bi-person-fill-gear nav-icon" aria-hidden="true"></i>
+            <span class="nav-text">Profile</span>
+          </button>
+        </li>
+
+      </ul>
+
+      <!-- Sidebar footer -->
+      <div class="sidebar-footer">
+        <a href="../index.html" class="sidebar-footer-link">
+          <i class="bi bi-house-fill nav-icon" aria-hidden="true"></i>
+          <span class="nav-text">Back to Website</span>
+        </a>
+        <button type="button" class="sidebar-footer-link is-logout" id="logoutBtn">
+          <i class="bi bi-box-arrow-left nav-icon" aria-hidden="true"></i>
+          <span class="nav-text">Log Out</span>
+        </button>
+      </div>
+
+    </aside>
+
+
+    <!-- ============================================================
+         MAIN AREA
+    ============================================================ -->
+    <div class="main-area" id="mainArea">
+
+      <!-- Top header bar -->
+      <header class="dash-header" id="dashHeader" role="banner">
+
+        <div class="header-left">
+          <button type="button" class="hamburger-btn" id="sidebarToggleBtn"
+                  aria-label="Open navigation menu" aria-expanded="false"
+                  aria-controls="sidebar">
+            <i class="bi bi-list" aria-hidden="true"></i>
+          </button>
+          <h1 class="header-page-title" id="pageTitle">Overview</h1>
+        </div>
+
+        <div class="header-center">
+          <div class="header-search" role="search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input type="search" id="globalSearchInput"
+                   placeholder="Search transactions, bills, contacts…"
+                   aria-label="Search the dashboard">
+          </div>
+        </div>
+
+        <div class="header-right">
+
+          <!-- Notifications -->
+          <div class="notif-wrap">
+            <button type="button" class="icon-btn" id="notifBtn"
+                    aria-haspopup="true" aria-expanded="false"
+                    aria-label="Notifications, 3 unread">
+              <i class="bi bi-bell-fill" aria-hidden="true"></i>
+              <span class="notif-badge" aria-hidden="true">3</span>
+            </button>
+            <div class="notif-dropdown" id="notifDropdown" role="menu"
+                 aria-label="Recent notifications" hidden>
+              <div class="notif-dropdown-head">
+                <strong>Notifications</strong>
+                <button type="button" class="notif-mark-read-btn" id="markAllReadBtn">
+                  Mark all read
+                </button>
+              </div>
+              <ul class="notif-list" role="list">
+                <li class="notif-item is-unread" role="menuitem">
+                  <span class="notif-icon is-success" aria-hidden="true">
+                    <i class="bi bi-check-circle-fill"></i>
+                  </span>
+                  <span class="notif-item-body">
+                    <strong>Transfer successful</strong>
+                    <p>₦50,000 sent to Emeka Nwosu</p>
+                    <time class="notif-item-time" datetime="2024-11-01T14:30">2 hours ago</time>
+                  </span>
+                </li>
+                <li class="notif-item is-unread" role="menuitem">
+                  <span class="notif-icon is-warning" aria-hidden="true">
+                    <i class="bi bi-safe2-fill"></i>
+                  </span>
+                  <span class="notif-item-body">
+                    <strong>Escrow order delivered</strong>
+                    <p>"Samsung Galaxy A54" was marked delivered</p>
+                    <time class="notif-item-time" datetime="2024-11-01T10:00">6 hours ago</time>
+                  </span>
+                </li>
+                <li class="notif-item" role="menuitem">
+                  <span class="notif-icon is-info" aria-hidden="true">
+                    <i class="bi bi-shield-fill-check"></i>
+                  </span>
+                  <span class="notif-item-body">
+                    <strong>Insurance premium due</strong>
+                    <p>Generator cover renewal — ₦800 on Nov 5</p>
+                    <time class="notif-item-time" datetime="2024-10-30T09:00">2 days ago</time>
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- User menu -->
+          <!-- FIX: Replaced text abbreviation "CO" with person-sq-2-min.jpg image -->
+          <!-- ERROR: Was using text abbreviation "CO" for avatar in header dropdown menu -->
+          <!-- FIX: Now uses person-sq-2-min.jpg from image folder for visual avatar -->
+          <div class="user-menu" id="userMenu">
+            <button type="button" class="user-menu-btn" id="userMenuBtn"
+                    aria-haspopup="true" aria-expanded="false"
+                    aria-label="Open user menu for Chukwuemeka Okafor">
+              <img class="avatar avatar-sm" src="images/Birthday.jpg" alt="Chukwuemeka Okafor" />
+              <span class="user-menu-name">Chukwuemeka</span>
+              <i class="bi bi-chevron-down" aria-hidden="true"></i>
+            </button>
+            <div class="user-dropdown" id="userDropdown" role="menu" hidden>
+              <button type="button" class="user-dropdown-link" data-panel="panel-profile" role="menuitem">
+                <i class="bi bi-person-fill" aria-hidden="true"></i> My Profile
+              </button>
+              <button type="button" class="user-dropdown-link" data-panel="panel-profile" role="menuitem">
+                <i class="bi bi-gear-fill" aria-hidden="true"></i> Settings
+              </button>
+              <hr class="dropdown-divider">
+              <button type="button" class="user-dropdown-link is-logout" id="userMenuLogoutBtn" role="menuitem">
+                <i class="bi bi-box-arrow-left" aria-hidden="true"></i> Log Out
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </header>
+
+
+      <!-- ============================================================
+           MAIN CONTENT — all panels
+      ============================================================ -->
+      <main class="dash-content" id="dashContent" role="main" aria-label="Dashboard content">
+
+
+        <!-- ========================================================
+             PANEL: OVERVIEW
+             UPDATED: Added a virtual card component in the hero grid.
+        ======================================================== -->
+        <section class="dash-panel is-active" id="panel-overview" aria-label="Overview panel">
+
+          <!-- Row 1: balance card + stat stack + VIRTUAL CARD (new) -->
+          <div class="overview-hero-grid">
+
+            <!-- Hero balance card (unchanged) -->
+            <div class="balance-card" aria-label="Account balance card">
+              <div class="balance-card-top">
+                <div>
+                  <p class="balance-label">Total Balance</p>
+                  <h2 class="balance-amount" id="balanceAmount" aria-live="polite">₦1,250,000.00</h2>
+                  <h2 class="balance-amount is-hidden" id="balanceAmountMasked" aria-live="polite">₦••••••••</h2>
+                </div>
+                <button type="button" class="balance-eye-btn" id="toggleBalanceBtn"
+                        aria-label="Hide balance amount" aria-pressed="false">
+                  <i class="bi bi-eye-fill" id="balanceEyeIcon" aria-hidden="true"></i>
+                </button>
+              </div>
+              <p class="balance-change">
+                <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+                +₦85,000 (7.3%) this month
+              </p>
+              <div class="balance-account-row">
+                <div>
+                  <p class="balance-acct-label">Account Number</p>
+                  <strong class="balance-acct-num" id="heroAccountNumber">0012 3456 7890</strong>
+                </div>
+                <button type="button" class="copy-btn" id="copyHeroAcctBtn"
+                        aria-label="Copy account number to clipboard" title="Copy account number">
+                  <i class="bi bi-copy" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div class="balance-card-bottom">
+                <span>Chukwuemeka Okafor</span>
+                <span class="balance-card-brand">
+                  <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i> NOVA
+                </span>
+              </div>
+              <span class="balance-card-circle balance-card-circle-1" aria-hidden="true"></span>
+              <span class="balance-card-circle balance-card-circle-2" aria-hidden="true"></span>
+            </div>
+
+            <!-- Stat stack (unchanged) -->
+            <div class="stat-stack">
+              <div class="stat-card" aria-label="Income this month">
+                <span class="stat-icon is-income" aria-hidden="true">
+                  <i class="bi bi-arrow-down-circle-fill"></i>
+                </span>
+                <span class="stat-body">
+                  <span class="stat-label">Income this month</span>
+                  <strong class="stat-value">₦450,000</strong>
+                  <span class="stat-change is-positive">
+                    <i class="bi bi-graph-up-arrow" aria-hidden="true"></i> +12% vs last month
+                  </span>
+                </span>
+              </div>
+              <div class="stat-card" aria-label="Expenses this month">
+                <span class="stat-icon is-expense" aria-hidden="true">
+                  <i class="bi bi-arrow-up-circle-fill"></i>
+                </span>
+                <span class="stat-body">
+                  <span class="stat-label">Expenses this month</span>
+                  <strong class="stat-value">₦180,000</strong>
+                  <span class="stat-change is-negative">
+                    <i class="bi bi-graph-up-arrow" aria-hidden="true"></i> +3% vs last month
+                  </span>
+                </span>
+              </div>
+              <div class="stat-card" aria-label="Savings this month">
+                <span class="stat-icon is-savings" aria-hidden="true">
+                  <i class="bi bi-piggy-bank-fill"></i>
+                </span>
+                <span class="stat-body">
+                  <span class="stat-label">Savings this month</span>
+                  <strong class="stat-value">₦270,000</strong>
+                  <span class="stat-change is-positive">
+                    <i class="bi bi-graph-up-arrow" aria-hidden="true"></i> +5% vs last month
+                  </span>
+                </span>
+              </div>
+            </div>
+
+          </div><!-- /.overview-hero-grid -->
+
+
+          <!-- NEW ROW: Virtual Card component (added per brief) -->
+          <div class="overview-virtual-card-row">
+            <div class="virtual-card-preview" aria-label="Your virtual card">
+              <div class="virtual-card-inner">
+                <!-- Card chip (SVG) -->
+                <svg class="vc-chip" viewBox="0 0 40 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <rect x="2" y="2" width="36" height="26" rx="4" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+                  <ellipse cx="20" cy="15" rx="12" ry="8" fill="rgba(255,255,255,0.08)"/>
+                  <circle cx="14" cy="15" r="3" fill="rgba(255,255,255,0.15)"/>
+                  <circle cx="26" cy="15" r="3" fill="rgba(255,255,255,0.15)"/>
+                </svg>
+                <!-- Card number -->
+                <div class="vc-number">•••• •••• •••• 7890</div>
+                <!-- Card holder + expiry -->
+                <div class="vc-footer">
+                  <span class="vc-holder">Chukwuemeka Okafor</span>
+                  <span class="vc-expiry">12/27</span>
+                </div>
+                <!-- Brand badge -->
+                <span class="vc-brand">NOVA</span>
+              </div>
+              <!-- Small action hint -->
+              <p class="vc-hint">
+                <i class="bi bi-shield-check" aria-hidden="true"></i>
+                Virtual card • Tap to manage in Profile
+              </p>
+            </div>
+
+            <!-- Quick actions beside the card -->
+            <div class="vc-actions">
+              <button type="button" class="btn btn-outline btn-sm" data-panel="panel-profile">
+                <i class="bi bi-eye" aria-hidden="true"></i> View Details
+              </button>
+              <button type="button" class="btn btn-outline btn-sm" id="vcCopyNumberBtn">
+                <i class="bi bi-copy" aria-hidden="true"></i> Copy Number
+              </button>
+            </div>
+          </div>
+
+
+          <!-- Row 2: analytics chart + quick transfer (unchanged) -->
+          <div class="overview-mid-grid">
+
+            <div class="card chart-card" aria-label="Six month balance trend">
+              <div class="card-head">
+                <h3 class="card-title">Balance Trend</h3>
+                <span class="chart-period-tag">Last 6 months</span>
+              </div>
+              <div class="chart-svg-wrap" id="analyticsChartWrap">
+                <svg viewBox="0 0 600 220" class="chart-svg" id="analyticsChartSvg"
+                     xmlns="http://www.w3.org/2000/svg" role="img"
+                     aria-label="Line chart of account balance trend from June to November">
+                  <defs>
+                    <linearGradient id="chartFillGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#C9A84C" stop-opacity="0.32"/>
+                      <stop offset="100%" stop-color="#C9A84C" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <line x1="0" y1="20" x2="600" y2="20" class="chart-grid-line"/>
+                  <line x1="0" y1="100" x2="600" y2="100" class="chart-grid-line"/>
+                  <line x1="0" y1="180" x2="600" y2="180" class="chart-grid-line"/>
+                  <path class="chart-area-fill" fill="url(#chartFillGradient)"
+                        d="M0,150 L100,165 L200,110 L300,130 L400,70 L500,90 L600,40
+                           L600,220 L0,220 Z"/>
+                  <path class="chart-line" fill="none"
+                        d="M0,150 L100,165 L200,110 L300,130 L400,70 L500,90 L600,40"/>
+                  <circle class="chart-point" cx="0"   cy="150" r="5" data-month="Jun" data-value="₦980,000"></circle>
+                  <circle class="chart-point" cx="100" cy="165" r="5" data-month="Jul" data-value="₦905,000"></circle>
+                  <circle class="chart-point" cx="200" cy="110" r="5" data-month="Aug" data-value="₦1,120,000"></circle>
+                  <circle class="chart-point" cx="300" cy="130" r="5" data-month="Sep" data-value="₦1,050,000"></circle>
+                  <circle class="chart-point" cx="400" cy="70"  r="5" data-month="Oct" data-value="₦1,310,000"></circle>
+                  <circle class="chart-point" cx="500" cy="90"  r="5" data-month="Nov" data-value="₦1,250,000"></circle>
+                  <circle class="chart-point" cx="600" cy="40"  r="6" data-month="Now" data-value="₦1,250,000" class="chart-point is-current"></circle>
+                </svg>
+                <div class="chart-tooltip" id="chartTooltip" hidden></div>
+              </div>
+              <div class="chart-x-labels" aria-hidden="true">
+                <span>Jun</span><span>Jul</span><span>Aug</span>
+                <span>Sep</span><span>Oct</span><span>Nov</span>
+              </div>
+            </div>
+
+            <!-- FIX: Replaced text initials with images in Quick Transfer section -->
+            <!-- ERROR: Was using text abbreviations (EN, AN, ND, IE) for beneficiary avatars -->
+            <!-- FIX: Now uses person-sq-1-min.jpg and person-sq-2-min.jpg from image folder for visual avatars -->
+            <div class="card quick-transfer-card" aria-label="Quick transfer to frequent recipients">
+              <div class="card-head">
+                <h3 class="card-title">Quick Transfer</h3>
+              </div>
+              <ul class="beneficiary-list" role="list">
+                <li>
+                  <button type="button" class="beneficiary-chip"
+                          data-name="Emeka Nwosu" data-bank="Zenith Bank" data-account="0123456789"
+                          aria-label="Send money to Emeka Nwosu at Zenith Bank">
+                    <img class="avatar avatar-sm" src="images/AI photography___AFRICAN ROYALTY 👑.jpg" alt="Emeka Nwosu" />
+                    <span class="beneficiary-meta">
+                      <strong>Emeka Nwosu</strong>
+                      <small>Zenith Bank</small>
+                    </span>
+                    <i class="bi bi-send-fill beneficiary-send-icon" aria-hidden="true"></i>
+                  </button>
+                </li>
+                <li>
+                  <button type="button" class="beneficiary-chip"
+                          data-name="Adaeze Nwachukwu" data-bank="GTBank (Guaranty Trust)" data-account="1234567890"
+                          aria-label="Send money to Adaeze Nwachukwu at GTBank">
+                    <img class="avatar avatar-sm" src="images/Adaeze.jpg" alt="Adaeze Nwachukwu" />
+                    <span class="beneficiary-meta">
+                      <strong>Adaeze Nwachukwu</strong>
+                      <small>GTBank</small>
+                    </span>
+                    <i class="bi bi-send-fill beneficiary-send-icon" aria-hidden="true"></i>
+                  </button>
+                </li>
+                <li>
+                  <button type="button" class="beneficiary-chip"
+                          data-name="Dr. Ngozi Dike" data-bank="First Bank" data-account="5555555555"
+                          aria-label="Send money to Dr. Ngozi Dike at First Bank">
+                    <img class="avatar avatar-sm" src="images/Mother.jpg" alt="Dr. Ngozi Dike" />
+                    <span class="beneficiary-meta">
+                      <strong>Dr. Ngozi Dike</strong>
+                      <small>First Bank</small>
+                    </span>
+                    <i class="bi bi-send-fill beneficiary-send-icon" aria-hidden="true"></i>
+                  </button>
+                </li>
+                <li>
+                  <button type="button" class="beneficiary-chip"
+                          data-name="Ikechukwu Eze" data-bank="Access Bank" data-account="9876543210"
+                          aria-label="Send money to Ikechukwu Eze at Access Bank">
+                    <img class="avatar avatar-sm" src="images/download.jpg" alt="Ikechukwu Eze" />
+                    <span class="beneficiary-meta">
+                      <strong>Ikechukwu Eze</strong>
+                      <small>Access Bank</small>
+                    </span>
+                    <i class="bi bi-send-fill beneficiary-send-icon" aria-hidden="true"></i>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Row 3: recent transactions (unchanged) -->
+          <div class="card recent-txn-card" aria-label="Recent transactions">
+            <div class="card-head">
+              <h3 class="card-title">Recent Transactions</h3>
+              <button type="button" class="card-link-action" data-panel="panel-history">
+                View All <i class="bi bi-arrow-right" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table" aria-label="Recent transactions list">
+                <thead>
+                  <tr>
+                    <th scope="col">Recipient / Description</th>
+                    <th scope="col">Bank</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="overviewTxnBody">
+                  <tr class="table-loading-row"><td colspan="6">Loading recent transactions…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section><!-- /#panel-overview -->
+
+
+        <!-- ========================================================
+             PANEL: TRANSACTIONS (merged Send + Receive)
+             NEW: Combines the old panel-send and panel-receive into
+             one vertically-stacked page with clear headers.
+        ======================================================== -->
+        <section class="dash-panel" id="panel-transactions" aria-label="Transactions panel">
+
+          <!-- ---- Send Money section (top) ---- -->
+          <div class="panel-section">
+            <h2 class="panel-section-title">
+              <i class="bi bi-send-fill text-gold" aria-hidden="true"></i> Send Money
+            </h2>
+            <div class="two-col-grid">
+              <!-- Main transfer form -->
+              <div class="card">
+                <div class="send-balance-row">
+                  <span>Available Balance</span>
+                  <strong class="text-gold" id="sendAvailableBalance">₦1,250,000.00</strong>
+                </div>
+                <form id="sendForm" novalidate aria-label="Money transfer form">
+                  <div class="field">
+                    <label class="field-label" for="recipientBank">Recipient Bank *</label>
+                    <select class="field-input" id="recipientBank" name="bank" required>
+                      <option value="">— Select Bank —</option>
+                      <option>Access Bank</option>
+                      <option>First Bank</option>
+                      <option>GTBank (Guaranty Trust)</option>
+                      <option>UBA (United Bank for Africa)</option>
+                      <option>Zenith Bank</option>
+                      <option>Opay</option>
+                      <option>Kuda Bank</option>
+                      <option>PalmPay</option>
+                      <option>Polaris Bank</option>
+                      <option>Stanbic IBTC</option>
+                      <option>Sterling Bank</option>
+                      <option>Wema Bank</option>
+                      <option>Nova Finance (Internal)</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="recipientAcct">Account Number *</label>
+                    <div class="input-with-action">
+                      <input type="tel" class="field-input" id="recipientAcct" name="accountNumber"
+                             placeholder="10-digit account number" maxlength="10" required
+                             inputmode="numeric" pattern="[0-9]{10}">
+                      <button type="button" class="btn btn-outline btn-sm" id="verifyAcctBtn">
+                        Verify
+                      </button>
+                    </div>
+                    <p class="field-hint" id="verifyStatusMsg" aria-live="polite"></p>
+                    <div class="verified-name-box is-hidden" id="verifiedNameBox" role="status" aria-live="polite">
+                      <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+                      <span id="verifiedNameText">—</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="transferAmount">Amount (₦) *</label>
+                    <div class="input-prefix-wrap">
+                      <span class="input-prefix" aria-hidden="true">₦</span>
+                      <input type="number" class="field-input" id="transferAmount" name="amount"
+                             placeholder="0.00" min="100" step="1" required
+                             aria-describedby="transferFeeNote">
+                    </div>
+                    <p class="field-hint" id="transferFeeNote" aria-live="polite">
+                      Transfer fee: <strong>₦10.00</strong> (flat fee for other banks)
+                    </p>
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="transferNote">Narration (optional)</label>
+                    <input type="text" class="field-input" id="transferNote" name="narration"
+                           placeholder="e.g. Payment for goods" maxlength="100">
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">
+                    Continue to PIN <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                  </button>
+                </form>
+              </div>
+
+              <!-- FIX: Replaced text initials with images in Recent Beneficiaries section -->
+              <!-- ERROR: Was using text abbreviations (EN, AN, ND, IE) for beneficiary avatars -->
+              <!-- FIX: Now uses person-sq-1-min.jpg and person-sq-2-min.jpg from image folder for visual avatars -->
+              <div class="card" aria-label="Recent beneficiaries">
+                <h4 class="card-title card-title-spaced">Recent Beneficiaries</h4>
+                <p class="card-sub">Tap a name to fill the form automatically.</p>
+                <ul class="beneficiary-list beneficiary-list-vertical" role="list">
+                  <li>
+                    <button type="button" class="beneficiary-chip"
+                            data-name="Emeka Nwosu" data-bank="Zenith Bank" data-account="7195409264">
+                      <img class="avatar avatar-sm" src="images/AI photography___AFRICAN ROYALTY 👑.jpg" alt="Emeka Nwosu" />
+                      <span class="beneficiary-meta"><strong>Emeka Nwosu</strong><small>Zenith Bank</small></span>
+                    </button>
+                  </li>
+                  <li>
+                    <button type="button" class="beneficiary-chip"
+                            data-name="Adaeze Nwachukwu" data-bank="GTBank (Guaranty Trust)" data-account="1234567890">
+                      <img class="avatar avatar-sm" src="images/Adaeze.jpg" alt="Adaeze Nwachukwu" />
+                      <span class="beneficiary-meta"><strong>Adaeze Nwachukwu</strong><small>GTBank</small></span>
+                    </button>
+                  </li>
+                  <li>
+                    <button type="button" class="beneficiary-chip"
+                            data-name="Dr. Ngozi Dike" data-bank="First Bank" data-account="52545157590">
+                      <img class="avatar avatar-sm" src="images/Mother.jpg" alt="Dr. Ngozi Dike" />
+                      <span class="beneficiary-meta"><strong>Dr. Ngozi Dike</strong><small>First Bank</small></span>
+                    </button>
+                  </li>
+                  <li>
+                    <button type="button" class="beneficiary-chip"
+                            data-name="Ikechukwu Eze" data-bank="Access Bank" data-account="98765287130">
+                      <img class="avatar avatar-sm" src="images/download.jpg" alt="Ikechukwu Eze" />
+                      <span class="beneficiary-meta"><strong>Ikechukwu Eze</strong><small>Access Bank</small></span>
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div><!-- /.two-col-grid -->
+          </div><!-- /.panel-section -->
+
+
+          <!-- ---- Receive Money section (bottom) ---- -->
+          <div class="panel-section panel-section-spaced">
+            <h2 class="panel-section-title">
+              <i class="bi bi-arrow-down-circle-fill text-gold" aria-hidden="true"></i> Receive Money
+            </h2>
+            <div class="centered-narrow">
+              <div class="card text-center">
+                <div class="receive-acct-block">
+                  <p class="receive-bank-name">Nova Finance · Providus Bank</p>
+                  <h2 class="receive-acct-num" id="receiveAccountNumber">0012 3456 7890</h2>
+                  <p class="receive-acct-holder">Chukwuemeka Okafor</p>
+                </div>
+                <div class="qr-wrap" aria-label="Decorative QR code placeholder for your account">
+                  <svg viewBox="0 0 120 120" class="qr-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <rect width="120" height="120" rx="8" fill="#FFFFFF"/>
+                    <rect x="2" y="2" width="116" height="116" rx="6" fill="none" stroke="#E4E8F0" stroke-width="2"/>
+                    <rect x="12" y="12" width="26" height="26" rx="3" fill="#0A1628"/>
+                    <rect x="18" y="18" width="14" height="14" rx="2" fill="#FFFFFF"/>
+                    <rect x="82" y="12" width="26" height="26" rx="3" fill="#0A1628"/>
+                    <rect x="88" y="18" width="14" height="14" rx="2" fill="#FFFFFF"/>
+                    <rect x="12" y="82" width="26" height="26" rx="3" fill="#0A1628"/>
+                    <rect x="18" y="88" width="14" height="14" rx="2" fill="#FFFFFF"/>
+                    <rect x="50" y="14" width="8" height="8" fill="#0A1628"/>
+                    <rect x="66" y="14" width="8" height="8" fill="#0A1628"/>
+                    <rect x="50" y="30" width="8" height="8" fill="#0A1628"/>
+                    <rect x="50" y="50" width="8" height="8" fill="#0A1628"/>
+                    <rect x="66" y="50" width="8" height="8" fill="#0A1628"/>
+                    <rect x="82" y="50" width="8" height="8" fill="#0A1628"/>
+                    <rect x="50" y="66" width="8" height="8" fill="#0A1628"/>
+                    <rect x="82" y="66" width="8" height="8" fill="#0A1628"/>
+                    <rect x="66" y="82" width="8" height="8" fill="#0A1628"/>
+                    <rect x="82" y="82" width="8" height="8" fill="#0A1628"/>
+                    <rect x="98" y="66" width="8" height="8" fill="#0A1628"/>
+                    <rect x="50" y="50" width="20" height="20" rx="4" fill="#C9A84C"/>
+                  </svg>
+                  <p class="qr-hint">Scan in the Nova app to send to this account instantly</p>
+                </div>
+                <div class="receive-action-row">
+                  <button type="button" class="btn btn-primary" id="copyReceiveAcctBtn">
+                    <i class="bi bi-copy" aria-hidden="true"></i> Copy Number
+                  </button>
+                  <button type="button" class="btn btn-outline" id="shareAcctBtn">
+                    <i class="bi bi-share-fill" aria-hidden="true"></i> Share
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div><!-- /.panel-section -->
+
+        </section><!-- /#panel-transactions -->
+
+
+        <!-- ========================================================
+             PANEL: PAY BILLS (merged Bills + Airtime + Data)
+             UPDATED: Pay Bills at the top, Airtime & Data underneath.
+        ======================================================== -->
+        <section class="dash-panel" id="panel-bills" aria-label="Pay Bills panel">
+
+          <!-- ---- Pay Bills section (top) ---- -->
+          <div class="panel-section">
+            <h2 class="panel-section-title">
+              <i class="bi bi-receipt text-gold" aria-hidden="true"></i> Pay Bills
+            </h2>
+            <div class="two-col-grid two-col-grid-wide-left">
+              <div class="card">
+                <!-- Tab bar (unchanged) -->
+                <div class="pill-tab-group" role="tablist" aria-label="Bill type">
+                  <button type="button" class="pill-tab is-active" data-tab="electricity"
+                          role="tab" aria-selected="true" aria-controls="bill-electricity">
+                    <i class="bi bi-lightning-fill" aria-hidden="true"></i> Electricity
+                  </button>
+                  <button type="button" class="pill-tab" data-tab="school"
+                          role="tab" aria-selected="false" aria-controls="bill-school">
+                    <i class="bi bi-mortarboard-fill" aria-hidden="true"></i> School Fees
+                  </button>
+                  <button type="button" class="pill-tab" data-tab="water"
+                          role="tab" aria-selected="false" aria-controls="bill-water">
+                    <i class="bi bi-droplet-fill" aria-hidden="true"></i> Water
+                  </button>
+                  <button type="button" class="pill-tab" data-tab="tv"
+                          role="tab" aria-selected="false" aria-controls="bill-tv">
+                    <i class="bi bi-tv-fill" aria-hidden="true"></i> TV
+                  </button>
+                  <button type="button" class="pill-tab" data-tab="betting"
+                          role="tab" aria-selected="false" aria-controls="bill-betting">
+                    <i class="bi bi-trophy-fill" aria-hidden="true"></i> Betting
+                  </button>
+                </div>
+
+                <!-- Electricity form (unchanged) -->
+                <form id="bill-electricity" class="bill-form is-active" role="tabpanel"
+                      data-mock-submit="Electricity token purchase successful!">
+                  <div class="field-row">
+                    <div class="field">
+                      <label class="field-label" for="elecProvider">Provider</label>
+                      <select class="field-input" id="elecProvider">
+                        <option>EEDC (Enugu/Imo/Abia)</option>
+                        <option>IKEDC (Ikeja)</option>
+                        <option>EKEDC (Eko)</option>
+                        <option>AEDC (Abuja)</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label class="field-label" for="elecType">Token Type</label>
+                      <select class="field-input" id="elecType">
+                        <option>Prepaid (Buy Token)</option>
+                        <option>Postpaid (Pay Bill)</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="meterNum">Meter Number *</label>
+                    <input type="tel" class="field-input" id="meterNum"
+                           placeholder="13-digit meter number" inputmode="numeric" required>
+                  </div>
+                  <div class="field">
+                    <label class="field-label">Quick Amount</label>
+                    <div class="amount-chip-group" data-target="elecAmount">
+                      <button type="button" class="amount-chip" data-amount="1000">₦1,000</button>
+                      <button type="button" class="amount-chip" data-amount="2000">₦2,000</button>
+                      <button type="button" class="amount-chip" data-amount="5000">₦5,000</button>
+                      <button type="button" class="amount-chip is-active" data-amount="10000">₦10,000</button>
+                      <button type="button" class="amount-chip" data-amount="20000">₦20,000</button>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="elecAmount">Amount (₦) *</label>
+                    <div class="input-prefix-wrap">
+                      <span class="input-prefix" aria-hidden="true">₦</span>
+                      <input type="number" class="field-input" id="elecAmount" value="10000" min="500">
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">
+                    Pay Electricity Bill <i class="bi bi-lightning-charge" aria-hidden="true"></i>
+                  </button>
+                </form>
+
+                <!-- School fees form (unchanged) -->
+                <form id="bill-school" class="bill-form" hidden role="tabpanel"
+                      data-mock-submit="School fee payment successful!">
+                  <div class="field">
+                    <label class="field-label" for="schoolName">Institution</label>
+                    <select class="field-input" id="schoolName">
+                      <option>IMSU (Imo State University)</option>
+                      <option>Alvan Ikoku Federal College of Education</option>
+                      <option>Imo State Polytechnic</option>
+                      <option>Federal University of Technology, Owerri</option>
+                      <option>Abia State University</option>
+                      <option>Other Institution</option>
+                    </select>
+                  </div>
+                  <div class="field-row">
+                    <div class="field">
+                      <label class="field-label" for="studentId">Student / Reg. Number *</label>
+                      <input type="text" class="field-input" id="studentId" placeholder="e.g. IMS/2021/0123" required>
+                    </div>
+                    <div class="field">
+                      <label class="field-label" for="schoolFeeAmount">Amount (₦) *</label>
+                      <div class="input-prefix-wrap">
+                        <span class="input-prefix" aria-hidden="true">₦</span>
+                        <input type="number" class="field-input" id="schoolFeeAmount" placeholder="0.00" required>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">
+                    Pay School Fees <i class="bi bi-mortarboard-fill" aria-hidden="true"></i>
+                  </button>
+                </form>
+
+                <!-- Water bill form (unchanged) -->
+                <form id="bill-water" class="bill-form" hidden role="tabpanel"
+                      data-mock-submit="Water bill payment successful!">
+                  <div class="field">
+                    <label class="field-label" for="waterCustomer">Customer Number *</label>
+                    <input type="tel" class="field-input" id="waterCustomer"
+                           placeholder="Imo Water Corp customer number" required>
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="waterAmount">Amount (₦) *</label>
+                    <div class="input-prefix-wrap">
+                      <span class="input-prefix" aria-hidden="true">₦</span>
+                      <input type="number" class="field-input" id="waterAmount" placeholder="0.00" required>
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">
+                    Pay Water Bill <i class="bi bi-droplet-fill" aria-hidden="true"></i>
+                  </button>
+                </form>
+
+                <!-- TV subscription form (unchanged) -->
+                <form id="bill-tv" class="bill-form" hidden role="tabpanel"
+                      data-mock-submit="TV subscription renewed successfully!">
+                  <div class="field-row">
+                    <div class="field">
+                      <label class="field-label" for="tvProvider">Provider</label>
+                      <select class="field-input" id="tvProvider">
+                        <option>DStv</option>
+                        <option>GOtv</option>
+                        <option>StarTimes</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label class="field-label" for="tvPackage">Package</label>
+                      <select class="field-input" id="tvPackage">
+                        <option>DStv Compact — ₦15,700/month</option>
+                        <option>DStv Compact Plus — ₦21,000/month</option>
+                        <option>DStv Premium — ₦37,500/month</option>
+                        <option>GOtv Max — ₦6,200/month</option>
+                        <option>GOtv Jolli — ₦4,150/month</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="smartcard">Smart Card Number *</label>
+                    <input type="tel" class="field-input" id="smartcard" placeholder="10-digit smart card number" required>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">
+                    Subscribe Now <i class="bi bi-tv-fill" aria-hidden="true"></i>
+                  </button>
+                </form>
+
+                <!-- Betting top-up form (unchanged) -->
+                <form id="bill-betting" class="bill-form" hidden role="tabpanel"
+                      data-mock-submit="Betting wallet funded successfully!">
+                  <div class="field-row">
+                    <div class="field">
+                      <label class="field-label" for="bettingPlatform">Platform</label>
+                      <select class="field-input" id="bettingPlatform">
+                        <option>Bet9ja</option>
+                        <option>SportyBet</option>
+                        <option>MSport</option>
+                        <option>1xBet</option>
+                        <option>Betking</option>
+                        <option>NairaBet</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label class="field-label" for="bettingUserId">User ID / Username *</label>
+                      <input type="text" class="field-input" id="bettingUserId" placeholder="Your betting ID" required>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field-label">Quick Top-up</label>
+                    <div class="amount-chip-group" data-target="bettingAmount">
+                      <button type="button" class="amount-chip" data-amount="500">₦500</button>
+                      <button type="button" class="amount-chip" data-amount="1000">₦1,000</button>
+                      <button type="button" class="amount-chip is-active" data-amount="2000">₦2,000</button>
+                      <button type="button" class="amount-chip" data-amount="5000">₦5,000</button>
+                      <button type="button" class="amount-chip" data-amount="10000">₦10,000</button>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="bettingAmount">Amount (₦) *</label>
+                    <div class="input-prefix-wrap">
+                      <span class="input-prefix" aria-hidden="true">₦</span>
+                      <input type="number" class="field-input" id="bettingAmount" value="2000" min="100">
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">
+                    Fund Betting Account <i class="bi bi-trophy-fill" aria-hidden="true"></i>
+                  </button>
+                </form>
+              </div>
+
+              <!-- Recent bill payments (unchanged) -->
+              <div class="card" aria-label="Recent bill payments">
+                <h4 class="card-title card-title-spaced">Recent Payments</h4>
+                <ul class="mini-list" role="list">
+                  <li class="mini-list-item">
+                    <span class="mini-list-icon is-electricity" aria-hidden="true"><i class="bi bi-lightning-fill"></i></span>
+                    <span class="mini-list-body"><strong>EEDC Electricity</strong><small>Meter: 45210067822</small></span>
+                    <span class="mini-list-amount">₦15,000</span>
+                  </li>
+                  <li class="mini-list-item">
+                    <span class="mini-list-icon is-tv" aria-hidden="true"><i class="bi bi-tv-fill"></i></span>
+                    <span class="mini-list-body"><strong>DStv Compact</strong><small>Smart: 1234567890</small></span>
+                    <span class="mini-list-amount">₦14,250</span>
+                  </li>
+                  <li class="mini-list-item">
+                    <span class="mini-list-icon is-school" aria-hidden="true"><i class="bi bi-mortarboard-fill"></i></span>
+                    <span class="mini-list-body"><strong>IMSU School Fee</strong><small>IMS/2021/1234</small></span>
+                    <span class="mini-list-amount">₦85,000</span>
+                  </li>
+                </ul>
+              </div>
+            </div><!-- /.two-col-grid -->
+          </div><!-- /.panel-section -->
+
+
+          <!-- ---- Airtime & Data section (bottom) ---- -->
+          <div class="panel-section panel-section-spaced">
+            <h2 class="panel-section-title">
+              <i class="bi bi-phone-fill text-gold" aria-hidden="true"></i> Airtime &amp; Data
+            </h2>
+            <div class="centered-narrow">
+              <div class="card">
+                <!-- Airtime / Data toggle -->
+                <div class="pill-tab-group" role="group" aria-label="Choose airtime or data">
+                  <button type="button" class="pill-tab is-active" data-type="airtime" aria-pressed="true">Airtime</button>
+                  <button type="button" class="pill-tab" data-type="data" aria-pressed="false">Data Bundle</button>
+                </div>
+
+                <!-- Network selector -->
+                <div class="network-grid" role="group" aria-label="Select network">
+                  <button type="button" class="network-card is-active" data-network="mtn" aria-pressed="true">
+                    <span class="network-name">MTN</span>
+                  </button>
+                  <button type="button" class="network-card" data-network="airtel" aria-pressed="false">
+                    <span class="network-name">Airtel</span>
+                  </button>
+                  <button type="button" class="network-card" data-network="glo" aria-pressed="false">
+                    <span class="network-name">Glo</span>
+                  </button>
+                  <button type="button" class="network-card" data-network="9mobile" aria-pressed="false">
+                    <span class="network-name">9Mobile</span>
+                  </button>
+                </div>
+
+                <!-- Airtime amount section -->
+                <div id="airtimeSection">
+                  <label class="field-label">Select Amount</label>
+                  <div class="amount-chip-group" data-target="airtimeAmount">
+                    <button type="button" class="amount-chip" data-amount="50">₦50</button>
+                    <button type="button" class="amount-chip" data-amount="100">₦100</button>
+                    <button type="button" class="amount-chip is-active" data-amount="200">₦200</button>
+                    <button type="button" class="amount-chip" data-amount="500">₦500</button>
+                    <button type="button" class="amount-chip" data-amount="1000">₦1,000</button>
+                    <button type="button" class="amount-chip" data-amount="2000">₦2,000</button>
+                  </div>
+                  <div class="field">
+                    <div class="input-prefix-wrap">
+                      <span class="input-prefix" aria-hidden="true">₦</span>
+                      <input type="number" class="field-input" id="airtimeAmount" value="200" min="50">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Data bundle section -->
+                <div id="dataSection" class="is-hidden">
+                  <label class="field-label">Select Bundle</label>
+                  <div class="bundle-grid">
+                    <button type="button" class="bundle-card is-active" data-size="1GB" data-price="₦300" data-validity="7 days" aria-pressed="true">
+                      <strong>1GB</strong><span>₦300</span><small>7 days</small>
+                    </button>
+                    <button type="button" class="bundle-card" data-size="2GB" data-price="₦500" data-validity="30 days" aria-pressed="false">
+                      <strong>2GB</strong><span>₦500</span><small>30 days</small>
+                    </button>
+                    <button type="button" class="bundle-card" data-size="5GB" data-price="₦1,200" data-validity="30 days" aria-pressed="false">
+                      <strong>5GB</strong><span>₦1,200</span><small>30 days</small>
+                    </button>
+                    <button type="button" class="bundle-card" data-size="10GB" data-price="₦2,000" data-validity="30 days" aria-pressed="false">
+                      <strong>10GB</strong><span>₦2,000</span><small>30 days</small>
+                    </button>
+                    <button type="button" class="bundle-card" data-size="20GB" data-price="₦3,500" data-validity="30 days" aria-pressed="false">
+                      <strong>20GB</strong><span>₦3,500</span><small>30 days</small>
+                    </button>
+                    <button type="button" class="bundle-card" data-size="50GB" data-price="₦8,000" data-validity="30 days" aria-pressed="false">
+                      <strong>50GB</strong><span>₦8,000</span><small>30 days</small>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="field field-spaced-top">
+                  <label class="field-label" for="airtimePhone">Phone Number *</label>
+                  <div class="input-with-action">
+                    <input type="tel" class="field-input" id="airtimePhone" value="0803 456 7890"
+                           placeholder="Phone number to recharge" required>
+                    <button type="button" class="btn btn-outline btn-sm" id="useMyNumberBtn" title="Use my own number">
+                      Me
+                    </button>
+                  </div>
+                </div>
+
+                <button type="button" class="btn btn-primary btn-block" id="buyAirtimeDataBtn">
+                  Buy Airtime <i class="bi bi-phone-fill" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+          </div><!-- /.panel-section -->
+
+        </section><!-- /#panel-bills -->
+
+
+        <!-- ========================================================
+             PANEL: MARKETPLACE
+             UPDATED: Redesigned browse layout with categories,
+             "Previous"/"Next" buttons, and compact padding.
+        ======================================================== -->
+        <section class="dash-panel" id="panel-marketplace" aria-label="Marketplace panel">
+
+          <div class="panel-top-row">
+            <div class="pill-tab-group" role="tablist" aria-label="Marketplace section">
+              <button type="button" class="pill-tab is-active" data-tab="browse" role="tab" aria-selected="true">Browse</button>
+              <button type="button" class="pill-tab" data-tab="listings" role="tab" aria-selected="false">My Listings</button>
+              <button type="button" class="pill-tab" data-tab="orders" role="tab" aria-selected="false">
+                Orders <span class="nav-badge nav-badge-inline">2</span>
+              </button>
+            </div>
+            <button type="button" class="btn btn-primary" id="openSellModalBtn">
+              <i class="bi bi-plus-lg" aria-hidden="true"></i> Sell an Item
+            </button>
+          </div>
+
+          <!-- ---- Browse tab (redesigned with categories + nav) ---- -->
+          <div id="market-browse" class="market-tab-panel is-active">
+
+            <!-- Category: Phones & Accessories -->
+            <!-- FIX: Replaced product icons with image placeholders for better visual representation -->
+            <!-- ERROR: Was using Bootstrap icons as product thumbnails -->
+            <!-- FIX: Now uses <img> tags with placeholder src - user will replace with actual product images -->
+            <div class="market-category">
+              <h4 class="market-category-title">Phones &amp; Accessories</h4>
+              <div class="product-grid" data-category="phones">
+                <div class="product-card">
+                  <!-- PLACEHOLDER: Replace src with actual Samsung Galaxy A54 image -->
+                  <div class="product-thumb"><img src="images/Samsung glaxyA04.png" alt="Samsung Galaxy A54" /></div>
+                  <div class="product-body">
+                    <h5>Samsung Galaxy A54</h5>
+                    <p class="product-seller">By Ikenna C. · ⭐4.9</p>
+                    <strong class="product-price">₦185,000</strong>
+                    <span class="escrow-tag"><i class="bi bi-shield-fill-check" aria-hidden="true"></i> Escrow Protected</span>
+                    <button type="button" class="btn btn-primary btn-sm btn-block">Buy Safely</button>
+                  </div>
+                </div>
+                <div class="product-card">
+                  <!-- PLACEHOLDER: Replace src with actual iPhone 13 Pro Max image -->
+                  <div class="product-thumb"><img src="/images/Iphone13promax.png" alt="iPhone 13 Pro Max" /></div>
+                  <div class="product-body">
+                    <h5>iPhone 13 Pro Max</h5>
+                    <p class="product-seller">By Chioma E. · ⭐4.8</p>
+                    <strong class="product-price">₦520,000</strong>
+                    <span class="escrow-tag"><i class="bi bi-shield-fill-check" aria-hidden="true"></i> Escrow Protected</span>
+                    <button type="button" class="btn btn-primary btn-sm btn-block">Buy Safely</button>
+                  </div>
+                </div>
+                <div class="product-card">
+                  <!-- PLACEHOLDER: Replace src with actual Apple AirPods Pro 2 image -->
+                  <div class="product-thumb"><img src="/images/Apple airpods pro 2.jpg" alt="Apple AirPods Pro 2" /></div>
+                  <div class="product-body">
+                    <h5>Apple AirPods Pro 2</h5>
+                    <p class="product-seller">By Emeka O. · ⭐4.7</p>
+                    <strong class="product-price">₦145,000</strong>
+                    <span class="escrow-tag"><i class="bi bi-shield-fill-check" aria-hidden="true"></i> Escrow Protected</span>
+                    <button type="button" class="btn btn-primary btn-sm btn-block">Buy Safely</button>
+                  </div>
+                </div>
+                <div class="product-card">
+                  <!-- PLACEHOLDER: Replace src with actual Samsung Galaxy Watch 6 image -->
+                  <div class="product-thumb"><img src="/images/smart watch.jpg" alt="Samsung Galaxy Watch 6" /></div>
+                  <div class="product-body">
+                    <h5>Samsung Galaxy Watch 6</h5>
+                    <p class="product-seller">By Ada N. · ⭐4.9</p>
+                    <strong class="product-price">₦210,000</strong>
+                    <span class="escrow-tag"><i class="bi bi-shield-fill-check" aria-hidden="true"></i> Escrow Protected</span>
+                    <button type="button" class="btn btn-primary btn-sm btn-block">Buy Safely</button>
+                  </div>
+                </div>
+              </div>
+              <!-- Navigation for this category -->
+              <div class="category-nav">
+                <button type="button" class="btn btn-outline btn-sm category-prev" data-category="phones">
+                  <i class="bi bi-chevron-left" aria-hidden="true"></i> Previous
+                </button>
+                <button type="button" class="btn btn-outline btn-sm category-next" data-category="phones">
+                  Next <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Category: Laptops & Accessories -->
+            <!-- FIX: Replaced product icons with image placeholders for better visual representation -->
+            <!-- ERROR: Was using Bootstrap icons as product thumbnails -->
+            <!-- FIX: Now uses <img> tags with placeholder src - user will replace with actual product images -->
+            <div class="market-category">
+              <h4 class="market-category-title">Laptops &amp; Accessories</h4>
+              <div class="product-grid" data-category="laptops">
+                <div class="product-card">
+                  <!-- PLACEHOLDER: Replace src with actual HP Pavilion 15 Laptop image -->
+                  <div class="product-thumb"><img src="images/HP EliteBook 830.jpg" alt="HP Pavilion 15 Laptop" /></div>
+                  <div class="product-body">
+                    <h5>HP Pavilion 15 Laptop</h5>
+                    <p class="product-seller">By Ngozi A. · ⭐4.7</p>
+                    <strong class="product-price">₦350,000</strong>
+                    <span class="escrow-tag"><i class="bi bi-shield-fill-check" aria-hidden="true"></i> Escrow Protected</span>
+                    <button type="button" class="btn btn-primary btn-sm btn-block">Buy Safely</button>
+                  </div>
+                </div>
+                <div class="product-card">
+                  <!-- PLACEHOLDER: Replace src with actual MacBook Air M2 image -->
+                  <div class="product-thumb"><img src="images/MacBook Pro 16.jpg" alt="MacBook Air M2" /></div>
+                  <div class="product-body">
+                    <h5>MacBook Air M2</h5>
+                    <p class="product-seller">By Oluchi D. · ⭐5.0</p>
+                    <strong class="product-price">₦720,000</strong>
+                    <span class="escrow-tag"><i class="bi bi-shield-fill-check" aria-hidden="true"></i> Escrow Protected</span>
+                    <button type="button" class="btn btn-primary btn-sm btn-block">Buy Safely</button>
+                  </div>
+                </div>
+                <div class="product-card">
+                  <!-- PLACEHOLDER: Replace src with actual Logitech MX Keys S image -->
+                  <div class="product-thumb"><img src="images/keyboard.jpg" alt="Logitech MX Keys S" /></div>
+                  <div class="product-body">
+                    <h5>Logitech MX Keys S</h5>
+                    <p class="product-seller">By Tunde B. · ⭐4.6</p>
+                    <strong class="product-price">₦45,000</strong>
+                    <span class="escrow-tag"><i class="bi bi-shield-fill-check" aria-hidden="true"></i> Escrow Protected</span>
+                    <button type="button" class="btn btn-primary btn-sm btn-block">Buy Safely</button>
+                  </div>
+                </div>
+                <div class="product-card">
+                  <!-- PLACEHOLDER: Replace src with actual Dell 27" 4K Monitor image -->
+                  <div class="product-thumb"><img src="images/Monitor.jpg" alt="Dell 27&quot; 4K Monitor" /></div>
+                  <div class="product-body">
+                    <h5>Dell 27" 4K Monitor</h5>
+                    <p class="product-seller">By Grace O. · ⭐4.8</p>
+                    <strong class="product-price">₦280,000</strong>
+                    <span class="escrow-tag"><i class="bi bi-shield-fill-check" aria-hidden="true"></i> Escrow Protected</span>
+                    <button type="button" class="btn btn-primary btn-sm btn-block">Buy Safely</button>
+                  </div>
+                </div>
+              </div>
+              <div class="category-nav">
+                <button type="button" class="btn btn-outline btn-sm category-prev" data-category="laptops">
+                  <i class="bi bi-chevron-left" aria-hidden="true"></i> Previous
+                </button>
+                <button type="button" class="btn btn-outline btn-sm category-next" data-category="laptops">
+                  Next <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Category: Electronics -->
+            <!-- FIX: Replaced product icons with image placeholders for better visual representation -->
+            <!-- ERROR: Was using Bootstrap icons as product thumbnails -->
+            <!-- FIX: Now uses <img> tags with placeholder src - user will replace with actual product images -->
+            <div class="market-category">
+              <h4 class="market-category-title">Electronics</h4>
+              <div class="product-grid" data-category="electronics">
+                <div class="product-card">
+                  <!-- PLACEHOLDER: Replace src with actual Binatone Standing Fan image -->
+                  <div class="product-thumb"><img src="images/Fan.jpg" alt="Binatone Standing Fan" /></div>
+                  <div class="product-body">
+                    <h5>Binatone Standing Fan</h5>
+                    <p class="product-seller">By Emeka O. · ⭐5.0</p>
+                    <strong class="product-price">₦28,000</strong>
+                    <span class="escrow-tag"><i class="bi bi-shield-fill-check" aria-hidden="true"></i> Escrow Protected</span>
+                    <button type="button" class="btn btn-primary btn-sm btn-block">Buy Safely</button>
+                  </div>
+                </div>
+                <div class="product-card">
+                  <!-- PLACEHOLDER: Replace src with actual Binatone Blender image -->
+                  <div class="product-thumb"><img src="images/Blender.jpg" alt="Binatone Blender" /></div>
+                  <div class="product-body">
+                    <h5>Binatone Blender (New)</h5>
+                    <p class="product-seller">By Ada N. · ⭐4.8</p>
+                    <strong class="product-price">₦18,500</strong>
+                    <span class="escrow-tag"><i class="bi bi-shield-fill-check" aria-hidden="true"></i> Escrow Protected</span>
+                    <button type="button" class="btn btn-primary btn-sm btn-block">Buy Safely</button>
+                  </div>
+                </div>
+                <div class="product-card">
+                  <!-- PLACEHOLDER: Replace src with actual Hisense 55" Smart TV image -->
+                  <div class="product-thumb"><img src="images/Hisence.jpg" alt="Hisense 55&quot; Smart TV" /></div>
+                  <div class="product-body">
+                    <h5>Hisense 55" Smart TV</h5>
+                    <p class="product-seller">By Chidi K. · ⭐4.5</p>
+                    <strong class="product-price">₦410,000</strong>
+                    <span class="escrow-tag"><i class="bi bi-shield-fill-check" aria-hidden="true"></i> Escrow Protected</span>
+                    <button type="button" class="btn btn-primary btn-sm btn-block">Buy Safely</button>
+                  </div>
+                </div>
+                <div class="product-card">
+                  <!-- PLACEHOLDER: Replace src with actual JBL Flip 6 Speaker image -->
+                  <div class="product-thumb"><img src="images/JBL.jpg" alt="JBL Flip 6 Speaker" /></div>
+                  <div class="product-body">
+                    <h5>JBL Flip 6 Speaker</h5>
+                    <p class="product-seller">By Funmi A. · ⭐4.9</p>
+                    <strong class="product-price">₦65,000</strong>
+                    <span class="escrow-tag"><i class="bi bi-shield-fill-check" aria-hidden="true"></i> Escrow Protected</span>
+                    <button type="button" class="btn btn-primary btn-sm btn-block">Buy Safely</button>
+                  </div>
+                </div>
+              </div>
+              <div class="category-nav">
+                <button type="button" class="btn btn-outline btn-sm category-prev" data-category="electronics">
+                  <i class="bi bi-chevron-left" aria-hidden="true"></i> Previous
+                </button>
+                <button type="button" class="btn btn-outline btn-sm category-next" data-category="electronics">
+                  Next <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+
+          </div><!-- /#market-browse -->
+
+          <!-- ---- My Listings tab (unchanged) ---- -->
+          <div id="market-listings" class="market-tab-panel">
+            <div class="empty-state">
+              <span class="empty-state-icon" aria-hidden="true"><i class="bi bi-shop-window"></i></span>
+              <h4>No Active Listings</h4>
+              <p>You haven't listed any items for sale yet. Items you list will appear here.</p>
+              <button type="button" class="btn btn-primary" id="openSellModalBtnEmpty">
+                <i class="bi bi-plus-lg" aria-hidden="true"></i> List My First Item
+              </button>
+            </div>
+          </div>
+
+          <!-- ---- Orders tab ---- -->
+          <!-- FIX: Replaced product icons with image placeholders for better visual representation -->
+          <!-- ERROR: Was using Bootstrap icons as order thumbnails -->
+          <!-- FIX: Now uses <img> tags with placeholder src - user will replace with actual product images -->
+          <div id="market-orders" class="market-tab-panel">
+            <div class="order-card" data-escrow-amount="185000">
+              <!-- PLACEHOLDER: Replace src with actual Samsung Galaxy A54 image -->
+              <div class="order-thumb"><img src="images/Samsung glaxyA04.png" alt="Samsung Galaxy A54" /></div>
+              <div class="order-body">
+                <strong>Samsung Galaxy A54</strong>
+                <p>Seller: Ikenna C. · Order #NOV-0047</p>
+                <p>Placed: Nov 1, 2024</p>
+              </div>
+              <div class="order-meta">
+                <span class="badge badge-warning" data-role="order-status">Delivered</span>
+                <div class="order-actions">
+                  <button type="button" class="btn btn-primary btn-sm" data-action="confirm-receipt">Confirm Receipt</button>
+                  <button type="button" class="btn btn-outline btn-sm" data-action="dispute">Dispute</button>
+                </div>
+              </div>
+            </div>
+            <div class="order-card" data-escrow-amount="350000">
+              <!-- PLACEHOLDER: Replace src with actual HP Pavilion 15 Laptop image -->
+              <div class="order-thumb"><img src="images/HP EliteBook 830.jpg" alt="HP Pavilion 15 Laptop" /></div>
+              <div class="order-body">
+                <strong>HP Pavilion 15 Laptop</strong>
+                <p>Seller: Ngozi A. · Order #NOV-0039</p>
+                <p>Placed: Oct 28, 2024</p>
+              </div>
+              <div class="order-meta">
+                <span class="badge badge-neutral" data-role="order-status">In Transit</span>
+                <p class="order-escrow-note"><i class="bi bi-safe2-fill" aria-hidden="true"></i> ₦350,000 held in escrow</p>
+              </div>
+            </div>
+          </div><!-- /#market-orders -->
+
+        </section><!-- /#panel-marketplace -->
+
+
+        <!-- ========================================================
+             PANEL: INSURANCE (unchanged)
+        ======================================================== -->
+        <section class="dash-panel" id="panel-insurance" aria-label="Insurance panel">
+          <div class="two-col-grid">
+            <div>
+              <div class="card card-spaced-bottom" aria-label="Active insurance policies">
+                <h3 class="card-title card-title-spaced">My Active Policies</h3>
+                <div class="policy-row">
+                  <span class="policy-icon is-generator" aria-hidden="true"><i class="bi bi-plugin"></i></span>
+                  <span class="policy-body">
+                    <strong>Generator Breakdown Cover</strong>
+                    <p>Mikano 7.5kVA · Premium: ₦800/month</p>
+                  </span>
+                  <span class="badge badge-success">Active</span>
+                </div>
+              </div>
+              <div class="card" aria-label="File a claim">
+                <h4 class="card-title card-title-spaced">File a Claim</h4>
+                <form id="claimForm" data-mock-submit="Claim submitted. Our team will review it within 24 hours.">
+                  <div class="field">
+                    <label class="field-label" for="claimPolicy">Select Policy</label>
+                    <select class="field-input" id="claimPolicy">
+                      <option>Generator Breakdown Cover</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="claimDesc">Describe the Issue *</label>
+                    <textarea class="field-input" id="claimDesc" rows="3"
+                              placeholder="Describe what happened in detail…" required></textarea>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">
+                    Submit Claim <i class="bi bi-send-fill" aria-hidden="true"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+            <div>
+              <h3 class="card-title card-title-spaced">Available Plans</h3>
+              <div class="plan-row">
+                <span class="policy-icon is-life" aria-hidden="true"><i class="bi bi-heart-pulse-fill"></i></span>
+                <span class="policy-body">
+                  <strong>Life Insurance</strong>
+                  <p>From ₦1,500/month · Up to ₦50M cover</p>
+                </span>
+                <button type="button" class="btn btn-outline btn-sm" data-action="get-cover" data-plan="Life Insurance">Get Cover</button>
+              </div>
+              <div class="plan-row is-active">
+                <span class="policy-icon is-generator" aria-hidden="true"><i class="bi bi-plugin"></i></span>
+                <span class="policy-body">
+                  <strong>Generator / Inverter Cover</strong>
+                  <p>₦800/month · Repairs + replacement</p>
+                </span>
+                <span class="badge badge-success">Active</span>
+              </div>
+              <div class="plan-row">
+                <span class="policy-icon is-fire" aria-hidden="true"><i class="bi bi-fire"></i></span>
+                <span class="policy-body">
+                  <strong>Market Shop Fire Insurance</strong>
+                  <p>From ₦500/month · All Imo State markets</p>
+                </span>
+                <button type="button" class="btn btn-outline btn-sm" data-action="get-cover" data-plan="Market Shop Fire Insurance">Get Cover</button>
+              </div>
+            </div>
+          </div>
+        </section><!-- /#panel-insurance -->
+
+
+        <!-- ========================================================
+             PANEL: OWEALTH (merged Quick Loans + Smart Savings)
+             NEW: Loans at the top, Savings directly below.
+        ======================================================== -->
+        <section class="dash-panel" id="panel-owealth" aria-label="OWealth panel">
+
+          <!-- ---- Quick Loans section (top) ---- -->
+          <div class="panel-section">
+            <h2 class="panel-section-title">
+              <i class="bi bi-cash-coin text-gold" aria-hidden="true"></i> Quick Loans
+            </h2>
+            <div class="two-col-grid">
+              <div class="card" aria-label="Loan calculator">
+                <div class="eligibility-banner">
+                  <i class="bi bi-patch-check-fill" aria-hidden="true"></i>
+                  You are eligible for up to <strong>₦500,000</strong>
+                </div>
+                <form id="loanForm" data-mock-submit="Loan application submitted! A decision is usually ready within 5 minutes.">
+                  <div class="field">
+                    <label class="field-label" for="loanAmountSlider">
+                      Loan Amount: <strong id="loanAmountLabel" class="text-gold">₦50,000</strong>
+                    </label>
+                    <input type="range" class="slider-input" id="loanAmountSlider"
+                           min="10000" max="500000" step="5000" value="50000"
+                           aria-label="Loan amount slider">
+                    <div class="input-prefix-wrap field-spaced-top">
+                      <span class="input-prefix" aria-hidden="true">₦</span>
+                      <input type="number" class="field-input" id="loanAmountInput"
+                             min="10000" max="500000" step="5000" value="50000">
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="loanTenure">Tenure (months)</label>
+                    <select class="field-input" id="loanTenure">
+                      <option value="1">1 month</option>
+                      <option value="3" selected>3 months</option>
+                      <option value="6">6 months</option>
+                      <option value="12">12 months</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="loanPurpose">Loan Purpose</label>
+                    <select class="field-input" id="loanPurpose">
+                      <option>Business Capital</option>
+                      <option>Education</option>
+                      <option>Medical Emergency</option>
+                      <option>Home Improvement</option>
+                      <option>Rent Payment</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+                  <div class="loan-summary-grid">
+                    <div class="loan-summary-cell">
+                      <span>Monthly Repayment</span>
+                      <strong id="loanMonthlyRepayment">₦—</strong>
+                    </div>
+                    <div class="loan-summary-cell">
+                      <span>Total Repayment</span>
+                      <strong id="loanTotalRepayment">₦—</strong>
+                    </div>
+                    <div class="loan-summary-cell">
+                      <span>Total Interest</span>
+                      <strong id="loanTotalInterest">₦—</strong>
+                    </div>
+                    <div class="loan-summary-cell">
+                      <span>Interest Rate</span>
+                      <strong>2.5% / month</strong>
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">
+                    Apply Now <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                  </button>
+                </form>
+              </div>
+              <div class="card" aria-label="Active loans">
+                <h4 class="card-title card-title-spaced">My Active Loan</h4>
+                <div class="active-loan-card">
+                  <div class="active-loan-head">
+                    <div>
+                      <p class="active-loan-type">Personal Loan</p>
+                      <strong>₦150,000</strong>
+                    </div>
+                    <span class="badge badge-success">Active</span>
+                  </div>
+                  <div class="progress-row">
+                    <div class="progress-labels">
+                      <small>Repaid: ₦50,000</small>
+                      <small>Remaining: ₦100,000</small>
+                    </div>
+                    <div class="progress-track" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" aria-label="33% repaid">
+                      <div class="progress-fill" style="width:33%"></div>
+                    </div>
+                  </div>
+                  <p class="active-loan-due">Next payment: <strong>₦16,667</strong> due Dec 15, 2024</p>
+                  <button type="button" class="btn btn-primary btn-block" id="makeRepaymentBtn">
+                    Make Repayment
+                  </button>
+                </div>
+              </div>
+            </div><!-- /.two-col-grid -->
+          </div><!-- /.panel-section -->
+
+
+          <!-- ---- Smart Savings section (bottom) ---- -->
+          <div class="panel-section panel-section-spaced">
+            <h2 class="panel-section-title">
+              <i class="bi bi-piggy-bank-fill text-gold" aria-hidden="true"></i> Smart Savings
+            </h2>
+            <div class="two-col-grid">
+              <div class="card" aria-label="Active savings goals">
+                <div class="card-head">
+                  <h3 class="card-title">My Savings Goals</h3>
+                  <button type="button" class="btn btn-primary btn-sm" id="openNewGoalModalBtn">+ New Goal</button>
+                </div>
+                <div id="savingsGoalList">
+                  <div class="goal-card" aria-label="House rent savings goal">
+                    <div class="goal-head">
+                      <span class="goal-icon" aria-hidden="true"><i class="bi bi-house-fill"></i></span>
+                      <span class="goal-meta">
+                        <strong>House Rent 2025</strong>
+                        <small>₦270,000 saved of ₦450,000 target</small>
+                      </span>
+                      <span class="goal-date">Jan 2025</span>
+                    </div>
+                    <div class="progress-row">
+                      <div class="progress-track" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-fill is-gold" style="width:60%"></div>
+                      </div>
+                      <span class="progress-pct">60%</span>
+                    </div>
+                  </div>
+                  <div class="goal-card" aria-label="Emergency fund savings goal">
+                    <div class="goal-head">
+                      <span class="goal-icon" aria-hidden="true"><i class="bi bi-safe2-fill"></i></span>
+                      <span class="goal-meta">
+                        <strong>Emergency Fund</strong>
+                        <small>₦85,000 saved of ₦200,000 target</small>
+                      </span>
+                      <span class="goal-date">Mar 2025</span>
+                    </div>
+                    <div class="progress-row">
+                      <div class="progress-track" role="progressbar" aria-valuenow="42" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-fill is-blue" style="width:42%"></div>
+                      </div>
+                      <span class="progress-pct">42%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card" aria-label="Savings interest summary">
+                <h4 class="card-title card-title-spaced">Interest Earned</h4>
+                <div class="interest-display">
+                  <strong class="text-gold">₦8,425</strong>
+                  <p>Total earned this year at 18% p.a.</p>
+                </div>
+                <div class="limit-row">
+                  <span>Savings Balance</span><strong>₦270,000</strong>
+                </div>
+                <div class="limit-row">
+                  <span>Interest Rate</span><strong class="text-gold">18% p.a.</strong>
+                </div>
+              </div>
+            </div><!-- /.two-col-grid -->
+          </div><!-- /.panel-section -->
+
+        </section><!-- /#panel-owealth -->
+
+
+        <!-- ========================================================
+             PANEL: TRANSACTION HISTORY (unchanged)
+        ======================================================== -->
+        <section class="dash-panel" id="panel-history" aria-label="Transaction history panel">
+          <div class="card">
+            <div class="card-head">
+              <h3 class="card-title">Transaction History</h3>
+              <button type="button" class="btn btn-outline btn-sm" id="exportHistoryBtn">
+                <i class="bi bi-download" aria-hidden="true"></i> Export CSV
+              </button>
+            </div>
+            <div class="filters-row">
+              <input type="search" class="field-input" id="historySearchInput"
+                     placeholder="Search transactions…" aria-label="Search transactions">
+              <select class="field-input" id="historyTypeFilter" aria-label="Filter by transaction type">
+                <option value="">All Types</option>
+                <option value="Transfer">Transfer</option>
+                <option value="Bill">Bill Payment</option>
+                <option value="Airtime">Airtime/Data</option>
+                <option value="Marketplace">Marketplace</option>
+              </select>
+              <input type="month" class="field-input" id="historyMonthFilter" aria-label="Filter by month">
+            </div>
+            <div class="table-wrap">
+              <table class="data-table" aria-label="Full transaction history">
+                <thead>
+                  <tr>
+                    <th scope="col">Type</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Date &amp; Time</th>
+                    <th scope="col">Reference</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="historyTxnBody">
+                  <tr class="table-loading-row"><td colspan="6">Loading transaction history…</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="empty-filter-msg is-hidden" id="historyEmptyMsg">No transactions match your filters.</p>
+          </div>
+        </section><!-- /#panel-history -->
+
+
+        <!-- ========================================================
+             PANEL: PROFILE & SETTINGS
+             UPDATED: Added a "Virtual Card" section with full
+             management features (view CVC, number, PIN, block/unblock).
+        ======================================================== -->
+        <section class="dash-panel" id="panel-profile" aria-label="Profile and settings panel">
+          <div class="two-col-grid">
+
+            <!-- Left column -->
+            <div>
+              <div class="card text-center card-spaced-bottom" aria-label="User profile information">
+                <div class="profile-avatar-wrap">
+                  <div class="avatar avatar-lg" id="profileAvatar" aria-hidden="true">CO</div>
+                  <button type="button" class="change-photo-btn" id="changePhotoBtn" aria-label="Change profile photo">
+                    <i class="bi bi-camera-fill" aria-hidden="true"></i>
+                  </button>
+                  <input type="file" id="avatarFileInput" accept="image/*" class="visually-hidden-input">
+                </div>
+                <h3 class="profile-name">Chukwuemeka Okafor</h3>
+                <p class="profile-email">chukwu.okafor@email.com</p>
+                <span class="badge badge-success badge-pill">
+                  <i class="bi bi-patch-check-fill" aria-hidden="true"></i> KYC Fully Verified
+                </span>
+              </div>
+              <div class="card" aria-label="Account tier and limits">
+                <h4 class="card-title card-title-spaced">Account Tier &amp; Limits</h4>
+                <div class="limit-row"><span>Daily Transfer Limit</span><strong>₦5,000,000</strong></div>
+                <div class="limit-row"><span>Single Transfer Limit</span><strong>₦2,000,000</strong></div>
+                <div class="limit-row"><span>Account Tier</span><strong class="text-gold">Tier 3 (Full KYC)</strong></div>
+              </div>
+            </div>
+
+            <!-- Right column -->
+            <div>
+
+              <!-- Personal Information (unchanged) -->
+              <div class="card card-spaced-bottom">
+                <h4 class="card-title card-title-spaced">Personal Information</h4>
+                <form id="personalInfoForm" data-mock-submit="Profile details saved successfully!">
+                  <div class="field-row">
+                    <div class="field">
+                      <label class="field-label" for="profileFirstName">First Name</label>
+                      <input type="text" class="field-input" id="profileFirstName" value="Chukwuemeka">
+                    </div>
+                    <div class="field">
+                      <label class="field-label" for="profileLastName">Last Name</label>
+                      <input type="text" class="field-input" id="profileLastName" value="Okafor">
+                    </div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field">
+                      <label class="field-label" for="profilePhone">Phone Number</label>
+                      <input type="tel" class="field-input" id="profilePhone" value="+234 803 456 7890">
+                    </div>
+                    <div class="field">
+                      <label class="field-label" for="profileEmail">Email Address</label>
+                      <input type="email" class="field-input" id="profileEmail" value="chukwu.okafor@email.com">
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="profileAddress">Address</label>
+                    <input type="text" class="field-input" id="profileAddress" value="15 Douglas Road, Owerri, Imo State">
+                  </div>
+                  <button type="submit" class="btn btn-primary">
+                    Save Changes <i class="bi bi-check-lg" aria-hidden="true"></i>
+                  </button>
+                </form>
+              </div>
+
+              <!-- Security (unchanged) -->
+              <div class="card card-spaced-bottom">
+                <h4 class="card-title card-title-spaced">Security</h4>
+                <div class="security-row">
+                  <span class="security-body">
+                    <strong>Transaction PIN</strong>
+                    <p>6-digit PIN used to authorise every payment</p>
+                  </span>
+                  <button type="button" class="btn btn-outline btn-sm" id="changePinOpenBtn">Change PIN</button>
+                </div>
+                <div class="security-row">
+                  <span class="security-body">
+                    <strong>Two-Factor Authentication (2FA)</strong>
+                    <p>Extra security code sent via SMS at login</p>
+                  </span>
+                  <label class="switch">
+                    <input type="checkbox" id="twoFaToggle" checked aria-label="Enable two-factor authentication">
+                    <span class="switch-track"><span class="switch-thumb"></span></span>
+                  </label>
+                </div>
+                <div class="security-row">
+                  <span class="security-body">
+                    <strong>Biometric Login</strong>
+                    <p>Use fingerprint or face ID to log in</p>
+                  </span>
+                  <label class="switch">
+                    <input type="checkbox" id="bioToggle" aria-label="Enable biometric login">
+                    <span class="switch-track"><span class="switch-thumb"></span></span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- NEW: Virtual Card management section -->
+              <div class="card" aria-label="Virtual card management">
+                <h4 class="card-title card-title-spaced">
+                  <i class="bi bi-credit-card-2-front-fill text-gold" aria-hidden="true"></i> Virtual Card
+                </h4>
+
+                <!-- Card preview (mini) -->
+                <div class="vc-profile-card">
+                  <div class="vc-profile-card-inner">
+                    <div class="vc-profile-top">
+                      <svg class="vc-chip vc-chip-sm" viewBox="0 0 40 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <rect x="2" y="2" width="36" height="26" rx="4" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+                        <ellipse cx="20" cy="15" rx="12" ry="8" fill="rgba(255,255,255,0.08)"/>
+                        <circle cx="14" cy="15" r="3" fill="rgba(255,255,255,0.15)"/>
+                        <circle cx="26" cy="15" r="3" fill="rgba(255,255,255,0.15)"/>
+                      </svg>
+                      <span class="vc-profile-brand">NOVA</span>
+                    </div>
+                    <div class="vc-profile-number" id="vcProfileNumber">•••• •••• •••• 7890</div>
+                    <div class="vc-profile-footer">
+                      <span class="vc-profile-holder">Chukwuemeka Okafor</span>
+                      <span class="vc-profile-expiry">12/27</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card details (toggleable) -->
+                <div class="vc-details-grid">
+                  <div class="vc-detail-item">
+                    <span class="vc-detail-label">Card Number</span>
+                    <div class="vc-detail-value-wrap">
+                      <span class="vc-detail-value" id="vcDetailNumber">**** **** **** 7890</span>
+                      <button type="button" class="vc-toggle-btn" data-target="vcDetailNumber" data-reveal="4532 1234 5678 7890">
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="vc-detail-item">
+                    <span class="vc-detail-label">CVC</span>
+                    <div class="vc-detail-value-wrap">
+                      <span class="vc-detail-value" id="vcDetailCvc">***</span>
+                      <button type="button" class="vc-toggle-btn" data-target="vcDetailCvc" data-reveal="123">
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="vc-detail-item">
+                    <span class="vc-detail-label">PIN</span>
+                    <div class="vc-detail-value-wrap">
+                      <span class="vc-detail-value" id="vcDetailPin">****</span>
+                      <button type="button" class="vc-toggle-btn" data-target="vcDetailPin" data-reveal="4567">
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Actions: block / manage -->
+                <div class="vc-actions-row">
+                  <button type="button" class="btn btn-danger-outline btn-sm" id="vcBlockBtn">
+                    <i class="bi bi-lock-fill" aria-hidden="true"></i> Block Card
+                  </button>
+                  <button type="button" class="btn btn-outline btn-sm" id="vcCopyDetailsBtn">
+                    <i class="bi bi-copy" aria-hidden="true"></i> Copy Details
+                  </button>
+                </div>
+
+                <p class="vc-status" id="vcStatus"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Active</p>
+              </div>
+
+            </div>
+
+          </div>
+        </section><!-- /#panel-profile -->
+
+      </main><!-- /#dashContent -->
+    </div><!-- /.main-area -->
+  </div><!-- /.app-shell -->
+
+
+  <!-- ============================================================
+       MOBILE BOTTOM NAVIGATION (updated to match new panels)
+  ============================================================ -->
+  <nav class="bottom-nav" id="bottomNav" aria-label="Mobile quick navigation">
+    <button type="button" class="bottom-nav-link is-active" data-panel="panel-overview" aria-current="page">
+      <i class="bi bi-grid-fill" aria-hidden="true"></i><span>Home</span>
+    </button>
+    <button type="button" class="bottom-nav-link" data-panel="panel-transactions">
+      <i class="bi bi-arrow-left-right" aria-hidden="true"></i><span>Transact</span>
+    </button>
+    <button type="button" class="bottom-nav-link" data-panel="panel-bills">
+      <i class="bi bi-receipt" aria-hidden="true"></i><span>Bills</span>
+    </button>
+    <button type="button" class="bottom-nav-link" data-panel="panel-marketplace">
+      <i class="bi bi-shop-window" aria-hidden="true"></i><span>Market</span>
+    </button>
+    <button type="button" class="bottom-nav-link" data-panel="panel-profile">
+      <i class="bi bi-person-fill" aria-hidden="true"></i><span>Profile</span>
+    </button>
+  </nav>
+
+
+  <!-- ============================================================
+       MODALS (all unchanged except the PIN modal's ID is preserved)
+  ============================================================ -->
+
+  <!-- PIN modal -->
+  <div class="modal-backdrop" id="pinModal" data-modal-close-on-backdrop="true" hidden>
+    <div class="modal-panel modal-sm" role="dialog" aria-modal="true" aria-labelledby="pinModalTitle">
+      <div class="modal-head">
+        <h5 class="modal-title" id="pinModalTitle">
+          <i class="bi bi-shield-lock-fill text-gold" aria-hidden="true"></i> Enter Transaction PIN
+        </h5>
+        <button type="button" class="modal-close-btn" data-modal-close aria-label="Close PIN entry">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="pinEntryStep">
+          <p class="pin-desc">Enter your 6-digit PIN to authorise this transfer. (Demo PIN: 123456)</p>
+          <div class="pin-box-row" role="group" aria-label="6-digit PIN entry">
+            <input type="password" class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="PIN digit 1">
+            <input type="password" class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="PIN digit 2">
+            <input type="password" class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="PIN digit 3">
+            <input type="password" class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="PIN digit 4">
+            <input type="password" class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="PIN digit 5">
+            <input type="password" class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="PIN digit 6">
+          </div>
+          <p class="field-hint is-error is-hidden" id="pinErrorMsg" aria-live="assertive">Incorrect PIN. Please try again.</p>
+          <div class="pin-summary">
+            <div class="pin-summary-row"><span>Sending to</span><strong id="pinSummaryRecipient">—</strong></div>
+            <div class="pin-summary-row"><span>Amount</span><strong id="pinSummaryAmount">—</strong></div>
+            <div class="pin-summary-row"><span>Fee</span><strong id="pinSummaryFee">—</strong></div>
+          </div>
+          <button type="button" class="btn btn-primary btn-block" id="confirmPinBtn">
+            Confirm Transfer <i class="bi bi-check-lg" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div id="pinSuccessStep" class="modal-success-state is-hidden" role="status" aria-live="polite">
+          <span class="modal-success-icon" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+          <h4>Transfer Successful!</h4>
+          <p id="pinSuccessMessage">Money sent successfully.</p>
+          <button type="button" class="btn btn-primary btn-block" id="pinSuccessDoneBtn">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sell Item modal (unchanged) -->
+  <div class="modal-backdrop" id="sellItemModal" data-modal-close-on-backdrop="true" hidden>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="sellModalTitle">
+      <div class="modal-head">
+        <h5 class="modal-title" id="sellModalTitle">
+          <i class="bi bi-shop text-gold" aria-hidden="true"></i> List an Item for Sale
+        </h5>
+        <button type="button" class="modal-close-btn" data-modal-close aria-label="Close">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="sellItemForm">
+          <div class="field">
+            <label class="field-label" for="itemName">Item Name *</label>
+            <input type="text" class="field-input" id="itemName" placeholder="e.g. Samsung Galaxy A54" required>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label" for="itemCategory">Category</label>
+              <select class="field-input" id="itemCategory">
+                <option>Electronics</option>
+                <option>Fashion &amp; Clothing</option>
+                <option>Food &amp; Groceries</option>
+                <option>Home &amp; Furniture</option>
+                <option>Books &amp; Education</option>
+                <option>Services</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label" for="itemPrice">Price (₦) *</label>
+              <div class="input-prefix-wrap">
+                <span class="input-prefix" aria-hidden="true">₦</span>
+                <input type="number" class="field-input" id="itemPrice" placeholder="0" required>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label" for="itemDesc">Description *</label>
+            <textarea class="field-input" id="itemDesc" rows="3"
+                      placeholder="Describe the item, its condition, and any other details…" required></textarea>
+          </div>
+          <div class="field">
+            <label class="field-label" for="itemPhotoInput">Photo (optional)</label>
+            <input type="file" class="field-input" id="itemPhotoInput" accept="image/*">
+            <img id="itemPhotoPreview" class="item-photo-preview is-hidden" alt="Selected item photo preview">
+          </div>
+          <p class="escrow-note">
+            <i class="bi bi-shield-fill-check text-gold" aria-hidden="true"></i>
+            All sales are Escrow-protected. Your earnings are held safely until the buyer confirms receipt.
+          </p>
+          <button type="submit" class="btn btn-primary btn-block">
+            List for Sale <i class="bi bi-arrow-right" aria-hidden="true"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Savings Goal modal (unchanged) -->
+  <div class="modal-backdrop" id="newGoalModal" data-modal-close-on-backdrop="true" hidden>
+    <div class="modal-panel modal-sm" role="dialog" aria-modal="true" aria-labelledby="newGoalModalTitle">
+      <div class="modal-head">
+        <h5 class="modal-title" id="newGoalModalTitle">
+          <i class="bi bi-piggy-bank-fill text-gold" aria-hidden="true"></i> New Savings Goal
+        </h5>
+        <button type="button" class="modal-close-btn" data-modal-close aria-label="Close">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="newGoalForm">
+          <div class="field">
+            <label class="field-label" for="goalName">Goal Name *</label>
+            <input type="text" class="field-input" id="goalName" placeholder="e.g. New Laptop" required>
+          </div>
+          <div class="field">
+            <label class="field-label" for="goalTarget">Target Amount (₦) *</label>
+            <div class="input-prefix-wrap">
+              <span class="input-prefix" aria-hidden="true">₦</span>
+              <input type="number" class="field-input" id="goalTarget" placeholder="0" min="1000" required>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label" for="goalDate">Target Date</label>
+            <input type="month" class="field-input" id="goalDate">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Create Goal</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change PIN modal (unchanged) -->
+  <div class="modal-backdrop" id="changePinModal" data-modal-close-on-backdrop="true" hidden>
+    <div class="modal-panel modal-sm" role="dialog" aria-modal="true" aria-labelledby="changePinModalTitle">
+      <div class="modal-head">
+        <h5 class="modal-title" id="changePinModalTitle">
+          <i class="bi bi-key-fill text-gold" aria-hidden="true"></i> Change Transaction PIN
+        </h5>
+        <button type="button" class="modal-close-btn" data-modal-close aria-label="Close">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="changePinForm">
+          <div class="field">
+            <label class="field-label" for="oldPinInput">Current PIN</label>
+            <input type="password" class="field-input" id="oldPinInput" maxlength="6" inputmode="numeric" required>
+          </div>
+          <div class="field">
+            <label class="field-label" for="newPinInput">New PIN (6 digits)</label>
+            <input type="password" class="field-input" id="newPinInput" maxlength="6" inputmode="numeric" required>
+          </div>
+          <div class="field">
+            <label class="field-label" for="confirmPinInput">Confirm New PIN</label>
+            <input type="password" class="field-input" id="confirmPinInput" maxlength="6" inputmode="numeric" required>
+          </div>
+          <p class="field-hint is-error is-hidden" id="changePinErrorMsg" aria-live="assertive"></p>
+          <button type="submit" class="btn btn-primary btn-block">Update PIN</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logout confirmation modal (unchanged) -->
+  <div class="modal-backdrop" id="logoutConfirmModal" data-modal-close-on-backdrop="true" hidden>
+    <div class="modal-panel modal-sm" role="dialog" aria-modal="true" aria-labelledby="logoutModalTitle">
+      <div class="modal-head">
+        <h5 class="modal-title" id="logoutModalTitle">Log Out</h5>
+        <button type="button" class="modal-close-btn" data-modal-close aria-label="Close">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="pin-desc">Are you sure you want to log out of Nova Finance?</p>
+        <div class="modal-action-row">
+          <button type="button" class="btn btn-outline btn-block" data-modal-close>Cancel</button>
+          <button type="button" class="btn btn-danger-outline btn-block" id="confirmLogoutBtn">Log Out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Toast container (unchanged) -->
+  <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+
+  <!-- Our JavaScript file (unchanged logic, but updated panel titles) -->
+  <script src="Assets/dashboard1.js"></script>
+</body>
+</html>

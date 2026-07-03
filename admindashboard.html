@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<!--
+================================================================================
+  NOVA FINANCE — ADMIN DASHBOARD ("COMMAND CENTER")
+  File:    admin-dashboard.html
+  Pairs with: admin-dashboard.css, admin-dashboard.js
+
+  WHAT THIS FILE IS
+  ------------------
+  This is the internal staff-facing control panel for the Nova Finance
+  platform. It is a Single Page Application (SPA): there is only ONE real
+  HTML page. Every "page" you see (Overview, Users & KYC, Transaction
+  Ledger, etc.) is really just a <section> that JavaScript shows or hides.
+  Nothing here ever triggers a full browser page reload when you click a
+  sidebar link.
+
+  WHY IT LOOKS LIKE THE USER DASHBOARD
+  -------------------------------------
+  This admin panel intentionally reuses the exact same design language as
+  the customer-facing dashboard (dashboard1.html / dashboard1.css):
+    - Same navy + gold colour palette
+    - Same Sora (headings) + Figtree (body) font pairing
+    - Same card / table / badge / modal / toast components
+    - Same "data-panel" click-routing pattern for navigation
+  This is deliberate: a staff member who has seen the customer app should
+  instantly recognise the visual language of the admin app. Consistency
+  reads as maturity and reduces the learning curve for new admins.
+
+  TECH STACK (per project requirements)
+  --------------------------------------
+  - Semantic HTML5 only.
+  - Pure custom CSS (Flexbox + Grid). NO Bootstrap CSS / Tailwind framework.
+  - Vanilla JavaScript (DOM manipulation). NO React / Vue / jQuery.
+  - Bootstrap ICONS (font icons) via CDN are allowed — this is icons-only,
+    not the Bootstrap CSS framework.
+  - Inline SVG is used for the brand logo and the small uptime sparkline
+    chart (no chart libraries).
+
+  BACKEND INTEGRATION (PHP) — READ THIS
+  --------------------------------------
+  Right now every table on this page is filled with realistic MOCK data
+  defined inside admin-dashboard.js. Every place that mock data is loaded
+  is wrapped in a small function (e.g. fetchUsers(), fetchTransactions())
+  that already RETURNS A PROMISE — exactly like a real fetch() call would.
+  When your PHP backend is ready, you only need to change the INSIDE of
+  those functions to call your real API endpoints (e.g.
+  fetch('/api/admin/users.php')) — nothing else in this file needs to
+  change, because the HTML ids/classes that the renderers write into
+  already exist and are stable. Look for the big
+  "BACKEND INTEGRATION POINT" comments inside admin-dashboard.js.
+
+  ACCESSIBILITY (for users with visual impairments)
+  ----------------------------------------------------
+  - A "skip to content" link is provided for keyboard/screen-reader users.
+  - All icon-only buttons have aria-label.
+  - All form inputs have a matching <label for="...">.
+  - Tables use proper <thead>/<th scope="col"> markup.
+  - Modals use role="dialog" + aria-modal="true" + aria-labelledby.
+  - Live regions (aria-live) announce toast messages and search results.
+  - Colour is never the ONLY signal — status badges also carry text.
+================================================================================
+-->
+<html lang="en">
+<head>
+
+  <!-- Character encoding — required so the Naira sign (₦) renders correctly -->
+  <meta charset="UTF-8">
+
+  <!-- Makes the layout scale correctly on phones/tablets instead of showing a tiny "desktop" view -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- This is an internal admin tool — tell search engines to never index or follow links on this page -->
+  <meta name="robots" content="noindex, nofollow">
+
+  <!-- Browser tab title -->
+  <title>Command Center — Nova Finance Admin</title>
+
+  <!-- Preconnect speeds up the Google Fonts download by opening the connection early -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Same brand fonts as the user dashboard: Sora for headings, Figtree for body copy -->
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Figtree:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+  <!-- Bootstrap ICONS ONLY (icon font, not the Bootstrap CSS framework) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        rel="stylesheet">
+
+  <!-- Our own hand-written stylesheet for this admin panel -->
+  <link rel="stylesheet" href="Css/admindashboard.css">
+
+  <!-- Optional favicon — point this at your real favicon file once you wire up folders -->
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+
+<body>
+
+  <!-- ================================================================
+       ACCESSIBILITY: "Skip to content" link.
+       This is invisible until a keyboard user presses Tab — it lets
+       screen-reader / keyboard-only users jump straight past the sidebar
+       navigation instead of having to tab through 7+ nav links first.
+  ================================================================= -->
+  <a href="#adminContent" class="skip-link">Skip to admin dashboard content</a>
+
+
+  <!-- ================================================================
+       APP SHELL — the outer two-column grid: sidebar (left) + main area
+       (right). This wraps literally everything else on the page.
+  ================================================================= -->
+  <div class="app-shell" id="appShell">
+
+    <!-- Dark overlay shown behind the sidebar on mobile when it slides
+         open, so the rest of the page is visually "dimmed" and the user
+         knows the sidebar is a temporary overlay, not part of the page -->
+    <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+
+
+    <!-- ============================================================
+         LEFT SIDEBAR — brand, logged-in admin card, main navigation,
+         and the Log Out button anchored to the bottom.
+    ============================================================= -->
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Admin dashboard navigation">
+
+      <!-- ---- Brand row: Nova logo + "Command Center" sub-label ---- -->
+      <!-- FIX: Replaced SVG logo with cover.png image as requested -->
+      <!-- ERROR: Was using inline SVG logo -->
+      <!-- FIX: Now uses cover.png from image folder for visual consistency -->
+      <div class="sidebar-brand">
+        <a href="#" class="brand-link" aria-label="Nova Finance Command Center home">
+          <!-- Image logo using cover.png from image folder -->
+          <img class="brand-logo" src="images/vector/cover.png" alt="Nova Finance Logo" />
+          <span class="brand-text">NOVA<small>Command Center</small></span>
+        </a>
+        <!-- Closes the sidebar on mobile (only visible on small screens, see CSS) -->
+        <button type="button" class="sidebar-close-btn" id="sidebarCloseBtn"
+                aria-label="Close navigation menu">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <!-- ---- Logged-in admin mini card ---- -->
+      <!-- FIX: Replaced text abbreviation "AB" with person-sq-1-min.jpg image -->
+      <!-- ERROR: Was using text abbreviation "AB" for avatar -->
+      <!-- FIX: Now uses person-sq-1-min.jpg from image folder for visual avatar -->
+      <div class="sidebar-user-card" aria-label="Logged in as Arora, Super Admin">
+        <img class="avatar avatar-md" src="images/person-sq-1-min.jpg" alt="Aarora" />
+        <div class="sidebar-user-meta">
+          <strong>Arora Miguez</strong>
+          <span class="badge badge-gold badge-pill">
+            <i class="bi bi-shield-lock-fill" aria-hidden="true"></i> Super Admin
+          </span>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           MAIN NAV LIST
+           Every button below has a "data-panel" attribute. Clicking it
+           tells admin-dashboard.js which <section id="..."> to reveal.
+           This single attribute is the entire routing mechanism — see
+           setActivePanel() in admin-dashboard.js.
+      ============================================================= -->
+      <ul class="sidebar-nav" role="list">
+
+        <li>
+          <button type="button" class="sidebar-nav-link is-active"
+                  data-panel="panel-overview" aria-current="page">
+            <i class="bi bi-grid-fill nav-icon" aria-hidden="true"></i>
+            <span class="nav-text">Overview</span>
+          </button>
+        </li>
+
+        <li>
+          <button type="button" class="sidebar-nav-link" data-panel="panel-users">
+            <i class="bi bi-people-fill nav-icon" aria-hidden="true"></i>
+            <span class="nav-text">Users &amp; KYC</span>
+            <!-- Badge shows how many KYC submissions are waiting — JS keeps this in sync -->
+            <span class="nav-badge" id="navBadgeKyc" aria-label="3 pending KYC reviews">3</span>
+          </button>
+        </li>
+
+        <li>
+          <button type="button" class="sidebar-nav-link" data-panel="panel-ledger">
+            <i class="bi bi-journal-text nav-icon" aria-hidden="true"></i>
+            <span class="nav-text">Transaction Ledger</span>
+          </button>
+        </li>
+
+        <li>
+          <button type="button" class="sidebar-nav-link" data-panel="panel-owealth">
+            <i class="bi bi-graph-up-arrow nav-icon" aria-hidden="true"></i>
+            <span class="nav-text">Owealth</span>
+          </button>
+        </li>
+
+        <li>
+          <button type="button" class="sidebar-nav-link" data-panel="panel-billers">
+            <i class="bi bi-router-fill nav-icon" aria-hidden="true"></i>
+            <span class="nav-text">Billers &amp; Top-Ups</span>
+          </button>
+        </li>
+
+        <li>
+          <button type="button" class="sidebar-nav-link" data-panel="panel-marketplace">
+            <i class="bi bi-shop-window nav-icon" aria-hidden="true"></i>
+            <span class="nav-text">Mini Marketplace</span>
+            <span class="nav-badge" id="navBadgeListings" aria-label="6 listings pending approval">6</span>
+          </button>
+        </li>
+
+        <li>
+          <button type="button" class="sidebar-nav-link" data-panel="panel-settings">
+            <i class="bi bi-gear-fill nav-icon" aria-hidden="true"></i>
+            <span class="nav-text">System Settings</span>
+          </button>
+        </li>
+
+      </ul>
+
+      <!-- ---- Sidebar footer: Log Out, anchored to the bottom via CSS (margin-top:auto) ---- -->
+      <div class="sidebar-footer">
+        <button type="button" class="sidebar-footer-link is-logout" id="logoutBtn">
+          <i class="bi bi-box-arrow-left nav-icon" aria-hidden="true"></i>
+          <span class="nav-text">Log Out</span>
+        </button>
+      </div>
+
+    </aside><!-- /.sidebar -->
+
+
+    <!-- ============================================================
+         MAIN AREA — everything to the right of the sidebar: the top
+         header bar plus the scrollable content region.
+    ============================================================= -->
+    <div class="main-area" id="mainArea">
+
+      <!-- ---- Top header bar ---- -->
+      <header class="dash-header" id="dashHeader" role="banner">
+
+        <div class="header-left">
+          <!-- Hamburger button — only visible on tablet/mobile widths (see CSS media queries) -->
+          <button type="button" class="hamburger-btn" id="sidebarToggleBtn"
+                  aria-label="Open navigation menu" aria-expanded="false"
+                  aria-controls="sidebar">
+            <i class="bi bi-list" aria-hidden="true"></i>
+          </button>
+          <!-- This heading's text is rewritten by JS every time you switch panels -->
+          <h1 class="header-page-title" id="pageTitle">Overview</h1>
+        </div>
+
+        <div class="header-center">
+          <div class="header-search" role="search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <!--
+              Global search. On Enter, JS routes you to the Transaction
+              Ledger with the term pre-filled — a small but "premium"
+              cross-panel convenience admins expect from a command centre.
+            -->
+            <input type="search" id="globalSearchInput"
+                   placeholder="Search users, transactions, or bills…"
+                   aria-label="Search the admin dashboard">
+          </div>
+        </div>
+
+        <div class="header-right">
+
+          <!-- ---- Notifications bell + dropdown ---- -->
+          <div class="notif-wrap">
+            <button type="button" class="icon-btn" id="notifBtn"
+                    aria-haspopup="true" aria-expanded="false"
+                    aria-label="Notifications, 3 unread">
+              <i class="bi bi-bell-fill" aria-hidden="true"></i>
+              <span class="notif-badge" aria-hidden="true">3</span>
+            </button>
+            <div class="notif-dropdown" id="notifDropdown" role="menu"
+                 aria-label="Recent system notifications" hidden>
+              <div class="notif-dropdown-head">
+                <strong>Notifications</strong>
+                <button type="button" class="notif-mark-read-btn" id="markAllReadBtn">
+                  Mark all read
+                </button>
+              </div>
+              <ul class="notif-list" role="list">
+                <li class="notif-item is-unread" role="menuitem">
+                  <span class="notif-icon is-warning" aria-hidden="true">
+                    <i class="bi bi-patch-question-fill"></i>
+                  </span>
+                  <span class="notif-item-body">
+                    <strong>New KYC submission</strong>
+                    <p>Tobi Adewale uploaded ID documents for review</p>
+                    <time class="notif-item-time" datetime="2024-11-01T14:30">12 minutes ago</time>
+                  </span>
+                </li>
+                <li class="notif-item is-unread" role="menuitem">
+                  <span class="notif-icon is-danger" aria-hidden="true">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                  </span>
+                  <span class="notif-item-body">
+                    <strong>Flagged transaction</strong>
+                    <p>₦2,400,000 transfer flagged for manual review</p>
+                    <time class="notif-item-time" datetime="2024-11-01T10:00">2 hours ago</time>
+                  </span>
+                </li>
+                <li class="notif-item is-unread" role="menuitem">
+                  <span class="notif-icon is-info" aria-hidden="true">
+                    <i class="bi bi-router-fill"></i>
+                  </span>
+                  <span class="notif-item-body">
+                    <strong>Biller API degraded</strong>
+                    <p>KPLC Electricity is currently in maintenance mode</p>
+                    <time class="notif-item-time" datetime="2024-10-30T09:00">5 hours ago</time>
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- ---- Quick link straight to System Settings ---- -->
+          <button type="button" class="icon-btn" id="quickSettingsBtn" data-panel="panel-settings"
+                  aria-label="Go to System Settings">
+            <i class="bi bi-gear-fill" aria-hidden="true"></i>
+          </button>
+
+          <!-- ---- Logged-in admin menu ---- -->
+          <!-- FIX: Replaced text abbreviation "AB" with person-sq-1-min.jpg image -->
+          <!-- ERROR: Was using text abbreviation "AB" for avatar in header menu -->
+          <!-- FIX: Now uses person-sq-1-min.jpg from image folder for visual avatar -->
+          <div class="user-menu" id="userMenu">
+            <button type="button" class="user-menu-btn" id="userMenuBtn"
+                    aria-haspopup="true" aria-expanded="false"
+                    aria-label="Open account menu for Arora Miguez">
+              <img class="avatar avatar-sm" src="images/person-sq-1-min.jpg" alt="Arora miguez" />
+              <span class="user-menu-name">Adaeze</span>
+              <i class="bi bi-chevron-down" aria-hidden="true"></i>
+            </button>
+            <div class="user-dropdown" id="userDropdown" role="menu" hidden>
+              <button type="button" class="user-dropdown-link" data-panel="panel-settings" role="menuitem">
+                <i class="bi bi-person-fill" aria-hidden="true"></i> Account Settings
+              </button>
+              <button type="button" class="user-dropdown-link" id="activityLogBtn" role="menuitem">
+                <i class="bi bi-clock-history" aria-hidden="true"></i> My Activity Log
+              </button>
+              <hr class="dropdown-divider">
+              <button type="button" class="user-dropdown-link is-logout" id="userMenuLogoutBtn" role="menuitem">
+                <i class="bi bi-box-arrow-left" aria-hidden="true"></i> Log Out
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </header><!-- /.dash-header -->
+
+
+      <!-- ============================================================
+           MAIN CONTENT — all 7 admin panels live here. Only ONE
+           ".dash-panel" has the ".is-active" class at any time; the
+           rest are display:none via CSS. admin-dashboard.js controls
+           which one is active.
+      ============================================================= -->
+      <main class="dash-content" id="adminContent" role="main" aria-label="Admin dashboard content">
+
+
+        <!-- ========================================================
+             PANEL 1: OVERVIEW
+             The landing state — top KPI cards, the live transaction
+             feed, and an API/biller health side-widget.
+        ========================================================= -->
+        <section class="dash-panel is-active" id="panel-overview" aria-label="Overview panel">
+
+          <!-- ---- Page intro row: greeting + reporting period selector ---- -->
+          <div class="panel-intro-row">
+            <div>
+              <h2 class="panel-intro-title">Overview Dashboard</h2>
+              <p class="panel-intro-sub">Welcome back — here's how Nova is performing right now.</p>
+            </div>
+            <!-- A real <select> (not a fake dropdown) so it's fully keyboard + screen-reader usable -->
+            <div class="field period-select-wrap">
+              <label class="visually-hidden-label" for="overviewPeriodSelect">Reporting period</label>
+              <select class="field-input period-select" id="overviewPeriodSelect">
+                <option value="today">Today</option>
+                <option value="week" selected>This Week</option>
+                <option value="month">This Month</option>
+                <option value="quarter">This Quarter</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- ---- KPI metric cards row ---- -->
+          <div class="metric-grid" aria-label="Key performance indicators">
+
+            <div class="metric-card" aria-label="Total inflow this period">
+              <div class="metric-card-top">
+                <span class="metric-label">Total Inflow</span>
+                <span class="metric-icon is-success" aria-hidden="true"><i class="bi bi-arrow-down-circle-fill"></i></span>
+              </div>
+              <strong class="metric-value" id="metricTotalInflow">₦128,450,000</strong>
+              <span class="metric-change is-positive">
+                <i class="bi bi-graph-up-arrow" aria-hidden="true"></i> +12.4% vs last period
+              </span>
+            </div>
+
+            <div class="metric-card" aria-label="Active KYC verified users">
+              <div class="metric-card-top">
+                <span class="metric-label">Active Users (KYC Verified)</span>
+                <span class="metric-icon is-info" aria-hidden="true"><i class="bi bi-people-fill"></i></span>
+              </div>
+              <strong class="metric-value" id="metricActiveUsers">48,210</strong>
+              <span class="metric-change is-positive">
+                <i class="bi bi-graph-up-arrow" aria-hidden="true"></i> +3.8% vs last period
+              </span>
+            </div>
+
+            <div class="metric-card" aria-label="Overall platform revenue">
+              <div class="metric-card-top">
+                <span class="metric-label">Overall Revenue</span>
+                <span class="metric-icon is-gold" aria-hidden="true"><i class="bi bi-graph-up-arrow"></i></span>
+              </div>
+              <strong class="metric-value" id="metricOverallRevenue">₦9,820,000</strong>
+              <span class="metric-change is-positive">
+                <i class="bi bi-graph-up-arrow" aria-hidden="true"></i> +8.1% vs last period
+              </span>
+            </div>
+
+            <div class="metric-card" aria-label="API gateway uptime">
+              <div class="metric-card-top">
+                <span class="metric-label">API Gateway Uptime</span>
+                <span class="metric-icon is-success" aria-hidden="true"><i class="bi bi-broadcast"></i></span>
+              </div>
+              <strong class="metric-value" id="metricApiUptime">99.95%</strong>
+              <span class="metric-change is-positive">
+                <i class="bi bi-check-circle-fill" aria-hidden="true"></i> All systems normal
+              </span>
+            </div>
+
+          </div><!-- /.metric-grid -->
+
+
+          <!-- ---- Live Transaction Activity + API/Biller Health widget ---- -->
+          <div class="overview-mid-grid">
+
+            <!-- Live transaction table (left, wider column) -->
+            <div class="card" aria-label="Live transaction activity">
+              <div class="card-head">
+                <h3 class="card-title">Live Transaction Activity</h3>
+                <button type="button" class="card-link-action" data-panel="panel-ledger">
+                  View Full Ledger <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div class="table-wrap">
+                <table class="data-table" aria-label="Most recent platform transactions">
+                  <thead>
+                    <tr>
+                      <th scope="col">ID</th>
+                      <th scope="col">User</th>
+                      <th scope="col">Type</th>
+                      <th scope="col">Amount</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Timestamp</th>
+                      <th scope="col">Action</th>
+                    </tr>
+                  </thead>
+                  <!-- JS fills this in via renderOverviewLiveTable() -->
+                  <tbody id="overviewLiveTxnBody">
+                    <tr class="table-loading-row"><td colspan="7">Loading live transactions…</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- API / Biller health widget (right, narrower column) -->
+            <div class="card api-health-card" aria-label="API gateway and biller health">
+              <div class="card-head">
+                <h3 class="card-title">API Gateway Health</h3>
+                <span class="chart-period-tag">Last 24 hours</span>
+              </div>
+              <!-- Small inline SVG sparkline — no chart library used -->
+              <div class="chart-svg-wrap" id="apiHealthChartWrap">
+                <svg viewBox="0 0 280 100" class="chart-svg api-health-chart" id="apiHealthChartSvg"
+                     xmlns="http://www.w3.org/2000/svg" role="img"
+                     aria-label="Line chart of API success rate over the last 24 hours, trending upward">
+                  <defs>
+                    <linearGradient id="apiHealthFillGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#C9A84C" stop-opacity="0.30"/>
+                      <stop offset="100%" stop-color="#C9A84C" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <path class="chart-area-fill" fill="url(#apiHealthFillGradient)"
+                        d="M0,70 L40,60 L80,66 L120,40 L160,48 L200,28 L240,34 L280,18
+                           L280,100 L0,100 Z"/>
+                  <path class="chart-line" fill="none"
+                        d="M0,70 L40,60 L80,66 L120,40 L160,48 L200,28 L240,34 L280,18"/>
+                </svg>
+              </div>
+              <!-- List of billers + live success rate + status — JS fills this in -->
+              <ul class="api-health-list" id="apiHealthList" role="list">
+                <li class="table-loading-row-inline">Loading biller status…</li>
+              </ul>
+              <button type="button" class="card-link-action api-health-view-all" data-panel="panel-billers">
+                View All Billers <i class="bi bi-arrow-right" aria-hidden="true"></i>
+              </button>
+            </div>
+
+          </div><!-- /.overview-mid-grid -->
+
+        </section><!-- /#panel-overview -->
+
+
+        <!-- ========================================================
+             PANEL 2: USERS & KYC
+             Searchable directory of every registered customer, their
+             verification status, balance, and moderation actions.
+        ========================================================= -->
+        <section class="dash-panel" id="panel-users" aria-label="Users and KYC panel">
+
+          <div class="panel-intro-row">
+            <div>
+              <h2 class="panel-intro-title">Users &amp; KYC</h2>
+              <p class="panel-intro-sub">Review identities, monitor balances, and moderate accounts.</p>
+            </div>
+          </div>
+
+          <!-- ---- Small KPI strip specific to this panel ---- -->
+          <div class="mini-metric-row" aria-label="User and KYC summary">
+            <div class="mini-metric"><span>Total Users</span><strong id="miniTotalUsers">48,210</strong></div>
+            <div class="mini-metric"><span>KYC Verified</span><strong class="text-success" id="miniVerifiedUsers">44,512</strong></div>
+            <div class="mini-metric"><span>Pending KYC</span><strong class="text-warning" id="miniPendingUsers">3</strong></div>
+            <div class="mini-metric"><span>Frozen Accounts</span><strong class="text-danger" id="miniFrozenUsers">2</strong></div>
+          </div>
+
+          <!-- ---- Search + filter row ---- -->
+          <div class="card">
+            <div class="filters-row filters-row-users">
+              <div class="field">
+                <label class="visually-hidden-label" for="usersSearchInput">Search users</label>
+                <input type="search" class="field-input" id="usersSearchInput"
+                       placeholder="Search by name, email, or phone…" aria-label="Search users">
+              </div>
+              <div class="field">
+                <label class="visually-hidden-label" for="usersKycFilter">Filter by KYC status</label>
+                <select class="field-input" id="usersKycFilter" aria-label="Filter by KYC status">
+                  <option value="">All KYC Statuses</option>
+                  <option value="Verified">Verified</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="visually-hidden-label" for="usersAccountFilter">Filter by account status</label>
+                <select class="field-input" id="usersAccountFilter" aria-label="Filter by account status">
+                  <option value="">All Account Statuses</option>
+                  <option value="Active">Active</option>
+                  <option value="Frozen">Frozen</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- ---- Users table ---- -->
+            <div class="table-wrap">
+              <table class="data-table" aria-label="Registered users directory">
+                <thead>
+                  <tr>
+                    <th scope="col">User</th>
+                    <th scope="col">Phone</th>
+                    <th scope="col">Balance</th>
+                    <th scope="col">Tier</th>
+                    <th scope="col">KYC Status</th>
+                    <th scope="col">Account</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <!-- JS fills this in via renderUsersTable() -->
+                <tbody id="usersTableBody">
+                  <tr class="table-loading-row"><td colspan="7">Loading users…</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="empty-filter-msg is-hidden" id="usersEmptyMsg" aria-live="polite">No users match your filters.</p>
+
+            <!-- ---- Pagination controls ---- -->
+            <div class="pagination-row">
+              <button type="button" class="btn btn-outline btn-sm" id="usersPrevPageBtn">
+                <i class="bi bi-chevron-left" aria-hidden="true"></i> Previous
+              </button>
+              <span class="pagination-info" id="usersPageInfo" aria-live="polite">Page 1 of 1</span>
+              <button type="button" class="btn btn-outline btn-sm" id="usersNextPageBtn">
+                Next <i class="bi bi-chevron-right" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+
+        </section><!-- /#panel-users -->
+
+
+        <!-- ========================================================
+             PANEL 3: TRANSACTION LEDGER
+             The master, filterable record of every monetary movement
+             across the whole platform.
+        ========================================================= -->
+        <section class="dash-panel" id="panel-ledger" aria-label="Transaction ledger panel">
+
+          <div class="panel-intro-row">
+            <div>
+              <h2 class="panel-intro-title">Transaction Ledger</h2>
+              <p class="panel-intro-sub">Every transfer, bill payment, top-up, and marketplace sale, in one place.</p>
+            </div>
+            <button type="button" class="btn btn-outline" id="exportLedgerBtn">
+              <i class="bi bi-download" aria-hidden="true"></i> Export CSV
+            </button>
+          </div>
+
+          <div class="card">
+            <!-- ---- Filters ---- -->
+            <div class="filters-row filters-row-ledger">
+              <div class="field">
+                <label class="visually-hidden-label" for="ledgerSearchInput">Search transactions</label>
+                <input type="search" class="field-input" id="ledgerSearchInput"
+                       placeholder="Search by user, reference, or description…" aria-label="Search transactions">
+              </div>
+              <div class="field">
+                <label class="visually-hidden-label" for="ledgerTypeFilter">Filter by type</label>
+                <select class="field-input" id="ledgerTypeFilter" aria-label="Filter by transaction type">
+                  <option value="">All Types</option>
+                  <option value="Transfer">Transfer</option>
+                  <option value="Bill Payment">Bill Payment</option>
+                  <option value="Airtime/Data">Airtime/Data</option>
+                  <option value="Marketplace">Marketplace</option>
+                  <option value="Loan">Loan</option>
+                  <option value="Savings">Savings</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="visually-hidden-label" for="ledgerStatusFilter">Filter by status</label>
+                <select class="field-input" id="ledgerStatusFilter" aria-label="Filter by transaction status">
+                  <option value="">All Statuses</option>
+                  <option value="Success">Success</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Failed">Failed</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="visually-hidden-label" for="ledgerMonthFilter">Filter by month</label>
+                <input type="month" class="field-input" id="ledgerMonthFilter" aria-label="Filter by month">
+              </div>
+            </div>
+
+            <!-- ---- Ledger table ---- -->
+            <div class="table-wrap">
+              <table class="data-table" aria-label="Full platform transaction ledger">
+                <thead>
+                  <tr>
+                    <th scope="col">Reference</th>
+                    <th scope="col">User</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Timestamp</th>
+                    <th scope="col">Action</th>
+                  </tr>
+                </thead>
+                <!-- JS fills this in via renderLedgerTable() -->
+                <tbody id="ledgerTableBody">
+                  <tr class="table-loading-row"><td colspan="8">Loading transaction ledger…</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="empty-filter-msg is-hidden" id="ledgerEmptyMsg" aria-live="polite">No transactions match your filters.</p>
+
+            <!-- ---- Pagination controls ---- -->
+            <div class="pagination-row">
+              <button type="button" class="btn btn-outline btn-sm" id="ledgerPrevPageBtn">
+                <i class="bi bi-chevron-left" aria-hidden="true"></i> Previous
+              </button>
+              <span class="pagination-info" id="ledgerPageInfo" aria-live="polite">Page 1 of 1</span>
+              <button type="button" class="btn btn-outline btn-sm" id="ledgerNextPageBtn">
+                Next <i class="bi bi-chevron-right" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+
+        </section><!-- /#panel-ledger -->
+
+
+        <!-- ========================================================
+             PANEL 4: OWEALTH (Quick Loans + Smart Savings)
+             Mirrors the merged "OWealth" page on the user dashboard:
+             Loans monitoring on top, Savings vaults below.
+        ========================================================= -->
+        <section class="dash-panel" id="panel-owealth" aria-label="Owealth panel">
+
+          <div class="panel-intro-row">
+            <div>
+              <h2 class="panel-intro-title">Owealth</h2>
+              <p class="panel-intro-sub">Monitor loan disbursements and the health of the savings vaults.</p>
+            </div>
+          </div>
+
+          <!-- ---- KPI strip for Owealth ---- -->
+          <div class="metric-grid" aria-label="Owealth key metrics">
+            <div class="metric-card" aria-label="Active loans">
+              <div class="metric-card-top">
+                <span class="metric-label">Active Loans</span>
+                <span class="metric-icon is-gold" aria-hidden="true"><i class="bi bi-cash-coin"></i></span>
+              </div>
+              <strong class="metric-value">1,284</strong>
+              <span class="metric-change is-positive"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> +5.2% this month</span>
+            </div>
+            <div class="metric-card" aria-label="Total disbursed">
+              <div class="metric-card-top">
+                <span class="metric-label">Total Disbursed</span>
+                <span class="metric-icon is-info" aria-hidden="true"><i class="bi bi-send-fill"></i></span>
+              </div>
+              <strong class="metric-value">₦182,400,000</strong>
+              <span class="metric-change is-positive"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> +9.0% this month</span>
+            </div>
+            <div class="metric-card" aria-label="Default rate">
+              <div class="metric-card-top">
+                <span class="metric-label">Default Rate</span>
+                <span class="metric-icon is-danger" aria-hidden="true"><i class="bi bi-exclamation-triangle-fill"></i></span>
+              </div>
+              <strong class="metric-value">2.3%</strong>
+              <span class="metric-change is-negative"><i class="bi bi-graph-down-arrow" aria-hidden="true"></i> +0.4% this month</span>
+            </div>
+            <div class="metric-card" aria-label="Total vault savings">
+              <div class="metric-card-top">
+                <span class="metric-label">Total Vault Savings</span>
+                <span class="metric-icon is-success" aria-hidden="true"><i class="bi bi-piggy-bank-fill"></i></span>
+              </div>
+              <strong class="metric-value">₦96,750,000</strong>
+              <span class="metric-change is-positive"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> +6.7% this month</span>
+            </div>
+          </div>
+
+          <!-- ---- Quick Loans section (top, like the user-side OWealth page) ---- -->
+          <div class="panel-section">
+            <h3 class="panel-section-title">
+              <i class="bi bi-cash-coin text-gold" aria-hidden="true"></i> Loan Disbursements
+            </h3>
+            <div class="card">
+              <div class="table-wrap">
+                <table class="data-table" aria-label="Active and recent loans">
+                  <thead>
+                    <tr>
+                      <th scope="col">Loan ID</th>
+                      <th scope="col">User</th>
+                      <th scope="col">Principal</th>
+                      <th scope="col">Tenure</th>
+                      <th scope="col">Outstanding</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Next Due</th>
+                    </tr>
+                  </thead>
+                  <!-- JS fills this in via renderLoansTable() -->
+                  <tbody id="loansTableBody">
+                    <tr class="table-loading-row"><td colspan="7">Loading loan book…</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ---- Smart Savings section (bottom, like the user-side OWealth page) ---- -->
+          <div class="panel-section panel-section-spaced">
+            <h3 class="panel-section-title">
+              <i class="bi bi-piggy-bank-fill text-gold" aria-hidden="true"></i> Top Savings Vaults
+            </h3>
+            <div class="card">
+              <p class="card-sub">The largest active savings goals across all users, by amount saved.</p>
+              <!-- JS fills this in via renderVaultsList() -->
+              <div id="vaultsListContainer">
+                <p class="table-loading-row-inline">Loading savings vaults…</p>
+              </div>
+            </div>
+          </div>
+
+        </section><!-- /#panel-owealth -->
+
+
+        <!-- ========================================================
+             PANEL 5: BILLERS & TOP-UPS (Utilities + Airtime/Data)
+             Operational control panel for every third-party telecom
+             and utility integration.
+        ========================================================= -->
+        <section class="dash-panel" id="panel-billers" aria-label="Billers and top-ups panel">
+
+          <div class="panel-intro-row">
+            <div>
+              <h2 class="panel-intro-title">Billers &amp; Top-Ups</h2>
+              <p class="panel-intro-sub">Monitor telecom and utility integrations, and tune VTU profit margins.</p>
+            </div>
+          </div>
+
+          <!-- ---- KPI strip for Billers ---- -->
+          <div class="metric-grid" aria-label="Biller key metrics">
+            <div class="metric-card" aria-label="Total connected billers">
+              <div class="metric-card-top">
+                <span class="metric-label">Connected Billers</span>
+                <span class="metric-icon is-info" aria-hidden="true"><i class="bi bi-router-fill"></i></span>
+              </div>
+              <strong class="metric-value">14</strong>
+              <span class="metric-change is-positive"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> 13 online</span>
+            </div>
+            <div class="metric-card" aria-label="Average uptime">
+              <div class="metric-card-top">
+                <span class="metric-label">Average Uptime</span>
+                <span class="metric-icon is-success" aria-hidden="true"><i class="bi bi-speedometer2"></i></span>
+              </div>
+              <strong class="metric-value">98.6%</strong>
+              <span class="metric-change is-positive"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> +0.3% this week</span>
+            </div>
+            <div class="metric-card" aria-label="Volume processed today">
+              <div class="metric-card-top">
+                <span class="metric-label">Volume Processed Today</span>
+                <span class="metric-icon is-gold" aria-hidden="true"><i class="bi bi-cash-stack"></i></span>
+              </div>
+              <strong class="metric-value">₦14,230,000</strong>
+              <span class="metric-change is-positive"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> +4.1% vs yesterday</span>
+            </div>
+            <div class="metric-card" aria-label="Failed transactions today">
+              <div class="metric-card-top">
+                <span class="metric-label">Failed Transactions Today</span>
+                <span class="metric-icon is-danger" aria-hidden="true"><i class="bi bi-x-circle-fill"></i></span>
+              </div>
+              <strong class="metric-value">37</strong>
+              <span class="metric-change is-negative"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> +6 vs yesterday</span>
+            </div>
+          </div>
+
+          <!-- ---- Airtime & Data (VTU) margin configuration section ---- -->
+          <div class="panel-section">
+            <h3 class="panel-section-title">
+              <i class="bi bi-phone-fill text-gold" aria-hidden="true"></i> Airtime &amp; Data (VTU) Providers
+            </h3>
+            <div class="card">
+              <p class="card-sub">Set the profit margin Nova earns on every airtime/data purchase, per network.</p>
+              <div class="table-wrap">
+                <table class="data-table" aria-label="VTU network providers and profit margins">
+                  <thead>
+                    <tr>
+                      <th scope="col">Network</th>
+                      <th scope="col">Default Cost Price</th>
+                      <th scope="col">Profit Margin (%)</th>
+                      <th scope="col">Enabled</th>
+                      <th scope="col">Action</th>
+                    </tr>
+                  </thead>
+                  <!-- JS fills this in via renderVtuTable() -->
+                  <tbody id="vtuTableBody">
+                    <tr class="table-loading-row"><td colspan="5">Loading VTU providers…</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ---- Utility billers uptime section ---- -->
+          <div class="panel-section panel-section-spaced">
+            <h3 class="panel-section-title">
+              <i class="bi bi-lightning-charge-fill text-gold" aria-hidden="true"></i> Utility &amp; Subscription Billers
+            </h3>
+            <div class="card">
+              <div class="table-wrap">
+                <table class="data-table" aria-label="Utility biller integrations and API status">
+                  <thead>
+                    <tr>
+                      <th scope="col">Biller</th>
+                      <th scope="col">Category</th>
+                      <th scope="col">Success Rate (24h)</th>
+                      <th scope="col">API Status</th>
+                      <th scope="col">Last Checked</th>
+                    </tr>
+                  </thead>
+                  <!-- JS fills this in via renderBillersUptimeTable() -->
+                  <tbody id="billersUptimeTableBody">
+                    <tr class="table-loading-row"><td colspan="5">Loading biller uptime…</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </section><!-- /#panel-billers -->
+
+
+        <!-- ========================================================
+             PANEL 6: MINI MARKETPLACE
+             Administrative oversight of the peer-to-peer marketplace:
+             pending listing approvals, escrow volume, and commission.
+        ========================================================= -->
+        <section class="dash-panel" id="panel-marketplace" aria-label="Marketplace panel">
+
+          <div class="panel-intro-row">
+            <div>
+              <h2 class="panel-intro-title">Mini Marketplace</h2>
+              <p class="panel-intro-sub">Approve new listings and track escrow volume and platform commission.</p>
+            </div>
+          </div>
+
+          <!-- ---- KPI strip for Marketplace ---- -->
+          <div class="metric-grid" aria-label="Marketplace key metrics">
+            <div class="metric-card" aria-label="Total escrow volume">
+              <div class="metric-card-top">
+                <span class="metric-label">Total Escrow Volume</span>
+                <span class="metric-icon is-info" aria-hidden="true"><i class="bi bi-safe2-fill"></i></span>
+              </div>
+              <strong class="metric-value">₦42,180,000</strong>
+              <span class="metric-change is-positive"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> +11.0% this month</span>
+            </div>
+            <div class="metric-card" aria-label="Platform commission earned">
+              <div class="metric-card-top">
+                <span class="metric-label">Commission Earned</span>
+                <span class="metric-icon is-gold" aria-hidden="true"><i class="bi bi-cash-coin"></i></span>
+              </div>
+              <strong class="metric-value">₦1,265,400</strong>
+              <span class="metric-change is-positive"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> +7.6% this month</span>
+            </div>
+            <div class="metric-card" aria-label="Pending approvals">
+              <div class="metric-card-top">
+                <span class="metric-label">Pending Approvals</span>
+                <span class="metric-icon is-warning" aria-hidden="true"><i class="bi bi-hourglass-split"></i></span>
+              </div>
+              <strong class="metric-value" id="metricPendingListings">6</strong>
+              <span class="metric-change">Awaiting your review</span>
+            </div>
+            <div class="metric-card" aria-label="Active listings">
+              <div class="metric-card-top">
+                <span class="metric-label">Active Listings</span>
+                <span class="metric-icon is-success" aria-hidden="true"><i class="bi bi-shop"></i></span>
+              </div>
+              <strong class="metric-value">312</strong>
+              <span class="metric-change is-positive"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> +18 this week</span>
+            </div>
+          </div>
+
+          <!-- ---- Pending listing approvals ---- -->
+          <div class="card">
+            <div class="card-head">
+              <h3 class="card-title">Listings Pending Approval</h3>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table" aria-label="Marketplace listings awaiting moderation">
+                <thead>
+                  <tr>
+                    <th scope="col">Item</th>
+                    <th scope="col">Seller</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Submitted</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <!-- JS fills this in via renderListingsTable() -->
+                <tbody id="listingsTableBody">
+                  <tr class="table-loading-row"><td colspan="6">Loading pending listings…</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="empty-filter-msg is-hidden" id="listingsEmptyMsg">No listings are currently pending approval.</p>
+          </div>
+
+          <!-- FIX: Added Items on Sale list with status as requested -->
+          <!-- NEW: List of all items on sale with bought, delivered, and payment status -->
+          <div class="card card-spaced-bottom">
+            <div class="card-head">
+              <h3 class="card-title">Items on Sale - Status Overview</h3>
+              <button type="button" class="btn btn-outline btn-sm" id="refreshItemsBtn">
+                <i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Refresh
+              </button>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table" aria-label="All marketplace items with sale status">
+                <thead>
+                  <tr>
+                    <th scope="col">Item</th>
+                    <th scope="col">Seller</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Bought</th>
+                    <th scope="col">Delivered</th>
+                    <th scope="col">Payment Made</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                <!-- JS fills this in via renderItemsOnSaleTable() -->
+                <tbody id="itemsOnSaleTableBody">
+                  <tr class="table-loading-row"><td colspan="8">Loading items on sale…</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="empty-filter-msg is-hidden" id="itemsOnSaleEmptyMsg">No items are currently on sale.</p>
+          </div>
+
+        </section><!-- /#panel-marketplace -->
+
+
+        <!-- ========================================================
+             PANEL 7: SYSTEM SETTINGS
+             Global platform configuration: transaction fees, admin
+             access control, and public-facing contact information.
+        ========================================================= -->
+        <section class="dash-panel" id="panel-settings" aria-label="System settings panel">
+
+          <div class="panel-intro-row">
+            <div>
+              <h2 class="panel-intro-title">System Settings</h2>
+              <p class="panel-intro-sub">Global configuration for fees, admin access, and platform contact details.</p>
+            </div>
+          </div>
+
+          <div class="two-col-grid">
+
+            <!-- ---- Left column: Transaction Fees + Contact Info ---- -->
+            <div>
+
+              <!-- Transaction fee configuration -->
+              <div class="card card-spaced-bottom" aria-label="Transaction fee settings">
+                <h4 class="card-title card-title-spaced">Transaction Fees</h4>
+                <!--
+                  data-mock-submit reuses the exact same generic-form pattern as the
+                  user dashboard: JS intercepts submit, fakes a short delay, then
+                  shows the message below as a toast. Swap this for a real fetch()
+                  POST to your PHP endpoint once the backend exists.
+                -->
+                <form id="feeSettingsForm" data-mock-submit="Transaction fee settings saved successfully!">
+                  <div class="field-row">
+                    <div class="field">
+                      <label class="field-label" for="feeTransferFlat">Transfer Fee (₦, flat)</label>
+                      <div class="input-prefix-wrap">
+                        <span class="input-prefix" aria-hidden="true">₦</span>
+                        <input type="number" class="field-input" id="feeTransferFlat" value="10" min="0">
+                      </div>
+                    </div>
+                    <div class="field">
+                      <label class="field-label" for="feeMarketplaceCommission">Marketplace Commission (%)</label>
+                      <input type="number" class="field-input" id="feeMarketplaceCommission" value="3" min="0" max="100" step="0.1">
+                    </div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field">
+                      <label class="field-label" for="feeBillFlat">Bill Payment Fee (₦, flat)</label>
+                      <div class="input-prefix-wrap">
+                        <span class="input-prefix" aria-hidden="true">₦</span>
+                        <input type="number" class="field-input" id="feeBillFlat" value="0" min="0">
+                      </div>
+                    </div>
+                    <div class="field">
+                      <label class="field-label" for="feeLoanInterest">Loan Interest Rate (% / month)</label>
+                      <input type="number" class="field-input" id="feeLoanInterest" value="2.5" min="0" max="100" step="0.1">
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary">
+                    Save Fee Settings <i class="bi bi-check-lg" aria-hidden="true"></i>
+                  </button>
+                </form>
+              </div>
+
+              <!-- Platform contact info -->
+              <div class="card" aria-label="Platform contact information settings">
+                <h4 class="card-title card-title-spaced">Platform Contact Info</h4>
+                <form id="contactInfoForm" data-mock-submit="Platform contact information updated!">
+                  <div class="field">
+                    <label class="field-label" for="supportEmailInput">Support Email</label>
+                    <input type="email" class="field-input" id="supportEmailInput" value="support@novafinance.ng">
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="supportPhoneInput">Support Phone</label>
+                    <input type="tel" class="field-input" id="supportPhoneInput" value="+234 700 100 2000">
+                  </div>
+                  <div class="security-row">
+                    <span class="security-body">
+                      <strong>Maintenance Mode</strong>
+                      <p>Temporarily disable new transactions platform-wide</p>
+                    </span>
+                    <label class="switch">
+                      <input type="checkbox" id="maintenanceModeToggle" aria-label="Enable maintenance mode">
+                      <span class="switch-track"><span class="switch-thumb"></span></span>
+                    </label>
+                  </div>
+                  <button type="submit" class="btn btn-primary">
+                    Save Contact Info <i class="bi bi-check-lg" aria-hidden="true"></i>
+                  </button>
+                </form>
+              </div>
+
+            </div>
+
+            <!-- ---- Right column: Admin Access Control ---- -->
+            <div>
+              <div class="card" aria-label="Admin access control">
+                <div class="card-head">
+                  <h4 class="card-title">Admin Access Control</h4>
+                  <button type="button" class="btn btn-primary btn-sm" id="openAddAdminModalBtn">
+                    <i class="bi bi-person-plus-fill" aria-hidden="true"></i> Add Admin
+                  </button>
+                </div>
+                <div class="table-wrap">
+                  <table class="data-table" aria-label="Admin accounts with platform access">
+                    <thead>
+                      <tr>
+                        <th scope="col">Admin</th>
+                        <th scope="col">Role</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Action</th>
+                      </tr>
+                    </thead>
+                    <!-- JS fills this in via renderAdminAccountsTable() -->
+                    <tbody id="adminAccountsTableBody">
+                      <tr class="table-loading-row"><td colspan="4">Loading admin accounts…</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- FIX: Added User Accounts Management section as requested -->
+              <!-- NEW: Table of all user accounts with block/activate controls -->
+              <div class="card card-spaced-bottom" aria-label="User accounts management">
+                <div class="card-head">
+                  <h4 class="card-title">User Accounts Management</h4>
+                  <button type="button" class="btn btn-outline btn-sm" id="refreshUsersBtn">
+                    <i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Refresh
+                  </button>
+                </div>
+                <div class="table-wrap">
+                  <table class="data-table" aria-label="All user accounts with status controls">
+                    <thead>
+                      <tr>
+                        <th scope="col">User</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Account Status</th>
+                        <th scope="col">Balance</th>
+                        <th scope="col">Actions</th>
+                      </tr>
+                    </thead>
+                    <!-- JS fills this in via renderUserAccountsTable() -->
+                    <tbody id="userAccountsTableBody">
+                      <tr class="table-loading-row"><td colspan="5">Loading user accounts…</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- FIX: Added 2-Step Verification Settings section as requested -->
+              <!-- NEW: 2-step verification configuration for both user and admin -->
+              <div class="card" aria-label="Two-factor authentication settings">
+                <div class="card-head">
+                  <h4 class="card-title">2-Step Verification Settings</h4>
+                </div>
+                <div class="two-factor-section">
+                  <div class="two-factor-item">
+                    <div class="two-factor-info">
+                      <strong>User 2FA</strong>
+                      <p>Require 2-step verification for all user logins and sensitive transactions</p>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" id="user2faToggle" checked aria-label="Enable user 2FA">
+                      <span class="switch-track"><span class="switch-thumb"></span></span>
+                    </label>
+                  </div>
+                  <div class="two-factor-item">
+                    <div class="two-factor-info">
+                      <strong>Admin 2FA</strong>
+                      <p>Require 2-step verification for all admin dashboard access</p>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" id="admin2faToggle" checked aria-label="Enable admin 2FA">
+                      <span class="switch-track"><span class="switch-thumb"></span></span>
+                    </label>
+                  </div>
+                  <div class="two-factor-item">
+                    <div class="two-factor-info">
+                      <strong>SMS Verification</strong>
+                      <p>Send verification codes via SMS (requires SMS provider integration)</p>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" id="sms2faToggle" aria-label="Enable SMS verification">
+                      <span class="switch-track"><span class="switch-thumb"></span></span>
+                    </label>
+                  </div>
+                  <div class="two-factor-item">
+                    <div class="two-factor-info">
+                      <strong>Email Verification</strong>
+                      <p>Send verification codes via email as backup method</p>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" id="email2faToggle" checked aria-label="Enable email verification">
+                      <span class="switch-track"><span class="switch-thumb"></span></span>
+                    </label>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-primary btn-block" id="save2faSettingsBtn">
+                  Save 2FA Settings <i class="bi bi-check-lg" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+
+          </div><!-- /.two-col-grid -->
+
+        </section><!-- /#panel-settings -->
+
+      </main><!-- /#adminContent -->
+    </div><!-- /.main-area -->
+  </div><!-- /.app-shell -->
+
+
+  <!-- ================================================================
+       MOBILE BOTTOM NAVIGATION
+       Quick-access bar shown only on small screens (see CSS). The full
+       set of 7 sections is still reachable via the hamburger → sidebar.
+  ================================================================= -->
+  <nav class="bottom-nav" id="bottomNav" aria-label="Mobile quick navigation">
+    <button type="button" class="bottom-nav-link is-active" data-panel="panel-overview" aria-current="page">
+      <i class="bi bi-grid-fill" aria-hidden="true"></i><span>Overview</span>
+    </button>
+    <button type="button" class="bottom-nav-link" data-panel="panel-users">
+      <i class="bi bi-people-fill" aria-hidden="true"></i><span>Users</span>
+    </button>
+    <button type="button" class="bottom-nav-link" data-panel="panel-ledger">
+      <i class="bi bi-journal-text" aria-hidden="true"></i><span>Ledger</span>
+    </button>
+    <button type="button" class="bottom-nav-link" data-panel="panel-billers">
+      <i class="bi bi-router-fill" aria-hidden="true"></i><span>Billers</span>
+    </button>
+    <button type="button" class="bottom-nav-link" data-panel="panel-settings">
+      <i class="bi bi-gear-fill" aria-hidden="true"></i><span>Settings</span>
+    </button>
+  </nav>
+
+
+  <!-- ================================================================
+       MODALS
+       All modals share the exact same open/close engine (openModal() /
+       closeModal() in admin-dashboard.js) — the same pattern used on
+       the customer dashboard's PIN modal, so behaviour is consistent.
+  ================================================================= -->
+
+  <!-- ---- Generic CONFIRM ACTION modal: reused for Freeze/Unfreeze,
+            Approve KYC, Approve/Reject listing, Remove admin, etc.
+            JS swaps the title/description/button text at runtime via
+            openConfirmModal(), so we only need ONE modal in the DOM. ---- -->
+  <div class="modal-backdrop" id="confirmActionModal" data-modal-close-on-backdrop="true" hidden>
+    <div class="modal-panel modal-sm" role="dialog" aria-modal="true" aria-labelledby="confirmActionTitle">
+      <div class="modal-head">
+        <h5 class="modal-title" id="confirmActionTitle">
+          <i class="bi bi-question-circle-fill text-gold" aria-hidden="true"></i> Confirm Action
+        </h5>
+        <button type="button" class="modal-close-btn" data-modal-close aria-label="Close">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="pin-desc" id="confirmActionDesc">Are you sure you want to proceed?</p>
+        <div class="modal-action-row">
+          <button type="button" class="btn btn-outline btn-block" data-modal-close>Cancel</button>
+          <button type="button" class="btn btn-primary btn-block" id="confirmActionBtn">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---- View User Profile modal (Users & KYC) ---- -->
+  <div class="modal-backdrop" id="userProfileModal" data-modal-close-on-backdrop="true" hidden>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="userProfileModalTitle">
+      <div class="modal-head">
+        <h5 class="modal-title" id="userProfileModalTitle">
+          <i class="bi bi-person-fill text-gold" aria-hidden="true"></i> User Profile
+        </h5>
+        <button type="button" class="modal-close-btn" data-modal-close aria-label="Close">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- All values below are filled in by openUserProfileModal() in JS -->
+        <div class="profile-modal-head">
+          <span class="avatar avatar-lg" id="upAvatar" aria-hidden="true">—</span>
+          <div>
+            <h3 class="profile-name" id="upName">—</h3>
+            <p class="profile-email" id="upEmail">—</p>
+          </div>
+        </div>
+        <div class="vc-details-grid profile-detail-grid">
+          <div class="vc-detail-item">
+            <span class="vc-detail-label">Phone</span>
+            <span class="vc-detail-value" id="upPhone">—</span>
+          </div>
+          <div class="vc-detail-item">
+            <span class="vc-detail-label">Balance</span>
+            <span class="vc-detail-value" id="upBalance">—</span>
+          </div>
+          <div class="vc-detail-item">
+            <span class="vc-detail-label">Account Tier</span>
+            <span class="vc-detail-value" id="upTier">—</span>
+          </div>
+          <div class="vc-detail-item">
+            <span class="vc-detail-label">KYC Status</span>
+            <span class="vc-detail-value" id="upKycStatus">—</span>
+          </div>
+          <div class="vc-detail-item">
+            <span class="vc-detail-label">Account Status</span>
+            <span class="vc-detail-value" id="upAccountStatus">—</span>
+          </div>
+          <div class="vc-detail-item">
+            <span class="vc-detail-label">Joined</span>
+            <span class="vc-detail-value" id="upJoined">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---- Transaction Detail modal (Overview + Ledger) ---- -->
+  <div class="modal-backdrop" id="transactionDetailModal" data-modal-close-on-backdrop="true" hidden>
+    <div class="modal-panel modal-sm" role="dialog" aria-modal="true" aria-labelledby="txnDetailModalTitle">
+      <div class="modal-head">
+        <h5 class="modal-title" id="txnDetailModalTitle">
+          <i class="bi bi-receipt text-gold" aria-hidden="true"></i> Transaction Detail
+        </h5>
+        <button type="button" class="modal-close-btn" data-modal-close aria-label="Close">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- All values below are filled in by openTransactionDetailModal() in JS -->
+        <div class="pin-summary">
+          <div class="pin-summary-row"><span>Reference</span><strong id="tdReference">—</strong></div>
+          <div class="pin-summary-row"><span>User</span><strong id="tdUser">—</strong></div>
+          <div class="pin-summary-row"><span>Type</span><strong id="tdType">—</strong></div>
+          <div class="pin-summary-row"><span>Description</span><strong id="tdDescription">—</strong></div>
+          <div class="pin-summary-row"><span>Amount</span><strong id="tdAmount">—</strong></div>
+          <div class="pin-summary-row"><span>Status</span><strong id="tdStatus">—</strong></div>
+          <div class="pin-summary-row"><span>Timestamp</span><strong id="tdTimestamp">—</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---- Add New Admin modal (System Settings) ---- -->
+  <div class="modal-backdrop" id="addAdminModal" data-modal-close-on-backdrop="true" hidden>
+    <div class="modal-panel modal-sm" role="dialog" aria-modal="true" aria-labelledby="addAdminModalTitle">
+      <div class="modal-head">
+        <h5 class="modal-title" id="addAdminModalTitle">
+          <i class="bi bi-person-plus-fill text-gold" aria-hidden="true"></i> Add New Admin
+        </h5>
+        <button type="button" class="modal-close-btn" data-modal-close aria-label="Close">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="addAdminForm">
+          <div class="field">
+            <label class="field-label" for="newAdminName">Full Name *</label>
+            <input type="text" class="field-input" id="newAdminName" placeholder="e.g. Tunde Bakare" required>
+          </div>
+          <div class="field">
+            <label class="field-label" for="newAdminEmail">Work Email *</label>
+            <input type="email" class="field-input" id="newAdminEmail" placeholder="name@novafinance.ng" required>
+          </div>
+          <div class="field">
+            <label class="field-label" for="newAdminRole">Role</label>
+            <select class="field-input" id="newAdminRole">
+              <option>Support Admin</option>
+              <option>Finance Admin</option>
+              <option>Compliance Admin</option>
+              <option>Super Admin</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">
+            Send Invite <i class="bi bi-send-fill" aria-hidden="true"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---- Logout confirmation modal (same pattern as the user dashboard) ---- -->
+  <div class="modal-backdrop" id="logoutConfirmModal" data-modal-close-on-backdrop="true" hidden>
+    <div class="modal-panel modal-sm" role="dialog" aria-modal="true" aria-labelledby="logoutModalTitle">
+      <div class="modal-head">
+        <h5 class="modal-title" id="logoutModalTitle">Log Out</h5>
+        <button type="button" class="modal-close-btn" data-modal-close aria-label="Close">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="pin-desc">Are you sure you want to log out of the Nova Command Center?</p>
+        <div class="modal-action-row">
+          <button type="button" class="btn btn-outline btn-block" data-modal-close>Cancel</button>
+          <button type="button" class="btn btn-danger-outline btn-block" id="confirmLogoutBtn">Log Out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================================================================
+       TOAST NOTIFICATIONS — pop-up confirmation messages.
+       aria-live="polite" means screen readers announce new toasts
+       without interrupting whatever the user is currently doing.
+  ================================================================= -->
+  <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+
+  <!-- Our JavaScript file — loaded last so the DOM above already exists
+       by the time the script runs and starts attaching event listeners -->
+  <script src="Assets/admindashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<!--
+  Nova Finance — Sign Up Page
+  File:    pages/signup.html
+  Links:   ../css/auth.css  |  ../js/auth.js
+  Paths use ../ because this file is inside the pages/ folder,
+  one level deeper than the root where css/ and js/ folders live.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- viewport: makes the page scale correctly on mobile devices -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Create your free Nova Finance account — secure digital banking for Nigerians.">
+  <!-- noindex: stops search engines indexing the private auth pages -->
+  <meta name="robots" content="noindex, nofollow">
+  <title>Create Account — Nova Finance</title>
+
+  <!-- Bootstrap 5 CSS: provides the grid and utility classes -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Our custom auth stylesheet -->
+  <link rel="stylesheet" href="Css/sign.css">
+
+  <!-- Favicon link -->
+     <link rel="icon" type="image/png" href="favicon.png">
+</head>
+
+<!--
+  data-page="signup" lets JS know which page this is,
+  though auth.js also detects this by checking for #signupForm.
+-->
+<body data-page="signup">
+
+
+<!-- ============================================================
+     MAIN WRAPPER
+     Flexbox container that holds both panels side by side.
+     CSS: .auth-wrapper { display: flex; flex-direction: row; }
+============================================================ -->
+<div class="auth-wrapper">
+
+
+  <!-- ============================================================
+       LEFT PANEL — Form Side (Navy Blue)
+       Contains: navigation, eyebrow, title, form, and alerts.
+  ============================================================ -->
+  <div class="auth-left">
+
+
+    <!-- ── Top Navigation Bar ─────────────────────────────────
+         role="navigation" + aria-label helps screen readers
+         identify this as the page's navigation region.
+    ─────────────────────────────────────────────────────────── -->
+    <nav class="auth-nav" role="navigation" aria-label="Nova Finance site navigation">
+
+      <!-- Logo: links back to the homepage -->
+      <a href="index.html" class="auth-logo" aria-label="Nova Finance — back to homepage">
+        <!--
+          Replace placeholder.png with your actual logo file.
+          alt text is shown if the image fails to load.
+        -->
+        <img
+          src="../assets/images/logo-dark.svg"
+          alt="Nova Finance Logo"
+          class="brand-logo"
+          onerror="this.style.display='none'"
+        >
+        <!-- Brand name with gold period — the signature element -->
+        <span class="brand-name">Nova<span class="brand-dot">.</span></span>
+      </a>
+
+      <!-- Nav links -->
+      <div class="auth-nav-links">
+        <!-- Takes user back to the main homepage -->
+        <a href="index.html">Home</a>
+        <!-- Takes user to the login page -->
+        <a href="login.html" class="active">Sign In</a>
+      </div>
+
+    </nav><!-- end .auth-nav -->
+
+
+    <!-- ── Form Content Area ──────────────────────────────────
+         role="main" marks the primary content of the page.
+         aria-label gives screen readers a description.
+    ─────────────────────────────────────────────────────────── -->
+    <main class="auth-form-container" role="main" aria-label="Create account form">
+
+      <!-- Success alert: hidden by default, shown by JS on success.
+           aria-live="polite" tells screen readers to announce the
+           text inside this div when it changes. -->
+      <div
+        class="auth-alert auth-alert-success"
+        id="signupSuccess"
+        role="alert"
+        aria-live="polite"
+      >
+        <!-- SVG check icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span class="auth-alert-msg"></span>
+      </div>
+
+      <!-- Error alert: hidden by default, shown by JS on error -->
+      <div
+        class="auth-alert auth-alert-error"
+        id="signupError"
+        role="alert"
+        aria-live="assertive"
+      >
+        <!-- SVG warning icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span class="auth-alert-msg"></span>
+      </div>
+
+      <!-- Eyebrow label above the main title -->
+      <p class="auth-eyebrow">Secure Your Financial Future</p>
+
+      <!-- Main page heading (H1 — one per page for SEO + accessibility) -->
+      <h1 class="auth-title">
+        Create new account<span class="title-dot">.</span>
+      </h1>
+
+      <!-- Subtitle with link to login -->
+      <p class="auth-subtitle">
+        Already a Member?
+        <a href="login.html">Log In</a>
+      </p>
+
+
+      <!-- ── SIGN UP FORM ──────────────────────────────────────
+           novalidate: disables the browser's own validation popups.
+           We handle all validation ourselves in auth.js.
+      ─────────────────────────────────────────────────────────── -->
+      <form
+        id="signupForm"
+        class="auth-form"
+        novalidate
+        aria-label="Create your Nova Finance account"
+      >
+
+        <!-- ── First Name + Last Name (side by side) ────────── -->
+        <div class="form-row">
+
+          <!-- First Name field -->
+          <div class="input-group">
+            <!-- for="firstName" links this label to the input below.
+                 Clicking the label focuses the input (better UX). -->
+            <label for="firstName">
+              First name <span aria-hidden="true" style="color:#EF4444;">*</span>
+            </label>
+            <div class="input-wrap">
+              <input
+                type="text"
+                id="firstName"
+                class="auth-input"
+                placeholder="First name"
+                autocomplete="given-name"
+                aria-required="true"
+                aria-describedby="err-firstName"
+              >
+              <!-- SVG: person/user icon -->
+              <span class="input-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </span>
+            </div>
+            <!-- Error message: hidden until JS adds class "visible" -->
+            <span class="field-error" id="err-firstName" role="alert"></span>
+          </div>
+
+          <!-- Last Name field -->
+          <div class="input-group">
+            <label for="lastName">
+              Last name <span aria-hidden="true" style="color:#EF4444;">*</span>
+            </label>
+            <div class="input-wrap">
+              <input
+                type="text"
+                id="lastName"
+                class="auth-input"
+                placeholder="Last name"
+                autocomplete="family-name"
+                aria-required="true"
+                aria-describedby="err-lastName"
+              >
+              <span class="input-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </span>
+            </div>
+            <span class="field-error" id="err-lastName" role="alert"></span>
+          </div>
+
+        </div><!-- end .form-row -->
+
+
+        <!-- ── Email field ────────────────────────────────────── -->
+        <div class="input-group">
+          <label for="signupEmail">
+            Email address <span aria-hidden="true" style="color:#EF4444;">*</span>
+          </label>
+          <div class="input-wrap">
+            <input
+              type="email"
+              id="signupEmail"
+              class="auth-input"
+              placeholder="you@example.com"
+              autocomplete="email"
+              aria-required="true"
+              aria-describedby="err-signupEmail"
+            >
+            <!-- SVG: envelope icon -->
+            <span class="input-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+            </span>
+          </div>
+          <span class="field-error" id="err-signupEmail" role="alert"></span>
+        </div>
+
+
+        <!-- ── Password field ──────────────────────────────────── -->
+        <div class="input-group">
+          <label for="signupPassword">
+            Password <span aria-hidden="true" style="color:#EF4444;">*</span>
+          </label>
+          <div class="input-wrap">
+            <!--
+              type="password" hides characters with dots.
+              JS toggles this to type="text" when eye is clicked.
+            -->
+            <input
+              type="password"
+              id="signupPassword"
+              class="auth-input"
+              placeholder="Min. 8 characters"
+              autocomplete="new-password"
+              aria-required="true"
+              aria-describedby="err-signupPassword"
+            >
+            <!--
+              Eye toggle button: clicking it shows/hides the password.
+              The SVG inside is replaced by JS when toggled.
+              aria-label tells screen readers what the button does.
+            -->
+            <button
+              type="button"
+              id="eyeToggle"
+              class="eye-toggle"
+              aria-label="Show password"
+              title="Show password"
+            >
+              <!-- id="eyeIcon" — JS swaps this SVG content on toggle -->
+              <span id="eyeIcon">
+                <!-- Eye open SVG (default: password is hidden) -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                     stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </span>
+            </button>
+          </div>
+          <span class="field-error" id="err-signupPassword" role="alert"></span>
+        </div>
+
+
+        <!-- ── Terms & Privacy checkbox ────────────────────────── -->
+        <div class="checkbox-row">
+          <input
+            type="checkbox"
+            id="agreeTerms"
+            aria-required="true"
+            aria-describedby="err-agreeTerms"
+          >
+          <label for="agreeTerms">
+            I agree to the
+            <a href="index.html#contact" target="_blank" rel="noopener">Terms of Service</a>
+            and
+            <a href="index.html#contact" target="_blank" rel="noopener">Privacy Policy</a>
+          </label>
+        </div>
+        <span class="field-error" id="err-agreeTerms" role="alert"></span>
+
+
+        <!-- ── Action Buttons ─────────────────────────────────── -->
+        <div class="auth-buttons">
+
+          <!-- Secondary button: takes user back to the homepage -->
+          <a
+            href="index.html"
+            class="btn-secondary"
+            aria-label="Back to Nova Finance homepage"
+          >
+            Back to Home
+          </a>
+
+          <!-- Primary submit button: creates the account -->
+          <button
+            type="submit"
+            id="signupBtn"
+            class="btn-primary"
+            aria-label="Create your Nova Finance account"
+          >
+            Create account
+          </button>
+
+        </div><!-- end .auth-buttons -->
+
+      </form><!-- end #signupForm -->
+
+
+      <!-- Link to login page for users who already have an account -->
+      <p class="auth-switch">
+        Already have an account?
+        <a href="login.html">Sign In</a>
+      </p>
+
+    </main><!-- end .auth-form-container -->
+
+  </div><!-- end .auth-left -->
+
+
+  <!-- ============================================================
+       RIGHT PANEL — Background Image
+       aria-hidden="true": purely decorative, screen readers skip it.
+       The actual background image is set via CSS class auth-right--signup.
+  ============================================================ -->
+  <div
+    class="auth-right auth-right--signup"
+    aria-hidden="true"
+    role="presentation"
+  ></div>
+
+
+</div><!-- end .auth-wrapper -->
+
+
+<!-- Bootstrap 5 JS Bundle (includes Popper.js) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Our auth JavaScript — must come after the DOM elements above -->
+<script src="Assets/sign_login.js"></script>
+
+</body>
+</html>

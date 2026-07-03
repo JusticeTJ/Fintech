@@ -1,0 +1,2493 @@
+<!DOCTYPE html>
+<!--
+  ================================================================
+  NOVA FINANCE — Main Single-Page Application (SPA) Homepage
+  File:   index.html
+  Author: Nova Finance Dev Team
+  Purpose: This ONE file contains every section of the website.
+           Clicking nav links does NOT load a new page — JavaScript
+           intercepts clicks and smoothly scrolls to the right
+           section on this same page. That pattern is called an SPA.
+  ================================================================
+-->
+<html lang="en">
+<head>
+  <!-- charset="UTF-8" tells the browser to use Unicode so all characters
+       including the Naira symbol ₦ and Igbo-language text render correctly -->
+  <meta charset="UTF-8">
+
+  <!-- viewport meta tag: makes the page scale correctly on mobile phones.
+       width=device-width = use the screen width. initial-scale=1 = no zoom. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- SEO description: shown by Google in search results -->
+  <meta name="description"
+        content="Nova Finance — Nigeria's most trusted digital finance platform.
+                 Send money, pay bills, buy insurance, trade safely. Owerri, Imo State.">
+
+  <!-- Page title: shown in browser tabs and bookmarks -->
+  <title>Nova Finance | Smart Money for Every Nigerian</title>
+
+  <!-- =====================================================
+       GOOGLE FONTS
+       Sora   — geometric, modern display font for headings
+       Figtree — warm, readable sans-serif for body text
+       display=swap means the fallback font shows immediately;
+       the custom font swaps in once loaded (no invisible text)
+  ===================================================== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Figtree:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+  <!-- =====================================================
+       BOOTSTRAP 5.3 CSS
+       Bootstrap provides: responsive grid (rows/cols),
+       navbar component, carousel, accordion (FAQ),
+       form controls, utility classes (d-flex, gap-3, etc.)
+  ===================================================== -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+  <!-- BOOTSTRAP ICONS — icon font library. Use: <i class="bi bi-phone"></i> -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        rel="stylesheet">
+
+  <!-- AOS (Animate On Scroll) CSS — needed for fade-in effects on scroll.
+       The matching JS is loaded at the bottom. -->
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+  <!-- OUR CUSTOM STYLESHEET — all Nova-specific styles live here -->
+  <link rel="stylesheet" href="Css/style.css">
+
+   <!-- Favicon link -->
+     <link rel="icon" type="image/png" href="favicon.png">
+</head>
+
+<!-- ===================================================
+     <body> is the visible page container.
+     The class "low-data-mode" is toggled by JavaScript
+     to strip animations for users on slow connections.
+=================================================== -->
+<body>
+
+<!-- =====================================================
+     SKIP LINK — accessibility feature.
+     Screen-reader users and keyboard-only users can press
+     Tab once and hit Enter to jump straight to main content,
+     bypassing the navbar. "sr-only" hides it visually
+     until focused. Required for WCAG accessibility.
+===================================================== -->
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+
+<!-- =====================================================
+     ██████████  NAVBAR  ██████████
+     
+     role="navigation" + aria-label → screen readers announce
+       "navigation landmark: Nova Finance"
+     
+     fixed-top → Bootstrap class that makes the navbar
+       stick to the top of the screen at all times via
+       position:fixed; top:0 in CSS
+     
+     id="mainNav" → JavaScript uses this to detect scroll
+       and apply a darker background after 80px of scrolling
+===================================================== -->
+<nav class="navbar navbar-expand-lg fixed-top" id="mainNav"
+     role="navigation" aria-label="Nova Finance main navigation">
+  <div class="container">
+
+    <!-- -----------------------------------------------
+         BRAND / LOGO
+         href="#home" → clicking logo scrolls back to hero
+         aria-label → tells screen readers what this is
+    ----------------------------------------------- -->
+    <a class="navbar-brand d-flex align-items-center gap-2"
+       href="#home" aria-label="Nova Finance — go to homepage">
+
+      <!-- FIX: Replaced SVG logo with img tag for custom logo image.
+           ERROR: SVG logo didn't match user's branding preference.
+           FIX: img tag allows you to insert your own logo image file.
+           PLACEHOLDER: Replace 'images/logo.png' with your actual logo file path.
+           alt attribute provides text description for screen readers (accessibility). -->
+      <img src="images/vector/cover.png" alt="Nova Finance Logo" class="nav-logo-icon"
+           width="44" height="44" onerror="this.src='https:via.placeholder.com/44x44/C9A84C/ffffff?text=NF'">
+
+      <!-- Brand text: "NOVA" in gold, "Finance" lighter -->
+      <span class="nav-brand-text">
+        <span class="brand-nova">NOVA</span>
+        <span class="brand-finance">Finance</span>
+      </span>
+    </a><!-- end .navbar-brand -->
+
+    <!-- -----------------------------------------------
+         NAVBAR RIGHT CONTROLS (mobile only: low-data + toggler)
+         d-flex d-lg-none → only visible on screens < 992px
+    ----------------------------------------------- -->
+    <div class="d-flex align-items-center gap-2 d-lg-none">
+
+      <!-- LOW DATA MODE TOGGLE (mobile) — see desktop version below -->
+      <button class="low-data-btn" id="lowDataToggleMobile"
+              aria-label="Toggle Low Data Mode" title="Low Data Mode">
+        <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>
+      </button>
+
+      <!-- HAMBURGER BUTTON — Bootstrap toggles the collapsed menu.
+           data-bs-toggle="collapse" activates Bootstrap's JS collapse plugin.
+           data-bs-target="#navbarMenu" says which element to show/hide.
+           aria-controls & aria-expanded → accessibility state announcement. -->
+      <button class="navbar-toggler nav-hamburger" type="button"
+              data-bs-toggle="collapse" data-bs-target="#navbarMenu"
+              aria-controls="navbarMenu" aria-expanded="false"
+              aria-label="Toggle navigation menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+      </button>
+    </div><!-- end mobile controls -->
+
+    <!-- -----------------------------------------------
+         COLLAPSIBLE MENU WRAPPER
+         collapse navbar-collapse → Bootstrap hides this on
+           small screens; shows it when toggler is clicked.
+         id="navbarMenu" → matched by data-bs-target above.
+    ----------------------------------------------- -->
+    <div class="collapse navbar-collapse" id="navbarMenu">
+
+      <!-- NAV LINKS — center-aligned using mx-auto (Bootstrap margin auto)
+           role="list" makes the UL semantic for screen readers -->
+      <ul class="navbar-nav mx-auto gap-1" role="list">
+
+        <!-- Each nav-item is one link in the menu -->
+
+        <!-- HOME: href="#home" → JS will intercept this, find the element
+             with id="home", and smoothly scroll there (no page load). -->
+        <li class="nav-item" role="listitem">
+          <a class="nav-link active" href="#home"
+             aria-current="page">Home</a>
+        </li>
+
+        <!-- ABOUT: scrolls to the #about section on THIS page -->
+        <li class="nav-item" role="listitem">
+          <a class="nav-link" href="#about">About</a>
+        </li>
+
+        <!-- SERVICES DROPDOWN: shows sub-services on hover (desktop)
+             or tap (mobile). data-bs-toggle="dropdown" activates BS dropdown. -->
+        <li class="nav-item dropdown" role="listitem">
+          <a class="nav-link dropdown-toggle" href="#services"
+             data-bs-toggle="dropdown" aria-expanded="false"
+             aria-haspopup="true" id="servicesDropdown">
+            Services
+          </a>
+          <!-- Dropdown menu: each item scrolls to a sub-section on the page -->
+          <ul class="dropdown-menu nav-dropdown" aria-labelledby="servicesDropdown">
+
+            <li>
+              <!-- The section-link class is used by JS to handle smooth scroll -->
+              <a class="dropdown-item" href="#transfers">
+                <i class="bi bi-send-fill me-2 text-gold" aria-hidden="true"></i>
+                Money Transfers
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="#bills">
+                <i class="bi bi-lightning-fill me-2 text-gold" aria-hidden="true"></i>
+                Bill Payments
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="#airtime">
+                <i class="bi bi-phone-fill me-2 text-gold" aria-hidden="true"></i>
+                Airtime &amp; Data
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="#loans">
+                <i class="bi bi-cash-coin me-2 text-gold" aria-hidden="true"></i>
+                Quick Loans
+              </a>
+            </li>
+            <!-- <hr> inside a dropdown acts as a visual divider line -->
+            <li><hr class="dropdown-divider border-gold-subtle"></li>
+            <li>
+              <a class="dropdown-item" href="#betting">
+                <i class="bi bi-trophy-fill me-2 text-gold" aria-hidden="true"></i>
+                Betting &amp; Gaming Top-up
+              </a>
+            </li>
+          </ul>
+        </li><!-- end Services dropdown -->
+
+        <!-- MARKETPLACE: scrolls to the marketplace+escrow section -->
+        <li class="nav-item" role="listitem">
+          <a class="nav-link" href="#marketplace">Marketplace</a>
+        </li>
+
+        <!-- INSURANCE: scrolls to the insurance broker section -->
+        <li class="nav-item" role="listitem">
+          <a class="nav-link" href="#insurance">Insurance</a>
+        </li>
+
+        <!-- CONTACT: scrolls to the contact form section -->
+        <li class="nav-item" role="listitem">
+          <a class="nav-link" href="#contact">Contact</a>
+        </li>
+      </ul><!-- end .navbar-nav -->
+
+      <!-- -----------------------------------------------
+           RIGHT SIDE: Low Data toggle + CTA buttons
+           ms-auto → margin-start: auto (pushes to the right)
+      ----------------------------------------------- -->
+      <div class="nav-right-controls d-flex align-items-center gap-3">
+
+        <!-- LOW DATA MODE TOGGLE (desktop version)
+             This button + JavaScript adds/removes class "low-data-mode"
+             on <body>. When active, CSS disables all animations so
+             the page loads and performs fast on 3G/slow internet. -->
+        <button class="low-data-btn d-none d-lg-flex align-items-center gap-1"
+                id="lowDataToggleDesktop"
+                aria-label="Toggle Low Data Mode"
+                title="Enable Low Data Mode for faster loading on 3G">
+          <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>
+          <span class="low-data-label">Low Data</span>
+        </button>
+
+        <!-- SIGN IN button: links to the Dashboard page (external page, not a section) -->
+        <a href="login.html" class="btn btn-nav-outline"
+           aria-label="Sign in to your Nova Finance account">Log in</a>
+
+        <!-- GET STARTED button: scrolls to contact form where user can register -->
+        <a href="sign_up.html" class="btn btn-nav-gold"
+           aria-label="Get started with Nova Finance">Get Started</a>
+      </div><!-- end .nav-right-controls -->
+
+    </div><!-- end #navbarMenu -->
+  </div><!-- end .container -->
+</nav><!-- end #mainNav -->
+
+
+<!-- =====================================================
+     ██████████  MAIN CONTENT  ██████████
+     id="main-content" → target for the skip-link above
+===================================================== -->
+<main id="main-content">
+
+
+  <!-- =====================================================
+       SECTION 1: HERO — Bootstrap Carousel
+       
+       id="home" → the nav "Home" link scrolls here
+       
+       Bootstrap Carousel works like this:
+       - The outer div has id="heroCarousel" and class="carousel"
+       - data-bs-ride="carousel" → starts auto-playing on load
+       - data-bs-interval="5500" → changes slides every 5.5 seconds
+       - carousel-fade → uses a cross-fade transition instead of slide
+       - .carousel-item.active → FIRST slide must have "active" class
+       - .carousel-control-prev/next → left/right arrow buttons
+       - .carousel-indicators → the dot indicators at the bottom
+  ===================================================== -->
+  <section id="home" aria-label="Welcome to Nova Finance">
+
+    <!-- The carousel container: all Bootstrap carousel logic lives here -->
+    <div id="heroCarousel" class="carousel carousel-fade slide"
+         data-bs-ride="carousel" data-bs-interval="5500">
+
+      <!-- -------------------------------------------
+           CAROUSEL INDICATORS (the dots at the bottom)
+           Each <button> controls one slide.
+           data-bs-target → which carousel to control
+           data-bs-slide-to → index of the slide (0-based)
+           aria-label → accessible description per dot
+      ------------------------------------------- -->
+      <div class="carousel-indicators hero-indicators">
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0"
+                class="active" aria-current="true" aria-label="Slide 1: Smart Finance"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"
+                aria-label="Slide 2: Safe Marketplace"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"
+                aria-label="Slide 3: Insurance"></button>
+      </div><!-- end indicators -->
+
+      <!-- -------------------------------------------
+           CAROUSEL SLIDES WRAPPER
+           carousel-inner must wrap all carousel-item divs
+      ------------------------------------------- -->
+      <div class="carousel-inner">
+
+        <!-- ==========================================
+             SLIDE 1 — General Hero: "Smart Money"
+             class="active" → this is the first visible slide
+        ========================================== -->
+        <div class="carousel-item active" role="tabpanel" aria-label="Slide 1 of 3">
+
+          <!-- Background image for this slide.
+               The CSS on .slide-1-bg sets background-image, size, and position.
+               aria-hidden="true" → decorative; screen readers skip it. -->
+          <div class="hero-slide-bg slide-1-bg" aria-hidden="true">
+            <!-- Dark gradient overlay sits on top of the background image,
+                 making the white text readable -->
+            <div class="hero-overlay"></div>
+          </div>
+
+          <!-- Slide content: centered using Bootstrap grid -->
+          <div class="carousel-caption hero-caption">
+            <div class="container">
+              <!-- row → Bootstrap horizontal container for columns
+                   justify-content-center → columns sit in the middle
+                   g-0 → no gutter (gap) between columns -->
+              <div class="row justify-content-center g-0">
+                <!-- col-lg-8 → takes 8 of 12 columns on large screens (centred) -->
+                <div class="col-lg-8 col-12">
+
+                  <!-- Small pill badge above the headline -->
+                  <div class="hero-badge" data-aos="fade-down" data-aos-delay="100">
+                    <span class="badge-dot" aria-hidden="true"></span>
+                    <span>Nigeria's Premier Fintech Platform</span>
+                  </div>
+
+                  <!-- H1: the most important heading on the entire page.
+                       There must be only ONE h1 per page (SEO + accessibility rule).
+                       data-aos="fade-up" → AOS library animates this in from below. -->
+                  <h1 class="hero-title" data-aos="fade-up" data-aos-delay="200">
+                    Smart Money
+                    <span class="title-gold">for Every</span>
+                    Nigerian
+                  </h1>
+
+                  <!-- Hero description -->
+                  <p class="hero-desc" data-aos="fade-up" data-aos-delay="300">
+                    Send money instantly, pay all your bills, invest wisely,
+                    shop safely with Escrow protection — all on one platform.
+                    Built in Owerri, serving Nigeria.
+                  </p>
+
+                  <!-- CTA button row: d-flex flex-wrap gap-3 = horizontal flex
+                       that wraps neatly on small screens -->
+                  <div class="hero-actions d-flex flex-wrap justify-content-center gap-3"
+                       data-aos="fade-up" data-aos-delay="400">
+                    <a href="sign_up.html" class="btn btn-gold-solid btn-hero">
+                      Open Free Account
+                      <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i>
+                    </a>
+                    <a href="#howitworks" class="btn btn-ghost-white btn-hero">
+                      <i class="bi bi-play-circle-fill me-2" aria-hidden="true"></i>
+                      How It Works
+                    </a>
+                  </div>
+
+                  <!-- Quick trust stats below CTAs -->
+                  <div class="hero-trust d-flex flex-wrap justify-content-center gap-4 mt-4"
+                       data-aos="fade-up" data-aos-delay="500">
+                    <div class="trust-stat">
+                      <strong>75K+</strong><span>Active Users</span>
+                    </div>
+                    <div class="trust-divider" aria-hidden="true"></div>
+                    <div class="trust-stat">
+                      <strong>₦8B+</strong><span>Monthly Volume</span>
+                    </div>
+                    <div class="trust-divider" aria-hidden="true"></div>
+                    <div class="trust-stat">
+                      <strong>99.9%</strong><span>Uptime</span>
+                    </div>
+                  </div><!-- end hero-trust -->
+                </div><!-- end col-lg-8 -->
+              </div><!-- end row -->
+            </div><!-- end container -->
+          </div><!-- end .carousel-caption -->
+        </div><!-- end Slide 1 -->
+
+
+        <!-- ==========================================
+             SLIDE 2 — Marketplace + Escrow Feature
+        ========================================== -->
+        <div class="carousel-item" role="tabpanel" aria-label="Slide 2 of 3">
+          <div class="hero-slide-bg slide-2-bg" aria-hidden="true">
+            <div class="hero-overlay hero-overlay-market"></div>
+          </div>
+          <div class="carousel-caption hero-caption">
+            <div class="container">
+              <div class="row justify-content-center g-0">
+                <div class="col-lg-8 col-12">
+                  <div class="hero-badge badge-market" data-aos="fade-down" data-aos-delay="100">
+                    <i class="bi bi-shield-fill-check me-2" aria-hidden="true"></i>
+                    <span>Nigeria's First Escrow Marketplace</span>
+                  </div>
+                  <h2 class="hero-title" data-aos="fade-up" data-aos-delay="200">
+                    Buy &amp; Sell
+                    <span class="title-gold">Without Fear.</span>
+                    Always.
+                  </h2>
+                  <p class="hero-desc" data-aos="fade-up" data-aos-delay="300">
+                    Tired of "what I ordered vs. what I got"? Our Escrow system holds
+                    your payment safely until you confirm your item arrived in perfect
+                    condition. No fraud. No stress. Just trust.
+                  </p>
+                  <div class="hero-actions d-flex flex-wrap justify-content-center gap-3"
+                       data-aos="fade-up" data-aos-delay="400">
+                    <a href="#marketplace" class="btn btn-gold-solid btn-hero">
+                      Explore Marketplace
+                      <i class="bi bi-shop ms-2" aria-hidden="true"></i>
+                    </a>
+                    <a href="#marketplace" class="btn btn-ghost-white btn-hero">
+                      How Escrow Works
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- end Slide 2 -->
+
+
+        <!-- ==========================================
+             SLIDE 3 — Insurance Broker Section
+        ========================================== -->
+        <div class="carousel-item" role="tabpanel" aria-label="Slide 3 of 3">
+          <div class="hero-slide-bg slide-3-bg" aria-hidden="true">
+            <div class="hero-overlay hero-overlay-insure"></div>
+          </div>
+          <div class="carousel-caption hero-caption">
+            <div class="container">
+              <div class="row justify-content-center g-0">
+                <div class="col-lg-8 col-12">
+                  <div class="hero-badge badge-insure" data-aos="fade-down" data-aos-delay="100">
+                    <i class="bi bi-award-fill me-2" aria-hidden="true"></i>
+                    <span>Certified Insurance Broker</span>
+                  </div>
+                  <h2 class="hero-title" data-aos="fade-up" data-aos-delay="200">
+                    Protect
+                    <span class="title-gold">What Matters</span>
+                    Most
+                  </h2>
+                  <p class="hero-desc" data-aos="fade-up" data-aos-delay="300">
+                    Life Insurance, Generator Breakdown Cover, and Market Shop Fire
+                    Insurance — tailored for real Nigerian lives and businesses.
+                    Fast claims. Affordable premiums. Real protection.
+                  </p>
+                  <div class="hero-actions d-flex flex-wrap justify-content-center gap-3"
+                       data-aos="fade-up" data-aos-delay="400">
+                    <a href="#insurance" class="btn btn-gold-solid btn-hero">
+                      Get Insured Today
+                      <i class="bi bi-shield-check ms-2" aria-hidden="true"></i>
+                    </a>
+                    <a href="#insurance" class="btn btn-ghost-white btn-hero">
+                      View Plans
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- end Slide 3 -->
+
+      </div><!-- end .carousel-inner -->
+
+      <!-- -------------------------------------------
+           CAROUSEL CONTROLS — Previous and Next arrows
+           data-bs-slide="prev/next" → Bootstrap JS handles
+           the actual slide change when clicked
+      ------------------------------------------- -->
+      <button class="carousel-control-prev hero-ctrl" type="button"
+              data-bs-target="#heroCarousel" data-bs-slide="prev"
+              aria-label="Previous slide">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next hero-ctrl" type="button"
+              data-bs-target="#heroCarousel" data-bs-slide="next"
+              aria-label="Next slide">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+
+    </div><!-- end #heroCarousel -->
+  </section><!-- end #home -->
+
+
+  <!-- =====================================================
+       SECTION 2: TRUST STRIP — "Regulated & Trusted By"
+       
+       Showing regulation and partner logos builds confidence.
+       aria-label on section announces it to screen readers.
+  ===================================================== -->
+  <section class="trust-strip" aria-label="Regulatory and partner trust indicators">
+    <div class="container">
+
+      <!-- Small label above the logos -->
+      <p class="trust-strip-label text-center" aria-label="Trusted by">
+        Regulated &amp; Trusted By
+      </p>
+
+      <!-- d-flex flex-wrap justify-content-center → horizontal row,
+           wraps on small screens, centred. gap-5 = 3rem spacing. -->
+      <div class="trust-logos d-flex flex-wrap justify-content-center align-items-center gap-4 gap-lg-5">
+        <!-- Each trust-logo is a text+icon pair (replace with real SVG logos later) -->
+        <div class="trust-logo-item">
+          <i class="bi bi-bank" aria-hidden="true"></i>
+          <span>CBN Licensed</span>
+        </div>
+        <div class="trust-logo-item">
+          <i class="bi bi-shield-check" aria-hidden="true"></i>
+          <span>NDIC Insured</span>
+        </div>
+        <div class="trust-logo-item">
+          <i class="bi bi-credit-card-2-front" aria-hidden="true"></i>
+          <span>Visa Partner</span>
+        </div>
+        <div class="trust-logo-item">
+          <i class="bi bi-globe" aria-hidden="true"></i>
+          <span>Mastercard</span>
+        </div>
+        <div class="trust-logo-item">
+          <i class="bi bi-phone" aria-hidden="true"></i>
+          <span>MTN MoMo</span>
+        </div>
+      </div><!-- end trust-logos -->
+    </div>
+  </section><!-- end trust strip -->
+
+
+  <!-- =====================================================
+       SECTION 3: ABOUT — Company story, mission, values
+       
+       id="about" → nav "About" link scrolls here
+       data-aos="fade-right/left" → AOS animation direction
+  ===================================================== -->
+  <section id="about" class="section-padding" aria-labelledby="about-heading">
+    <div class="container">
+      <!-- row with Bootstrap grid: 2 columns on large, stacked on mobile -->
+      <div class="row align-items-center g-5">
+
+        <!-- LEFT: Image with floating stat card on top -->
+        <div class="col-lg-6" data-aos="fade-right" data-aos-duration="800">
+          <!-- about-img-wrap is position:relative so the floating card can
+               be position:absolute inside it -->
+          <div class="about-img-wrap">
+            <!-- img-fluid = max-width:100% so image never overflows its column
+                 rounded-4 = Bootstrap class for border-radius: 1rem
+                 object-fit: cover is set in CSS to crop nicely -->
+            <img src="/images/About.png"
+                 alt="Nova Finance team at our Owerri office on Douglas Road"
+                 class="  img-fluid rounded-4 about-main-img"
+                 loading="lazy">
+            <!-- loading="lazy" → browser only loads this image when user
+                 scrolls near it, saving bandwidth -->
+
+            <!-- Floating stat overlay card — position:absolute (in CSS),
+                 appears at bottom-right of the image -->
+            <div class="about-float-card" data-aos="zoom-in" data-aos-delay="400">
+              <div class="float-card-icon" aria-hidden="true">
+                <i class="bi bi-people-fill"></i>
+              </div>
+              <div>
+                <!-- This number will be animated by the counter JS function -->
+                <strong class="counter-up" data-target="75000">0</strong>+
+                <p>Happy Customers</p>
+              </div>
+            </div><!-- end floating card -->
+
+          </div><!-- end about-img-wrap -->
+        </div><!-- end left column -->
+
+        <!-- RIGHT: Text content -->
+        <div class="col-lg-6" data-aos="fade-left" data-aos-duration="800">
+
+          <!-- section-label: the small pill badge above each section heading -->
+          <span class="section-label" aria-label="Section: About Us">About Nova Finance</span>
+
+          <!-- H2: each major section uses h2. Only h1 is the page-level heading. -->
+          <h2 class="section-title" id="about-heading">
+            Built in Owerri.<br>
+            <span class="text-gold">Built for Nigeria.</span>
+          </h2>
+
+          <p class="section-text">
+            Nova Finance Is a Pan African Fintech mircofinance bank and  was founded in 2022 on Douglas Road, Owerri, Imo State,
+            with a bold belief: every Nigerian — from the market trader in Imo State
+            to the Business owners in Nigeria — deserves access to world-class financial services
+            without stress, long queues, or hidden charges.<br>
+            It was created to help the Middle Middle class, Lower Middle class and Lower class seccure good banking services with insurance coverage available for secure trading.
+          </p>
+          <p class="section-text">
+            Today, we serve over 75,000 customers across Nigeria and beyond.
+            From instant bank transfers to Nigeria's first Escrow Marketplace, we are
+            redefining what fintech means for Nigerians.
+          </p>
+
+          <!-- Feature checklist: ul list-unstyled removes default bullet points -->
+          <ul class="about-checklist list-unstyled mt-4" aria-label="Key features and credentials">
+            <!-- Each li is a flex row: icon | text -->
+            <li class="check-item">
+              <div class="check-icon" aria-hidden="true"><i class="bi bi-check-lg"></i></div>
+              <div>
+                <strong>CBN Licensed &amp; NDIC Insured</strong>
+                <p>Your deposits are insured up to ₦5,000,000 by the NDIC</p>
+              </div>
+            </li>
+            <li class="check-item">
+              <div class="check-icon" aria-hidden="true"><i class="bi bi-check-lg"></i></div>
+              <div>
+                <strong>Zero Hidden Charges</strong>
+                <p>We publish every fee. What you see is always what you pay</p>
+              </div>
+            </li>
+            <li class="check-item">
+              <div class="check-icon" aria-hidden="true"><i class="bi bi-check-lg"></i></div>
+              <div>
+                <strong>24/7 Support in English &amp; Igbo</strong>
+                <p>Real humans available via chat, phone, and WhatsApp</p>
+              </div>
+            </li>
+          </ul><!-- end checklist -->
+
+          <!-- CTA link to scroll to services section -->
+          <a href="#services" class="btn btn-gold-outline mt-4">
+            Explore Our Services
+            <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i>
+          </a>
+        </div><!-- end right column -->
+      </div><!-- end row -->
+    </div><!-- end container -->
+  </section><!-- end #about -->
+
+
+  <!-- =====================================================
+       SECTION 4: SERVICES OVERVIEW
+       
+       id="services" → nav "Services" link scrolls here.
+       Six service cards in a Bootstrap 3-column grid.
+  ===================================================== -->
+  <section id="services" class="section-padding section-dark"
+           aria-labelledby="services-heading">
+    <div class="container">
+
+      <!-- Section header: centered -->
+      <div class="row justify-content-center mb-5">
+        <div class="col-lg-7 text-center" data-aos="fade-up">
+          <span class="section-label">What We Offer</span>
+          <h2 class="section-title" id="services-heading">
+            Every Financial Service<br>
+            <span class="text-gold">You Will Ever Need</span>
+          </h2>
+          <p class="section-sub">
+            From the simplest airtime recharge to the most complex business payment —
+            Nova Finance has you covered, 24 hours a day, 7 days a week.
+          </p>
+        </div>
+      </div>
+
+      <!-- g-4 → Bootstrap gutter: 1.5rem gap between all cards -->
+      <div class="row g-4">
+
+        <!-- ---- SERVICE CARD 1: Money Transfers ---- -->
+        <!-- col-md-6 col-lg-4 → 2 columns on tablet, 3 on desktop -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="0">
+          <!-- a tag wraps the whole card — the href scrolls to the
+               transfers sub-section further down this same page -->
+          <a href="#transfers" class="service-card-link">
+            <article class="service-card">
+              <!-- Icon wrapper: CSS gives this a subtle gold background circle -->
+              <div class="svc-icon" aria-hidden="true">
+                <i class="bi bi-send-fill"></i>
+              </div>
+              <h3 class="svc-title">Instant Transfers</h3>
+              <p class="svc-desc">
+                Send money to any Nigerian bank account or mobile wallet in seconds.
+                Pan-African transfers available. Real-time confirmation always.
+              </p>
+              <!-- Small arrow link at the bottom of each card -->
+              <span class="svc-arrow" aria-hidden="true">
+                Learn more <i class="bi bi-arrow-right"></i>
+              </span>
+            </article>
+          </a>
+        </div><!-- end card 1 -->
+
+        <!-- ---- SERVICE CARD 2: Bill Payments ---- -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
+          <a href="#bills" class="service-card-link">
+            <article class="service-card">
+              <div class="svc-icon" aria-hidden="true">
+                <i class="bi bi-lightning-charge-fill"></i>
+              </div>
+              <h3 class="svc-title">Utility Bills</h3>
+              <p class="svc-desc">
+                Pay EEDC electricity, school fees (IMSU, Alvan Ikoku),
+                Imo Water, DStv/GOtv, Bet9ja, SportyBet — all in one tap.
+              </p>
+              <span class="svc-arrow" aria-hidden="true">
+                Learn more <i class="bi bi-arrow-right"></i>
+              </span>
+            </article>
+          </a>
+        </div><!-- end card 2 -->
+
+        <!-- ---- SERVICE CARD 3: Airtime & Data ---- -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
+          <a href="#airtime" class="service-card-link">
+            <article class="service-card">
+              <div class="svc-icon" aria-hidden="true">
+                <i class="bi bi-phone-fill"></i>
+              </div>
+              <h3 class="svc-title">Airtime &amp; Data</h3>
+              <p class="svc-desc">
+                Instant recharge for MTN, Airtel, Glo, and 9Mobile.
+                Data bundles, SME data, and corporate top-ups available
+                at the best rates on the market.
+              </p>
+              <span class="svc-arrow" aria-hidden="true">
+                Learn more <i class="bi bi-arrow-right"></i>
+              </span>
+            </article>
+          </a>
+        </div><!-- end card 3 -->
+
+        <!-- ---- SERVICE CARD 4: Quick Loans ---- -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="300">
+          <a href="#loans" class="service-card-link">
+            <article class="service-card">
+              <div class="svc-icon" aria-hidden="true">
+                <i class="bi bi-cash-coin"></i>
+              </div>
+              <h3 class="svc-title">Quick Loans</h3>
+              <p class="svc-desc">
+                Personal and business loans up to ₦5,000,000.
+                No collateral below ₦500,000. Decision in under 5 minutes.
+                Repay on your schedule.
+              </p>
+              <span class="svc-arrow" aria-hidden="true">
+                Learn more <i class="bi bi-arrow-right"></i>
+              </span>
+            </article>
+          </a>
+        </div><!-- end card 4 -->
+
+        <!-- ---- SERVICE CARD 5: Smart Savings ---- -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="400">
+          <a href="#contact" class="service-card-link">
+            <article class="service-card">
+              <div class="svc-icon" aria-hidden="true">
+                <i class="bi bi-piggy-bank-fill"></i>
+              </div>
+              <h3 class="svc-title">Smart Savings</h3>
+              <p class="svc-desc">
+                Earn up to 18% per annum. Set automatic savings goals.
+                Fixed deposits, target savings, and group savings (Ajo/Esusu)
+                all available.
+              </p>
+              <span class="svc-arrow" aria-hidden="true">
+                Learn more <i class="bi bi-arrow-right"></i>
+              </span>
+            </article>
+          </a>
+        </div><!-- end card 5 -->
+
+        <!-- ---- SERVICE CARD 6: Investments ---- -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="500">
+          <a href="#contact" class="service-card-link">
+            <article class="service-card">
+              <div class="svc-icon" aria-hidden="true">
+                <i class="bi bi-graph-up-arrow"></i>
+              </div>
+              <h3 class="svc-title">Investments</h3>
+              <p class="svc-desc">
+                Treasury Bills, bonds, mutual funds. Invest from ₦1,000.
+                Transparent yields. Managed portfolios for beginners
+                and experienced investors alike.
+              </p>
+              <span class="svc-arrow" aria-hidden="true">
+                Learn more <i class="bi bi-arrow-right"></i>
+              </span>
+            </article>
+          </a>
+        </div><!-- end card 6 -->
+
+      </div><!-- end .row.g-4 -->
+    </div><!-- end container -->
+  </section><!-- end #services -->
+
+
+  <!-- =====================================================
+       SECTION 5: TRANSFERS DETAIL
+       id="transfers" — linked from the Services dropdown
+  ===================================================== -->
+  <section id="transfers" class="section-padding" aria-labelledby="transfers-heading">
+    <div class="container">
+      <div class="row align-items-center g-5">
+
+        <!-- LEFT: Text content -->
+        <div class="col-lg-6" data-aos="fade-right">
+          <span class="section-label">Money Transfers</span>
+          <h2 class="section-title" id="transfers-heading">
+            Send Money Anywhere<br>
+            <span class="text-gold">in Seconds</span>
+          </h2>
+          <p class="section-text">
+            Transfer funds to any Nigerian bank account, mobile wallet, or
+            Pan-African destination instantly. No paperwork, no delays — just
+            enter the account number and amount, confirm with your PIN, and
+            the money lands in seconds.
+          </p>
+          <!-- Feature pills grid: d-flex flex-wrap gives responsive pill row -->
+          <div class="feature-pills d-flex flex-wrap gap-2 mt-3">
+            <span class="fpill"><i class="bi bi-check-circle-fill me-1"></i>Same bank — free</span>
+            <span class="fpill"><i class="bi bi-check-circle-fill me-1"></i>Other banks — ₦10</span>
+            <span class="fpill"><i class="bi bi-check-circle-fill me-1"></i>Pan-African transfers</span>
+            <span class="fpill"><i class="bi bi-check-circle-fill me-1"></i>Bulk payments</span>
+            <span class="fpill"><i class="bi bi-check-circle-fill me-1"></i>Scheduled transfers</span>
+          </div>
+          <a href="sign_up.html" class="btn btn-gold-solid mt-4">
+            Send Money Now <i class="bi bi-arrow-right ms-2"></i>
+          </a>
+        </div><!-- end left -->
+
+        <!-- RIGHT: Styled transfer UI mockup -->
+        <div class="col-lg-6" data-aos="fade-left">
+          <!-- A CSS-rendered mockup of the transfer form in the app -->
+          <div class="feature-mockup">
+            <div class="mockup-header-bar">
+              <span class="mockup-bar-dot d-red"></span>
+              <span class="mockup-bar-dot d-yellow"></span>
+              <span class="mockup-bar-dot d-green"></span>
+              <span class="mockup-bar-title">Send Money</span>
+            </div>
+            <!-- Transfer form mockup inside the card -->
+            <div class="mockup-body">
+              <!-- Balance display -->
+              <div class="mock-balance-row">
+                <div>
+                  <p class="mock-label">Available Balance</p>
+                  <h3 class="mock-amount">₦ 1,250,000.00</h3>
+                </div>
+                <div class="mock-avatar-circle" aria-label="User initials">CO</div>
+              </div>
+              <!-- Input field mockup rows -->
+              <div class="mock-input-row">
+                <span class="mock-input-label">Recipient Bank</span>
+                <div class="mock-input-val">Zenith Bank ●●●● 4491</div>
+              </div>
+              <div class="mock-input-row">
+                <span class="mock-input-label">Account Name</span>
+                <div class="mock-input-val verified">
+                  Emeka Nwosu
+                  <i class="bi bi-check-circle-fill text-success ms-2"></i>
+                </div>
+              </div>
+              <div class="mock-input-row">
+                <span class="mock-input-label">Amount</span>
+                <div class="mock-amount-big">₦ 50,000</div>
+              </div>
+              <!-- Send button inside mockup -->
+              <button class="mock-send-btn" disabled aria-label="Demo send button">
+                <i class="bi bi-send-fill me-2"></i>Send ₦50,000
+              </button>
+            </div><!-- end mockup-body -->
+          </div><!-- end feature-mockup -->
+        </div><!-- end right column -->
+      </div><!-- end row -->
+    </div>
+  </section><!-- end #transfers -->
+
+
+  <!-- =====================================================
+       SECTION 6: BILL PAYMENTS
+       id="bills" — linked from Services dropdown
+  ===================================================== -->
+  <section id="bills" class="section-padding section-dark" aria-labelledby="bills-heading">
+    <div class="container">
+      <div class="row justify-content-center mb-5">
+        <div class="col-lg-7 text-center" data-aos="fade-up">
+          <span class="section-label">Utility Bills</span>
+          <h2 class="section-title" id="bills-heading">
+            Pay Every Bill in<br>
+            <span class="text-gold">One Place</span>
+          </h2>
+          <p class="section-sub">
+            Stop visiting multiple offices or buying scratch cards.
+            Every payment you need — electricity, education, entertainment, and more — is here.
+          </p>
+        </div>
+      </div>
+
+      <!-- Bills grid: 4 columns on desktop, 2 on tablet, 1 on mobile -->
+      <div class="row g-3">
+
+        <!-- ELECTRICITY — EEDC serves Imo State -->
+        <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="0">
+          <div class="bill-card">
+            <div class="bill-icon" aria-hidden="true">
+              <i class="bi bi-lightning-fill"></i>
+            </div>
+            <h4 class="bill-name">Electricity</h4>
+            <p class="bill-sub">EEDC, IKEDC, AEDC</p>
+          </div>
+        </div>
+
+        <!-- SCHOOL FEES — Imo State universities -->
+        <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="100">
+          <div class="bill-card">
+            <div class="bill-icon" aria-hidden="true">
+              <i class="bi bi-mortarboard-fill"></i>
+            </div>
+            <h4 class="bill-name">School Fees</h4>
+            <p class="bill-sub">IMSU, Alvan Ikoku, IMT</p>
+          </div>
+        </div>
+
+        <!-- WATER — Imo State Water Corporation -->
+        <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="200">
+          <div class="bill-card">
+            <div class="bill-icon" aria-hidden="true">
+              <i class="bi bi-droplet-fill"></i>
+            </div>
+            <h4 class="bill-name">Water Bill</h4>
+            <p class="bill-sub">Imo Water Corp</p>
+          </div>
+        </div>
+
+        <!-- TV SUBSCRIPTIONS -->
+        <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="300">
+          <div class="bill-card">
+            <div class="bill-icon" aria-hidden="true">
+              <i class="bi bi-tv-fill"></i>
+            </div>
+            <h4 class="bill-name">TV Subscription</h4>
+            <p class="bill-sub">DStv, GOtv, StarTimes</p>
+          </div>
+        </div>
+
+        <!-- BETTING TOP-UP — very popular in Nigeria -->
+        <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="400">
+          <div class="bill-card" id="betting">
+            <div class="bill-icon icon-gold" aria-hidden="true">
+              <i class="bi bi-trophy-fill"></i>
+            </div>
+            <h4 class="bill-name">Betting &amp; Gaming</h4>
+            <p class="bill-sub">Bet9ja, SportyBet, MSport</p>
+          </div>
+        </div>
+
+        <!-- INTERNET / BROADBAND -->
+        <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="500">
+          <div class="bill-card">
+            <div class="bill-icon" aria-hidden="true">
+              <i class="bi bi-wifi"></i>
+            </div>
+            <h4 class="bill-name">Internet</h4>
+            <p class="bill-sub">Spectranet, Smile, ipNX</p>
+          </div>
+        </div>
+
+        <!-- TRANSPORT / RIDE HAILING -->
+        <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="600">
+          <div class="bill-card">
+            <div class="bill-icon" aria-hidden="true">
+              <i class="bi bi-car-front-fill"></i>
+            </div>
+            <h4 class="bill-name">Transport</h4>
+            <p class="bill-sub">Uber, Bolt, Ride-share</p>
+          </div>
+        </div>
+
+        <!-- HEALTH INSURANCE -->
+        <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="700">
+          <div class="bill-card">
+            <div class="bill-icon" aria-hidden="true">
+              <i class="bi bi-heart-pulse-fill"></i>
+            </div>
+            <h4 class="bill-name">Health Payments</h4>
+            <p class="bill-sub">NHIS, HMO, Hospital</p>
+          </div>
+        </div>
+
+      </div><!-- end bills grid -->
+    </div>
+  </section><!-- end #bills -->
+
+
+  <!-- =====================================================
+       SECTION 7: AIRTIME & DATA
+       id="airtime"
+  ===================================================== -->
+  <section id="airtime" class="section-padding" aria-labelledby="airtime-heading">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <!-- RIGHT: Content (order-lg-2 so it appears second on large screens) -->
+        <div class="col-lg-6 order-lg-2" data-aos="fade-left">
+          <span class="section-label">Airtime &amp; Data</span>
+          <h2 class="section-title" id="airtime-heading">
+            Stay Connected.<br>
+            <span class="text-gold">Instantly.</span>
+          </h2>
+          <p class="section-text">
+            Run out of data at the worst moment? Nova Finance recharges any Nigerian
+            network in under 5 seconds. Buy airtime for yourself or as a gift.
+            Access the cheapest data bundles directly — no middleman, no premium markup.
+          </p>
+          <!-- Network logos as styled badges -->
+          <div class="network-badges d-flex flex-wrap gap-3 mt-3">
+            <!-- Each badge has a network colour defined in CSS -->
+            <span class="net-badge net-mtn">MTN</span>
+            <span class="net-badge net-airtel">Airtel</span>
+            <span class="net-badge net-glo">Glo</span>
+            <span class="net-badge net-9mobile">9Mobile</span>
+          </div>
+          <ul class="about-checklist list-unstyled mt-4">
+            <li class="check-item">
+              <div class="check-icon"><i class="bi bi-check-lg"></i></div>
+              <div><strong>SME Data rates</strong> — Up to 30% cheaper than standard</div>
+            </li>
+            <li class="check-item">
+              <div class="check-icon"><i class="bi bi-check-lg"></i></div>
+              <div><strong>Auto-recharge</strong> — Never run out again</div>
+            </li>
+            <li class="check-item">
+              <div class="check-icon"><i class="bi bi-check-lg"></i></div>
+              <div><strong>Gift recharge</strong> — Top up anyone's number</div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- LEFT: Network selector mockup -->
+        <div class="col-lg-6 order-lg-1" data-aos="fade-right">
+          <div class="feature-mockup airtime-mockup">
+            <div class="mockup-header-bar">
+              <span class="mockup-bar-dot d-red"></span>
+              <span class="mockup-bar-dot d-yellow"></span>
+              <span class="mockup-bar-dot d-green"></span>
+              <span class="mockup-bar-title">Buy Airtime &amp; Data</span>
+            </div>
+            <div class="mockup-body">
+              <!-- Network selector tabs inside mockup -->
+              <div class="net-selector d-flex gap-2 mb-4" role="tablist">
+                <button class="net-tab active" role="tab" aria-selected="true">MTN</button>
+                <button class="net-tab" role="tab" aria-selected="false">Airtel</button>
+                <button class="net-tab" role="tab" aria-selected="false">Glo</button>
+                <button class="net-tab" role="tab" aria-selected="false">9Mobile</button>
+              </div>
+              <!-- Quick-amount buttons -->
+              <p class="mock-label">Select Amount</p>
+              <div class="quick-amounts d-flex flex-wrap gap-2 mb-3">
+                <button class="quick-amt">₦50</button>
+                <button class="quick-amt active-amt">₦100</button>
+                <button class="quick-amt">₦200</button>
+                <button class="quick-amt">₦500</button>
+                <button class="quick-amt">₦1,000</button>
+                <button class="quick-amt">₦5,000</button>
+              </div>
+              <!-- Phone number input mockup -->
+              <div class="mock-input-row">
+                <span class="mock-input-label">Phone Number</span>
+                <div class="mock-input-val">0803 456 7890</div>
+              </div>
+              <button class="mock-send-btn" disabled>
+                <i class="bi bi-phone-fill me-2"></i>Buy ₦100 Airtime
+              </button>
+            </div>
+          </div>
+        </div><!-- end mockup column -->
+      </div>
+    </div>
+  </section><!-- end #airtime -->
+
+
+  <!-- =====================================================
+       STATS COUNTER SECTION
+       Full-width emerald/navy gradient strip with animated
+       numbers. JavaScript counts them up when visible.
+  ===================================================== -->
+  <section id="stats" class="stats-section" aria-label="Nova Finance key statistics">
+    <div class="container">
+      <div class="row g-4 text-center">
+
+        <!-- data-target tells JS what final number to count up to -->
+        <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="0">
+          <div class="stat-block">
+            <h3 class="stat-num">
+              <span class="counter-up" data-target="75000">0</span>+
+            </h3>
+            <p class="stat-label">Active Users</p>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="100">
+          <div class="stat-block">
+            <h3 class="stat-num">
+              ₦<span class="counter-up" data-target="8">0</span>B+
+            </h3>
+            <p class="stat-label">Monthly Volume</p>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="200">
+          <div class="stat-block">
+            <h3 class="stat-num">
+              <span class="counter-up" data-target="99">0</span>.9%
+            </h3>
+            <p class="stat-label">Platform Uptime</p>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="300">
+          <div class="stat-block">
+            <h3 class="stat-num">
+              <span class="counter-up" data-target="18">0</span>+
+            </h3>
+            <p class="stat-label">Partner Banks</p>
+          </div>
+        </div>
+      </div><!-- end row -->
+    </div>
+  </section><!-- end stats -->
+
+
+  <!-- =====================================================
+       SECTION 8: MARKETPLACE + ESCROW — The Unique Feature
+       
+       id="marketplace" → nav "Marketplace" link scrolls here.
+       
+       This is Nova's key differentiator from other fintechs:
+       a safe marketplace with funds held in escrow until the
+       buyer confirms receipt. Eliminates "what I ordered vs
+       what I got" fraud completely.
+  ===================================================== -->
+  <section id="marketplace" class="section-padding" aria-labelledby="marketplace-heading">
+    <div class="container">
+
+      <!-- Section header -->
+      <div class="row justify-content-center mb-5">
+        <div class="col-lg-8 text-center" data-aos="fade-up">
+          <span class="section-label section-label-gold">🛡️ Our Unique Feature</span>
+          <h2 class="section-title" id="marketplace-heading">
+            The Nova
+            <span class="text-gold">Safe Marketplace</span><br>
+            with Escrow Protection
+          </h2>
+          <p class="section-sub">
+            The problem: Nigerian online buyers constantly fear being defrauded.
+            <strong>Our solution:</strong> When you buy through Nova, we hold your money safely
+            until you confirm you received exactly what you ordered.
+            No more "what I ordered vs. what I got." Forever.
+          </p>
+        </div>
+      </div>
+
+      <!-- Escrow explainer: 4-step visual process -->
+      <div class="row g-4 mb-6" aria-label="How Escrow works in 4 steps">
+        <!-- Step 1 -->
+        <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="0">
+          <div class="escrow-step">
+            <div class="escrow-num" aria-label="Step 1">01</div>
+            <div class="escrow-icon" aria-hidden="true">
+              <i class="bi bi-cart-fill"></i>
+            </div>
+            <h4 class="escrow-title">Buyer Places Order</h4>
+            <p class="escrow-desc">
+              Customer browses the Nova Marketplace, selects an item,
+              and completes the checkout. Payment is collected from their wallet.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
+          <div class="escrow-step">
+            <div class="escrow-num" aria-label="Step 2">02</div>
+            <div class="escrow-icon escrow-icon-hold" aria-hidden="true">
+              <i class="bi bi-safe2-fill"></i>
+            </div>
+            <h4 class="escrow-title">Nova Holds Payment</h4>
+            <p class="escrow-desc">
+              The full payment is locked securely in Nova's escrow vault.
+              The seller receives a notification to ship or deliver the item.
+              Money is NOT released yet.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
+          <div class="escrow-step">
+            <div class="escrow-num" aria-label="Step 3">03</div>
+            <div class="escrow-icon escrow-icon-deliver" aria-hidden="true">
+              <i class="bi bi-truck-front-fill"></i>
+            </div>
+            <h4 class="escrow-title">Item Delivered</h4>
+            <p class="escrow-desc">
+              Seller ships/delivers the item. Buyer has 7 days to
+              inspect it. If there is an issue, they raise a dispute.
+              Nova's team investigates and resolves fairly.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
+          <div class="escrow-step">
+            <div class="escrow-num" aria-label="Step 4">04</div>
+            <div class="escrow-icon escrow-icon-release" aria-hidden="true">
+              <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <h4 class="escrow-title">Funds Released</h4>
+            <p class="escrow-desc">
+              Buyer confirms receipt and satisfaction.
+              Nova immediately releases the full payment to the seller's account.
+              Both parties are protected. Always.
+            </p>
+          </div>
+        </div>
+      </div><!-- end escrow steps -->
+
+      <!-- Marketplace features row -->
+      <div class="row g-4 mt-2">
+        <div class="col-lg-4" data-aos="fade-up" data-aos-delay="0">
+          <div class="market-feature-card">
+            <i class="bi bi-shop-window mfc-icon" aria-hidden="true"></i>
+            <h4>List &amp; Sell Anything</h4>
+            <p>
+              From phones and clothing to fresh food and handmade crafts —
+              any legal product can be listed. Free to sell for personal accounts.
+              Low 1.5% commission on sales.
+            </p>
+          </div>
+        </div>
+        <div class="col-lg-4" data-aos="fade-up" data-aos-delay="150">
+          <div class="market-feature-card mfc-featured">
+            <i class="bi bi-shield-lock-fill mfc-icon mfc-icon-gold" aria-hidden="true"></i>
+            <h4>Buyer Protection Guarantee</h4>
+            <p>
+              If your item does not arrive or doesn't match the description,
+              you get a <strong>100% refund</strong>. No arguments.
+              Nova's Dispute Team resolves all cases within 48 hours.
+            </p>
+          </div>
+        </div>
+        <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
+          <div class="market-feature-card">
+            <i class="bi bi-star-fill mfc-icon" aria-hidden="true"></i>
+            <h4>Verified Seller Ratings</h4>
+            <p>
+              Every seller earns a public trust score based on delivery speed,
+              product accuracy, and dispute history.
+              High-rated sellers get a Nova Verified badge.
+            </p>
+          </div>
+        </div>
+      </div><!-- end marketplace features -->
+
+      <!-- Bottom CTA -->
+      <div class="text-center mt-5" data-aos="fade-up">
+        <a href="sign_up.html" class="btn btn-gold-solid btn-lg me-3">
+          <i class="bi bi-shop me-2"></i>Browse Marketplace
+        </a>
+        <a href="sign_up.html" class="btn btn-gold-outline btn-lg">
+          Start Selling Free
+        </a>
+      </div>
+
+    </div>
+  </section><!-- end #marketplace -->
+
+
+  <!-- =====================================================
+       SECTION 9: INSURANCE BROKER
+       id="insurance" → nav "Insurance" link scrolls here
+       
+       3 unique insurance products tailored for Nigerian lives:
+       1. Life Insurance (via broker partners)
+       2. Generator/Inverter Breakdown Cover (UNIQUE)
+       3. Market Shop Fire Insurance (UNIQUE)
+  ===================================================== -->
+  <section id="insurance" class="section-padding section-dark"
+           aria-labelledby="insurance-heading">
+    <div class="container">
+
+      <!-- Section header -->
+      <div class="row justify-content-center mb-5">
+        <div class="col-lg-7 text-center" data-aos="fade-up">
+          <span class="section-label">Insurance Broker</span>
+          <h2 class="section-title" id="insurance-heading">
+            Real Protection for
+            <span class="text-gold">Real Nigerian Lives</span>
+          </h2>
+          <p class="section-sub">
+            As a certified insurance broker, Nova partners with AIICO, Leadway,
+            Custodian, and AXA Mansard to offer you affordable, tailored cover —
+            with fast claims processed directly through the app.
+          </p>
+        </div>
+      </div>
+
+      <!-- 3 insurance product cards: col-md-4 = side by side on tablet+ -->
+      <div class="row g-4">
+
+        <!-- INSURANCE PRODUCT 1: Life Insurance -->
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="0">
+          <!-- article → semantic HTML for a self-contained content block -->
+          <article class="insure-card">
+            <div class="insure-badge">
+              <i class="bi bi-heart-pulse-fill" aria-hidden="true"></i>
+            </div>
+            <h3 class="insure-title">Life Insurance</h3>
+            <p class="insure-tagline">Protect your family's future</p>
+            <p class="insure-desc">
+              Nova brokers life insurance policies from Nigeria's top insurers.
+              Get a quote, compare plans, and pay premiums monthly through your
+              Nova wallet — starting from just ₦1,500/month.
+            </p>
+            <!-- Feature list for this insurance product -->
+            <ul class="insure-list list-unstyled">
+              <li><i class="bi bi-check2-circle me-2"></i>From ₦5000/month</li>
+              <li><i class="bi bi-check2-circle me-2"></i>Coverage up to ₦50M</li>
+              <li><i class="bi bi-check2-circle me-2"></i>Fast claims via app</li>
+              <li><i class="bi bi-check2-circle me-2"></i>AIICO, Leadway, AXA</li>
+            </ul>
+            <a href="sign_up.html" class="btn btn-insure-cta w-100">Get Life Cover</a>
+          </article>
+        </div><!-- end life insurance card -->
+
+        <!-- INSURANCE PRODUCT 2: Generator/Inverter Cover (UNIQUE) -->
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="150">
+          <article class="insure-card insure-featured">
+            <!-- "Most Popular" ribbon badge -->
+            <div class="insure-popular-badge" aria-label="Most popular plan">
+              ⚡ Most Popular
+            </div>
+            <div class="insure-badge insure-badge-gold">
+              <i class="bi bi-plugin" aria-hidden="true"></i>
+            </div>
+            <h3 class="insure-title">Generator &amp; Inverter Cover</h3>
+            <p class="insure-tagline">Because NEPA won't always come</p>
+            <p class="insure-desc">
+              Your generator is not a luxury — it is essential. Nova's exclusive
+              Breakdown Cover pays for repairs or full replacement when your generator
+              or inverter fails. Tailored for Nigeria's power reality.
+            </p>
+            <ul class="insure-list insure-list-white list-unstyled">
+              <li><i class="bi bi-check2-circle me-2"></i>From ₦3000/month</li>
+              <li><i class="bi bi-check2-circle me-2"></i>Covers repairs &amp; parts</li>
+              <li><i class="bi bi-check2-circle me-2"></i>Replacement if irreparable</li>
+              <li><i class="bi bi-check2-circle me-2"></i>24hr emergency callout</li>
+            </ul>
+            <a href="sign_up.html" class="btn btn-insure-white w-100">Protect My Generator</a>
+          </article>
+        </div><!-- end generator insurance card -->
+
+        <!-- INSURANCE PRODUCT 3: Market Shop Fire Insurance (UNIQUE) -->
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+          <article class="insure-card">
+            <div class="insure-badge">
+              <i class="bi bi-fire" aria-hidden="true"></i>
+            </div>
+            <h3 class="insure-title">Market Shop Fire Insurance</h3>
+            <p class="insure-tagline">For traders in every Owerri market</p>
+            <p class="insure-desc">
+              Fire destroys markets in Nigeria every year. Protect your shop,
+              stock, and equipment at Eke-Ukwu, Nkwo, Ahiara, or any other
+              market — for as little as ₦500/month. Rebuild quickly, not from scratch.
+            </p>
+            <ul class="insure-list list-unstyled">
+              <li><i class="bi bi-check2-circle me-2"></i>From ₦3000/month</li>
+              <li><i class="bi bi-check2-circle me-2"></i>Covers stock &amp; equipment</li>
+              <li><i class="bi bi-check2-circle me-2"></i>Quick payout (3–5 days)</li>
+              <li><i class="bi bi-check2-circle me-2"></i>All Imo State markets</li>
+            </ul>
+            <a href="sign_up.html" class="btn btn-insure-cta w-100">Protect My Shop</a>
+          </article>
+        </div><!-- end fire insurance card -->
+
+      </div><!-- end insurance row -->
+    </div>
+  </section><!-- end #insurance -->
+
+
+  <!-- =====================================================
+       SECTION 10: HOW IT WORKS
+       id="howitworks" — linked from hero CTA button
+  ===================================================== -->
+  <section id="howitworks" class="section-padding" aria-labelledby="hiw-heading">
+    <div class="container">
+      <div class="row justify-content-center mb-5">
+        <div class="col-lg-7 text-center" data-aos="fade-up">
+          <span class="section-label">Getting Started</span>
+          <h2 class="section-title" id="hiw-heading">
+            Up and Running in<br>
+            <span class="text-gold">Under 5 Minutes</span>
+          </h2>
+          <p class="section-sub">
+            No paperwork. No bank visit. No complicated forms.
+            Just your phone, your BVN, and you're done.
+          </p>
+        </div>
+      </div>
+
+      <!-- 4-step cards: position:relative on the row so
+           JS/CSS can draw connecting lines between them -->
+      <div class="row g-4 hiw-row">
+        <!-- STEP 1 -->
+        <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="0">
+          <div class="hiw-card">
+            <!-- Large faint step number behind the card content -->
+            <div class="hiw-num" aria-label="Step 1">01</div>
+            <div class="hiw-icon" aria-hidden="true">
+              <i class="bi bi-person-plus-fill"></i>
+            </div>
+            <h4 class="hiw-title">Create Account</h4>
+            <p class="hiw-desc">
+              Visit nova.ng or download the Nova app. Enter your phone number,
+              create a PIN, and start. Takes under 2 minutes.
+            </p>
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="150">
+          <div class="hiw-card">
+            <div class="hiw-num" aria-label="Step 2">02</div>
+            <div class="hiw-icon" aria-hidden="true">
+              <i class="bi bi-person-badge-fill"></i>
+            </div>
+            <h4 class="hiw-title">Verify Identity</h4>
+            <p class="hiw-desc">
+              Take a quick selfie and enter your NIN or BVN.
+              Our system verifies you in under 10 minutes — fully automated.
+            </p>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
+          <div class="hiw-card">
+            <div class="hiw-num" aria-label="Step 3">03</div>
+            <div class="hiw-icon" aria-hidden="true">
+              <i class="bi bi-wallet2"></i>
+            </div>
+            <h4 class="hiw-title">Fund Your Wallet</h4>
+            <p class="hiw-desc">
+              Add money by bank transfer, debit card, USSD (*737#), or cash deposit
+              at any Nova Agent in Owerri. Your Nova account number is instant.
+            </p>
+          </div>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="450">
+          <div class="hiw-card">
+            <div class="hiw-num" aria-label="Step 4">04</div>
+            <div class="hiw-icon hiw-icon-active" aria-hidden="true">
+              <i class="bi bi-lightning-charge-fill"></i>
+            </div>
+            <h4 class="hiw-title">Start Transacting</h4>
+            <p class="hiw-desc">
+              Send money, pay bills, shop the Marketplace, get insured, invest —
+              everything is live from your dashboard, 24/7.
+            </p>
+          </div>
+        </div>
+      </div><!-- end hiw row -->
+
+      <!-- CTA below steps -->
+      <div class="text-center mt-5" data-aos="fade-up">
+        <a href="sign_up.html" class="btn btn-gold-solid btn-lg">
+          Open My Account Free <i class="bi bi-arrow-right ms-2"></i>
+        </a>
+      </div>
+    </div>
+  </section><!-- end #howitworks -->
+
+
+  <!-- =====================================================
+       SECTION 11: QUICK LOANS (sub-section of services)
+       id="loans"
+  ===================================================== -->
+  <section id="loans" class="section-padding section-dark" aria-labelledby="loans-heading">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <!-- LEFT: Loan tiers display -->
+        <div class="col-lg-6" data-aos="fade-right">
+          <span class="section-label">Quick Loans</span>
+          <h2 class="section-title" id="loans-heading">
+            Money When<br>
+            <span class="text-gold">You Need It Most</span>
+          </h2>
+          <p class="section-text">
+            Nova offers collateral-free personal and business loans. Apply in
+            the app, get a decision in 5 minutes, and receive funds immediately
+            upon approval — day or night.
+          </p>
+          <!-- Loan tier cards: 3 tiers stacked vertically -->
+          <div class="loan-tiers mt-4">
+            <!-- Tier 1 -->
+            <div class="loan-tier" data-aos="fade-right" data-aos-delay="100">
+              <div class="tier-range">₦10,000 — ₦500,000</div>
+              <div class="tier-details">
+                <span class="tier-tag">No Collateral</span>
+                <span class="tier-tag">5 mins approval</span>
+              </div>
+            </div>
+            <!-- Tier 2 -->
+            <div class="loan-tier" data-aos="fade-right" data-aos-delay="200">
+              <div class="tier-range">₦500,001 — ₦2,000,000</div>
+              <div class="tier-details">
+                <span class="tier-tag">Payslip required</span>
+                <span class="tier-tag">24hr approval</span>
+              </div>
+            </div>
+            <!-- Tier 3 -->
+            <div class="loan-tier" data-aos="fade-right" data-aos-delay="300">
+              <div class="tier-range">₦2,000,001 — ₦5,000,000</div>
+              <div class="tier-details">
+                <span class="tier-tag">Business docs</span>
+                <span class="tier-tag">48hr approval</span>
+              </div>
+            </div>
+          </div><!-- end loan-tiers -->
+          <a href="sign_up.html" class="btn btn-gold-solid mt-4">
+            Apply for a Loan <i class="bi bi-arrow-right ms-2"></i>
+          </a>
+        </div>
+
+        <!-- RIGHT: Key loan stats -->
+        <div class="col-lg-6" data-aos="fade-left">
+          <div class="row g-3">
+            <!-- 4 small stat cards in a 2x2 grid -->
+            <div class="col-6">
+              <div class="loan-stat-card">
+                <div class="lsc-icon" aria-hidden="true">
+                  <i class="bi bi-percent"></i>
+                </div>
+                <h4>From 2.5%</h4>
+                <p>Monthly interest rate</p>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="loan-stat-card">
+                <div class="lsc-icon" aria-hidden="true">
+                  <i class="bi bi-clock-fill"></i>
+                </div>
+                <h4>5 Minutes</h4>
+                <p>Average approval time</p>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="loan-stat-card">
+                <div class="lsc-icon" aria-hidden="true">
+                  <i class="bi bi-calendar-check"></i>
+                </div>
+                <h4>3–12 Months</h4>
+                <p>Flexible repayment</p>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="loan-stat-card lsc-gold">
+                <div class="lsc-icon" aria-hidden="true">
+                  <i class="bi bi-people-fill"></i>
+                </div>
+                <h4>12,000+</h4>
+                <p>Loans disbursed</p>
+              </div>
+            </div>
+          </div><!-- end 2x2 grid -->
+        </div><!-- end right column -->
+      </div><!-- end row -->
+    </div>
+  </section><!-- end #loans -->
+
+
+  <!-- =====================================================
+       SECTION 12: WHY CHOOSE NOVA (Features)
+  ===================================================== -->
+  <section id="whyus" class="section-padding" aria-labelledby="whyus-heading">
+    <div class="container">
+      <div class="row justify-content-center mb-5">
+        <div class="col-lg-7 text-center" data-aos="fade-up">
+          <span class="section-label">Why Nova Finance</span>
+          <h2 class="section-title" id="whyus-heading">
+            Everything You Need.
+            <span class="text-gold">Nothing You Don't.</span>
+          </h2>
+        </div>
+      </div>
+
+      <div class="row g-4">
+
+        <!-- Feature 1 -->
+        <div class="col-md-6" data-aos="fade-up" data-aos-delay="0">
+          <div class="why-card">
+            <div class="why-icon" aria-hidden="true">
+              <i class="bi bi-lightning-charge-fill"></i>
+            </div>
+            <div class="why-text">
+              <h4>Instant Transfers, Always</h4>
+              <p>Money moves to any Nigerian bank in under 10 seconds,
+                 24 hours a day, 365 days a year — including Christmas and Eid.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="col-md-6" data-aos="fade-up" data-aos-delay="100">
+          <div class="why-card">
+            <div class="why-icon" aria-hidden="true">
+              <i class="bi bi-shield-fill-check"></i>
+            </div>
+            <div class="why-text">
+              <h4>Military-Grade Security</h4>
+              <p>256-bit SSL encryption, biometric login, real-time fraud detection,
+                 and 2FA. Your money is safer than in most traditional banks.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
+          <div class="why-card">
+            <div class="why-icon" aria-hidden="true">
+              <i class="bi bi-graph-up"></i>
+            </div>
+            <div class="why-text">
+              <h4>Smart Financial Analytics</h4>
+              <p>See exactly where your money goes. Automatic spending categories,
+                 monthly budgets, and personalised savings insights in your dashboard.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="col-md-6" data-aos="fade-up" data-aos-delay="300">
+          <div class="why-card">
+            <div class="why-icon" aria-hidden="true">
+              <i class="bi bi-headset"></i>
+            </div>
+            <div class="why-text">
+              <h4>Human Support in English &amp; Vanacular(Mother Tongue)</h4>
+              <p>Chat with a real Nova agent 24/7 — in your language.
+                 Our Owerri-based support team resolves 95% of issues in the first contact.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 5: LOW DATA MODE — highlight this as a unique UX feature -->
+        <div class="col-md-6" data-aos="fade-up" data-aos-delay="400">
+          <div class="why-card why-card-gold">
+            <div class="why-icon why-icon-dark" aria-hidden="true">
+              <i class="bi bi-lightning-charge"></i>
+            </div>
+            <div class="why-text">
+              <h4>⚡ Low Data Mode</h4>
+              <p>On a 3G connection? Toggle Low Data Mode at the top of this page.
+                 Animations turn off, heavy assets skip loading, and Nova works
+                 at full speed even on 512KB/s.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="col-md-6" data-aos="fade-up" data-aos-delay="500">
+          <div class="why-card">
+            <div class="why-icon" aria-hidden="true">
+              <i class="bi bi-translate"></i>
+            </div>
+            <div class="why-text">
+              <h4>Built for Nigerians</h4>
+              <p>USSD code (*737#) for when you have no data. Designed for Owerri
+                 first, then the rest of Nigeria. Familiar, practical, local.</p>
+            </div>
+          </div>
+        </div>
+      </div><!-- end features row -->
+    </div>
+  </section><!-- end #whyus -->
+
+
+  <!-- =====================================================
+       SECTION 13: TESTIMONIALS
+       All names and places from Owerri / Imo State
+       Real person images from the Nova template assets
+  ===================================================== -->
+  <section id="testimonials" class="section-padding section-dark"
+           aria-labelledby="testimonials-heading">
+    <div class="container">
+
+      <div class="row justify-content-center mb-5">
+        <div class="col-lg-7 text-center" data-aos="fade-up">
+          <span class="section-label">Testimonials</span>
+          <h2 class="section-title" id="testimonials-heading">
+            Owerri Speaks.<br>
+            <span class="text-gold">We Listen.</span>
+          </h2>
+          <p class="section-sub">
+            Real experiences from real customers across Imo State and beyond.
+          </p>
+        </div>
+      </div>
+
+      <!-- g-4 Bootstrap gutter, row wraps to 2 cols on tablet, 3 on desktop -->
+      <div class="row g-4">
+
+        <!-- TESTIMONIAL 1 -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="0">
+          <article class="testi-card">
+            <!-- Five gold stars: role="img" + aria-label = accessible rating -->
+            <div class="testi-stars" role="img" aria-label="5 out of 5 stars">
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+            </div>
+            <!-- blockquote = semantic HTML for quoted text -->
+            <blockquote class="testi-text">
+              "I sell clothes at Eke-Ukwu Market. Since I started using Nova's
+              Marketplace Escrow, I've attracted customers from Lagos and Abuja
+              who trust buying from me. My sales tripled in 6 months!"
+            </blockquote>
+            <div class="testi-author">
+              <!-- Person image from the Nova template -->
+              <img src="/images/AI photography___AFRICAN ROYALTY 👑.jpg"
+                   alt="Photo of Chukwuemeka Okafor" class="testi-avatar"
+                   loading="lazy" width="48" height="48">
+              <div class="testi-info">
+                <strong>Chukwuemeka Okafor</strong>
+                <span>Cloth Merchant, Eke-Ukwu Market, Owerri</span>
+              </div>
+            </div>
+          </article>
+        </div><!-- end testimonial 1 -->
+
+        <!-- TESTIMONIAL 2 -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
+          <article class="testi-card">
+            <div class="testi-stars" role="img" aria-label="5 out of 5 stars">
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+            </div>
+            <blockquote class="testi-text">
+              "The Generator Insurance saved me ₦85,000 last month when my
+              Mikano broke down. I filed the claim on a Friday, an engineer
+              came Saturday, and Nova paid the repair bill directly. Incredible service!"
+            </blockquote>
+            <div class="testi-author">
+              <img src="/images/Adaeze.jpg"
+                   alt="Photo of Adaeze Nwachukwu" class="testi-avatar"
+                   loading="lazy" width="48" height="48">
+              <div class="testi-info">
+                <strong>Adaeze Nwachukwu</strong>
+                <span>Hair Salon Owner, New Owerri</span>
+              </div>
+            </div>
+          </article>
+        </div><!-- end testimonial 2 -->
+
+        <!-- TESTIMONIAL 3 -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
+          <article class="testi-card">
+            <div class="testi-stars" role="img" aria-label="5 out of 5 stars">
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-half" aria-hidden="true"></i>
+            </div>
+            <blockquote class="testi-text">
+              "I pay IMSU fees for three of my children through Nova. No more
+              going to the bank, no more queue, no more 'system is down'.
+              I pay from Okigwe Road in my parlour on a Sunday evening. Nova
+              changed everything for our family."
+            </blockquote>
+            <div class="testi-author">
+              <img src="/images/Mother.jpg"
+                   alt="Photo of Dr. Ngozi Dike" class="testi-avatar"
+                   loading="lazy" width="48" height="48">
+              <div class="testi-info">
+                <strong>Dr. Ngozi Dike</strong>
+                <span>Senior Lecturer, IMSU, Owerri</span>
+              </div>
+            </div>
+          </article>
+        </div><!-- end testimonial 3 -->
+
+        <!-- TESTIMONIAL 4 -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="300">
+          <article class="testi-card">
+            <div class="testi-stars" role="img" aria-label="5 out of 5 stars">
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+            </div>
+            <blockquote class="testi-text">
+              "I applied for a ₦400,000 business loan at 11pm on a Tuesday.
+              By 11:15pm I had the money in my account and ordered stock
+              immediately. No other platform in Nigeria can do this. Nova is different."
+            </blockquote>
+            <div class="testi-author">
+              <img src="/images/Birthday.jpg"
+                   alt="Photo of Ikechukwu Eze" class="testi-avatar"
+                   loading="lazy" width="48" height="48">
+              <div class="testi-info">
+                <strong>Ikechukwu Eze</strong>
+                <span>Electronics Dealer, Wetheral Road, Owerri</span>
+              </div>
+            </div>
+          </article>
+        </div><!-- end testimonial 4 -->
+
+        <!-- TESTIMONIAL 5 -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="400">
+          <article class="testi-card">
+            <div class="testi-stars" role="img" aria-label="5 out of 5 stars">
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+            </div>
+            <blockquote class="testi-text">
+              "My shop at Nkwo market caught fire last year. Nova's Market Shop
+              Insurance paid me ₦1.2 million in 4 days. I was back open in
+              2 weeks. Without Nova, I would have lost everything."
+            </blockquote>
+            <div class="testi-author">
+              <img src="/images/download (1).jpg"
+                   alt="Photo of Chioma Obi" class="testi-avatar"
+                   loading="lazy" width="48" height="48">
+              <div class="testi-info">
+                <strong>Chioma Obi</strong>
+                <span>Provision Store Owner, Nkwo Market, Orlu</span>
+              </div>
+            </div>
+          </article>
+        </div><!-- end testimonial 5 -->
+
+        <!-- TESTIMONIAL 6 -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="500">
+          <article class="testi-card">
+            <div class="testi-stars" role="img" aria-label="5 out of 5 stars">
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+              <i class="bi bi-star-fill" aria-hidden="true"></i>
+            </div>
+            <blockquote class="testi-text">
+              "I work in Lagos but my family is in Owerri. I send money home
+              every week and pay EEDC bills for my parents — all through Nova.
+              Faster than any bank, cheaper than any transfer service I've tried."
+            </blockquote>
+            <div class="testi-author">
+              <img src="/images/download.jpg"
+                   alt="Photo of Emeka Nwosu" class="testi-avatar"
+                   loading="lazy" width="48" height="48">
+              <div class="testi-info">
+                <strong>Emeka Nwosu</strong>
+                <span>Civil Engineer, Lagos — from Okigwe, Imo State</span>
+              </div>
+            </div>
+          </article>
+        </div><!-- end testimonial 6 -->
+
+      </div><!-- end testimonials row -->
+    </div>
+  </section><!-- end #testimonials -->
+
+
+  <!-- =====================================================
+       SECTION 14: FAQ — Bootstrap Accordion
+       id="faq" (not in main nav but accessible via footer links)
+       
+       Bootstrap Accordion works by:
+       - The outer div has id="faqAccordion" (required)
+       - Each question is an .accordion-item
+       - data-bs-parent="#faqAccordion" closes other items
+         when a new one opens (so only one is open at a time)
+  ===================================================== -->
+  <section id="faq" class="section-padding" aria-labelledby="faq-heading">
+    <div class="container">
+      <div class="row justify-content-center mb-5">
+        <div class="col-lg-7 text-center" data-aos="fade-up">
+          <span class="section-label">FAQ</span>
+          <h2 class="section-title" id="faq-heading">
+            Frequently Asked
+            <span class="text-gold">Questions</span>
+          </h2>
+        </div>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-lg-8" data-aos="fade-up" data-aos-delay="100">
+
+          <!-- Bootstrap Accordion container -->
+          <div class="accordion nova-accordion" id="faqAccordion">
+
+            <!-- FAQ ITEM 1 -->
+            <div class="accordion-item faq-item">
+              <h3 class="accordion-header">
+                <!-- accordion-button: clickable header row
+                     data-bs-toggle="collapse" activates Bootstrap's collapse JS
+                     data-bs-target="#faq1" → which panel to open/close
+                     aria-expanded="true" → first item is open by default -->
+                <button class="accordion-button faq-btn" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#faq1"
+                        aria-expanded="true" aria-controls="faq1">
+                  How do I open a Nova Finance account?
+                </button>
+              </h3>
+              <!-- accordion-collapse collapse show → "show" makes it open by default -->
+              <div id="faq1" class="accordion-collapse collapse show"
+                   data-bs-parent="#faqAccordion">
+                <div class="accordion-body faq-body">
+                  Visit <strong>nova.ng</strong> or download the Nova Finance app from
+                  Google Play or the App Store. Enter your phone number, create a 6-digit PIN,
+                  take a quick selfie, and upload your NIN or Driver's Licence.
+                  Your account is live in under 5 minutes — no bank visit required.
+                </div>
+              </div>
+            </div><!-- end faq 1 -->
+
+            <!-- FAQ ITEM 2 -->
+            <div class="accordion-item faq-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button faq-btn collapsed" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#faq2"
+                        aria-expanded="false" aria-controls="faq2">
+                  Is my money safe with Nova Finance?
+                </button>
+              </h3>
+              <div id="faq2" class="accordion-collapse collapse"
+                   data-bs-parent="#faqAccordion">
+                <div class="accordion-body faq-body">
+                  Absolutely. Nova Finance is licensed by the Central Bank of Nigeria (CBN)
+                  and all deposits are insured by the NDIC up to ₦5,000,000. We use
+                  256-bit SSL encryption (the same standard as global banks), biometric
+                  authentication, and real-time fraud detection to protect your account at all times.
+                </div>
+              </div>
+            </div><!-- end faq 2 -->
+
+            <!-- FAQ ITEM 3 -->
+            <div class="accordion-item faq-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button faq-btn collapsed" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#faq3"
+                        aria-expanded="false" aria-controls="faq3">
+                  How does the Escrow Marketplace protect me as a buyer?
+                </button>
+              </h3>
+              <div id="faq3" class="accordion-collapse collapse"
+                   data-bs-parent="#faqAccordion">
+                <div class="accordion-body faq-body">
+                  When you buy any item in the Nova Marketplace, your payment is locked
+                  in escrow (held securely by Nova). The seller ships your item. You have
+                  <strong>7 days</strong> after delivery to inspect it. If it matches the
+                  description, you confirm receipt and funds go to the seller. If it does not
+                  match, you raise a dispute and Nova's team investigates — you get a full
+                  refund if the seller is at fault. You are protected. Always.
+                </div>
+              </div>
+            </div><!-- end faq 3 -->
+
+            <!-- FAQ ITEM 4 -->
+            <div class="accordion-item faq-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button faq-btn collapsed" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#faq4"
+                        aria-expanded="false" aria-controls="faq4">
+                  How do I qualify for a loan?
+                </button>
+              </h3>
+              <div id="faq4" class="accordion-collapse collapse"
+                   data-bs-parent="#faqAccordion">
+                <div class="accordion-body faq-body">
+                  To access a Nova loan, you must have an active Nova account for at least
+                  60 days, maintain regular transactions, and have a good internal credit score.
+                  Loans from ₦10,000–₦500,000 require no collateral. Higher amounts require
+                  employment documentation or business records. Apply directly in the app —
+                  decision in 5 minutes.
+                </div>
+              </div>
+            </div><!-- end faq 4 -->
+
+            <!-- FAQ ITEM 5 -->
+            <div class="accordion-item faq-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button faq-btn collapsed" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#faq5"
+                        aria-expanded="false" aria-controls="faq5">
+                  Where is Nova Finance located in Owerri?
+                </button>
+              </h3>
+              <div id="faq5" class="accordion-collapse collapse"
+                   data-bs-parent="#faqAccordion">
+                <div class="accordion-body faq-body">
+                  Our head office is at <strong>15 Douglas Road, Owerri, Imo State</strong>.
+                  We also have agent locations across Imo State in Orlu, Okigwe, Mbaise,
+                  and Oguta. However, most services are fully available online and you rarely
+                  need to visit in person. Office hours are Mon–Fri 8am–5pm, Sat 9am–1pm.
+                  Support is available 24/7 by chat and WhatsApp.
+                </div>
+              </div>
+            </div><!-- end faq 5 -->
+
+            <!-- FAQ ITEM 6 -->
+            <div class="accordion-item faq-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button faq-btn collapsed" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#faq6"
+                        aria-expanded="false" aria-controls="faq6">
+                  What is Low Data Mode and how do I use it?
+                </button>
+              </h3>
+              <div id="faq6" class="accordion-collapse collapse"
+                   data-bs-parent="#faqAccordion">
+                <div class="accordion-body faq-body">
+                  Low Data Mode is a special feature that strips all heavy animations and
+                  background visuals from the website so it loads instantly even on 3G or
+                  slow networks (like 512KB/s). Click the <strong>⚡ Low Data</strong> button
+                  at the top of any page to toggle it on. Your preference is saved in your
+                  browser and remembered for future visits.
+                </div>
+              </div>
+            </div><!-- end faq 6 -->
+
+          </div><!-- end accordion -->
+        </div><!-- end col -->
+      </div><!-- end row -->
+    </div>
+  </section><!-- end #faq -->
+
+
+  <!-- =====================================================
+       SECTION 15: CTA BANNER — Bold call to action
+  ===================================================== -->
+  <section class="cta-banner" aria-label="Call to action: Open your account">
+    <div class="container">
+      <div class="cta-inner" data-aos="zoom-in">
+        <div class="row align-items-center g-4">
+          <div class="col-lg-8">
+            <h2 class="cta-title">
+              Ready to Take Control of<br>
+              <span>Your Financial Future?</span>
+            </h2>
+            <p class="cta-desc">
+              Join 75,000+ Nigerians who trust Nova Finance.
+              Open your free account in under 5 minutes — no paperwork, no branch visit.
+            </p>
+          </div>
+          <div class="col-lg-4 text-lg-end">
+            <a href="sign_up.html" class="btn btn-cta-white btn-lg">
+              Open Free Account
+              <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+      </div><!-- end .cta-inner -->
+    </div>
+  </section><!-- end .cta-banner -->
+
+
+  <!-- =====================================================
+       SECTION 16: CONTACT
+       id="contact" → nav "Contact" and all CTA buttons scroll here
+  ===================================================== -->
+  <section id="contact" class="section-padding" aria-labelledby="contact-heading">
+    <div class="container">
+
+      <div class="row justify-content-center mb-5">
+        <div class="col-lg-7 text-center" data-aos="fade-up">
+          <span class="section-label">Get In Touch</span>
+          <h2 class="section-title" id="contact-heading">
+            Contact
+            <span class="text-gold">Nova Finance</span>
+          </h2>
+          <p class="section-sub">
+            Our team in Owerri is ready to help. Reach us by phone, email,
+            WhatsApp, or just come to our office.
+          </p>
+        </div>
+      </div>
+
+      <div class="row g-5">
+
+        <!-- LEFT: Contact info -->
+        <div class="col-lg-5" data-aos="fade-right">
+
+          <!-- Contact info card: address -->
+          <div class="contact-info-item">
+            <div class="contact-icon" aria-hidden="true">
+              <i class="bi bi-geo-alt-fill"></i>
+            </div>
+            <div>
+              <strong>Head Office</strong>
+              <!-- address: semantic HTML for physical addresses -->
+              <address>
+                15 Douglas Road, Owerri,<br>
+                Imo State, Nigeria
+              </address>
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="contact-info-item">
+            <div class="contact-icon" aria-hidden="true">
+              <i class="bi bi-telephone-fill"></i>
+            </div>
+            <div>
+              <strong>Phone / WhatsApp</strong>
+              <!-- tel: URI scheme makes this clickable on mobile phones -->
+              <a href="tel:+2348034567890">+234 (0) 803 456 7890</a>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="contact-info-item">
+            <div class="contact-icon" aria-hidden="true">
+              <i class="bi bi-envelope-fill"></i>
+            </div>
+            <div>
+              <strong>Email</strong>
+              <!-- mailto: opens the user's email client -->
+              <a href="mailto:hello@novafinance.ng">hello@novafinance.ng</a>
+            </div>
+          </div>
+
+          <!-- Office hours -->
+          <div class="contact-info-item">
+            <div class="contact-icon" aria-hidden="true">
+              <i class="bi bi-clock-fill"></i>
+            </div>
+            <div>
+              <strong>Office Hours</strong>
+              <!-- time element: semantic HTML for times -->
+              <p>
+                <time datetime="Mo-Fr 08:00-17:00">Mon–Fri: 8:00am – 5:00pm</time><br>
+                <time datetime="Sa 09:00-13:00">Saturday: 9:00am – 1:00pm</time>
+              </p>
+            </div>
+          </div>
+
+          <!-- Social media links -->
+          <div class="contact-socials mt-4" aria-label="Social media links">
+            <a href="#" class="social-link" aria-label="Nova Finance on Facebook">
+              <i class="bi bi-facebook" aria-hidden="true"></i>
+            </a>
+            <a href="#" class="social-link" aria-label="Nova Finance on Twitter/X">
+              <i class="bi bi-twitter-x" aria-hidden="true"></i>
+            </a>
+            <a href="#" class="social-link" aria-label="Nova Finance on Instagram">
+              <i class="bi bi-instagram" aria-hidden="true"></i>
+            </a>
+            <a href="#" class="social-link" aria-label="Nova Finance on WhatsApp">
+              <i class="bi bi-whatsapp" aria-hidden="true"></i>
+            </a>
+            <a href="#" class="social-link" aria-label="Nova Finance on LinkedIn">
+              <i class="bi bi-linkedin" aria-hidden="true"></i>
+            </a>
+          </div><!-- end socials -->
+        </div><!-- end left contact info -->
+
+        <!-- RIGHT: Contact form -->
+        <div class="col-lg-7" data-aos="fade-left">
+          <div class="contact-form-card">
+
+            <!-- id="contactForm" → send_email.js targets this to handle submission
+                 novalidate → we handle validation ourselves in JS (not browser default) -->
+            <form id="contactForm" novalidate aria-label="Contact form">
+              <div class="row g-3">
+
+                <!-- Full Name -->
+                <div class="col-md-6">
+                  <!-- for="contactName" connects the label to the input (accessibility) -->
+                  <label class="form-label" for="contactName">Full Name *</label>
+                  <!-- type="text" → text input
+                       id="contactName" → matched by label's for attribute
+                       name="name" → field name sent to the PHP backend
+                       required → HTML5 validation (our JS also validates)
+                       autocomplete="name" → hints browser autofill -->
+                  <input type="text" class="form-control nova-input"
+                         id="contactName" name="name"
+                         placeholder="e.g. Chukwuemeka Okafor"
+                         required autocomplete="name"
+                         aria-required="true">
+                </div>
+
+                <!-- Email -->
+                <div class="col-md-6">
+                  <label class="form-label" for="contactEmail">Email *</label>
+                  <input type="email" class="form-control nova-input"
+                         id="contactEmail" name="email"
+                         placeholder="you@example.com"
+                         required autocomplete="email"
+                         aria-required="true">
+                </div>
+
+                <!-- Phone -->
+                <div class="col-md-6">
+                  <label class="form-label" for="contactPhone">Phone Number</label>
+                  <!-- type="tel" → mobile keyboards show numeric dialpad -->
+                  <input type="tel" class="form-control nova-input"
+                         id="contactPhone" name="phone"
+                         placeholder="+234 803 XXX XXXX"
+                         autocomplete="tel">
+                </div>
+
+                <!-- Topic / Subject -->
+                <div class="col-md-6">
+                  <label class="form-label" for="contactTopic">Topic</label>
+                  <!-- select: dropdown menu for choosing a predefined topic -->
+                  <select class="form-select nova-input"
+                          id="contactTopic" name="topic"
+                          aria-label="Select topic">
+                    <!-- value="" → default empty option -->
+                    <option value="">Select a topic</option>
+                    <option>Account Opening</option>
+                    <option>Transfers &amp; Payments</option>
+                    <option>Marketplace &amp; Escrow</option>
+                    <option>Insurance</option>
+                    <option>Loans &amp; Credit</option>
+                    <option>Business Account</option>
+                    <option>Technical Support</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+
+                <!-- Message textarea -->
+                <div class="col-12">
+                  <label class="form-label" for="contactMsg">Message *</label>
+                  <!-- textarea: multi-line text input
+                       rows="5" → default height in lines -->
+                  <textarea class="form-control nova-input"
+                            id="contactMsg" name="message"
+                            rows="5"
+                            placeholder="Tell us how we can help..."
+                            required aria-required="true"></textarea>
+                </div>
+
+                <!-- Submit button -->
+                <div class="col-12">
+                  <!-- type="submit" → triggers the form's 'submit' event
+                       id="submitBtn" → JavaScript disables it while processing -->
+                  <button type="submit" class="btn btn-gold-solid w-100 btn-submit"
+                          id="submitBtn">
+                    Send Message
+                    <i class="bi bi-send-fill ms-2" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div><!-- end form row -->
+            </form><!-- end #contactForm -->
+
+            <!-- Feedback messages: hidden by default (d-none Bootstrap class).
+                 JavaScript shows the correct one after form submission. -->
+            <div id="formSuccess" class="alert alert-success mt-3 d-none" role="alert">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              Message sent! Our Owerri team will respond within 2 hours.
+            </div>
+            <div id="formError" class="alert alert-danger mt-3 d-none" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              Please fill in all required fields correctly.
+            </div>
+
+          </div><!-- end .contact-form-card -->
+        </div><!-- end right column -->
+      </div><!-- end row -->
+    </div>
+  </section><!-- end #contact -->
+
+</main><!-- end #main-content -->
+
+
+<!-- =====================================================
+     FOOTER
+     Not a section in the nav, but the bottom of the page.
+     Contains links, contact info, legal text, and copyright.
+===================================================== -->
+<footer class="site-footer" role="contentinfo">
+  <div class="container">
+
+    <!-- Top: newsletter bar -->
+    <div class="footer-top">
+      <div class="row align-items-center g-3">
+        <div class="col-lg-6">
+          <h4 class="footer-newsletter-title">Stay Updated with Nova Finance</h4>
+          <p class="footer-newsletter-sub">
+            Fintech news, product updates, and exclusive Owerri offers.
+          </p>
+        </div>
+        <div class="col-lg-6">
+          <!-- role="search" makes screen readers announce this as a search/input form -->
+          <form class="newsletter-form d-flex gap-2" role="form"
+                aria-label="Newsletter signup">
+            <input type="email" class="form-control nova-input newsletter-input"
+                   placeholder="Enter your email address"
+                   aria-label="Email address for newsletter">
+            <!-- type="button" (not submit) so it doesn't reload the page -->
+            <button type="button" class="btn btn-gold-solid newsletter-btn">
+              Subscribe
+            </button>
+          </form>
+        </div>
+      </div>
+    </div><!-- end footer top -->
+
+    <!-- Divider: Bootstrap's hr element -->
+    <hr class="footer-hr">
+
+    <!-- Footer main columns -->
+    <div class="row g-4 footer-main">
+
+      <!-- COLUMN 1: Brand info -->
+      <div class="col-lg-4 col-md-6">
+        <!-- FIX: Replaced SVG logo with img tag for custom logo image (same as navbar).
+             ERROR: SVG logo didn't match user's branding preference.
+             FIX: img tag allows you to insert your own logo image file.
+             PLACEHOLDER: Replace 'images/logo.png' with your actual logo file path.
+             alt attribute provides text description for screen readers (accessibility). -->
+        <div class="footer-brand d-flex align-items-center gap-2 mb-3">
+          <img src="images/vector/cover.png" alt="Nova Finance Logo" class="nav-logo-icon"
+               width="44" height="44" onerror="this.src='https://via.placeholder.com/44x44/C9A84C/ffffff?text=NF'">
+          <span class="nav-brand-text">
+            <span class="brand-nova">NOVA</span>
+            <span class="brand-finance">Finance</span>
+          </span>
+        </div>
+        <p class="footer-about-text">
+          Nigeria's most trusted digital finance platform. Built in Owerri,
+          Imo State. Serving 75,000+ customers across Nigeria since 2022.
+        </p>
+        <!-- Regulatory badges -->
+        <div class="footer-badges d-flex flex-wrap gap-2 mt-3">
+          <span class="reg-badge">
+            <i class="bi bi-shield-fill-check me-1"></i>CBN Licensed
+          </span>
+          <span class="reg-badge">
+            <i class="bi bi-award-fill me-1"></i>NDIC Insured
+          </span>
+        </div>
+      </div><!-- end brand column -->
+
+      <!-- COLUMN 2: Services links -->
+      <div class="col-lg-2 col-md-3 col-6">
+        <h5 class="footer-col-heading">Services</h5>
+        <ul class="footer-links list-unstyled">
+          <!-- Each link is an anchor to a section on this page (SPA) -->
+          <li><a href="#transfers">Money Transfers</a></li>
+          <li><a href="#bills">Bill Payments</a></li>
+          <li><a href="#airtime">Airtime &amp; Data</a></li>
+          <li><a href="#loans">Quick Loans</a></li>
+          <li><a href="#marketplace">Marketplace</a></li>
+          <li><a href="#insurance">Insurance</a></li>
+        </ul>
+      </div><!-- end services column -->
+
+      <!-- COLUMN 3: Company links -->
+      <div class="col-lg-2 col-md-3 col-6">
+        <h5 class="footer-col-heading">Company</h5>
+        <ul class="footer-links list-unstyled">
+          <li><a href="#about">About Us</a></li>
+          <li><a href="#howitworks">How It Works</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#contact">Contact Us</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Blog</a></li>
+        </ul>
+      </div><!-- end company column -->
+
+      <!-- COLUMN 4: Contact info -->
+      <div class="col-lg-4 col-md-6">
+        <h5 class="footer-col-heading">Our Owerri Office</h5>
+        <div class="footer-contact">
+          <p>
+            <i class="bi bi-geo-alt me-2" aria-hidden="true"></i>
+            15 Douglas Road, Owerri, Imo State
+          </p>
+          <p>
+            <a href="tel:+2348034567890">
+              <i class="bi bi-telephone me-2" aria-hidden="true"></i>
+              +234 (0) 803 456 7890
+            </a>
+          </p>
+          <p>
+            <a href="mailto:hello@novafinance.ng">
+              <i class="bi bi-envelope me-2" aria-hidden="true"></i>
+              hello@novafinance.ng
+            </a>
+          </p>
+          <p>
+            <i class="bi bi-clock me-2" aria-hidden="true"></i>
+            Mon–Fri: 8am–5pm | Sat: 9am–1pm
+          </p>
+        </div>
+        <!-- Footer social icons -->
+        <div class="footer-socials mt-3" aria-label="Nova Finance social media">
+          <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+          <a href="#" aria-label="Twitter/X"><i class="bi bi-twitter-x"></i></a>
+          <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+          <a href="#" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+          <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+        </div>
+      </div><!-- end contact column -->
+
+    </div><!-- end footer main -->
+
+    <hr class="footer-hr">
+
+    <!-- Footer bottom: copyright + legal links -->
+    <div class="footer-bottom d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <p class="footer-copyright">
+        <!-- id="copyrightYear" → JS fills in the current year automatically -->
+        &copy; <span id="copyrightYear"></span> Nova Finance Ltd.
+        All rights reserved. RC: 1234567. Owerri, Imo State.
+      </p>
+      <!-- Legal links -->
+      <div class="footer-legal d-flex flex-wrap gap-3">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">AML Policy</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div><!-- end footer bottom -->
+
+  </div><!-- end container -->
+</footer><!-- end site-footer -->
+
+
+<!-- =====================================================
+     BACK TO TOP BUTTON
+     id="backToTop" → JS adds/removes class "visible"
+     based on scroll position
+===================================================== -->
+<button id="backToTop" class="back-to-top" aria-label="Scroll back to top of page">
+  <i class="bi bi-arrow-up" aria-hidden="true"></i>
+</button>
+
+
+<!-- =====================================================
+     JAVASCRIPT — loaded at the BOTTOM of <body>
+     
+     WHY BOTTOM? HTML is parsed top-to-bottom. If scripts
+     were in <head>, they would run BEFORE the HTML elements
+     exist, causing errors. Loading at the bottom ensures
+     all elements exist before JS tries to access them.
+===================================================== -->
+
+<!-- Bootstrap 5.3 Bundle: includes Bootstrap JS + Popper.js
+     Popper.js is required for dropdowns, tooltips, modals.
+     The "bundle" version includes both in one file. -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- AOS (Animate On Scroll) — must load AFTER Bootstrap -->
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+
+<!-- OUR CUSTOM APP LOGIC -->
+<script src="Assets/app.js"></script>
+
+<!-- CONTACT FORM HANDLER -->
+<script src="Assets/send_email.js"></script>
+
+</body>
+</html>

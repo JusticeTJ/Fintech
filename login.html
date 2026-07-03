@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<!--
+  Nova Finance — Login Page
+  File:    pages/login.html
+  CSS:     ../css/auth.css
+  JS:      ../js/auth.js
+
+  IDs auth.js reads on THIS page:
+    #loginForm         — the <form> element
+    #loginEmail        — email input
+    #loginPassword     — password input
+    #rememberMe        — remember me checkbox
+    #loginEyeToggle    — eye toggle button
+    #loginEyeIcon      — <span> inside the eye button (SVG swaps here)
+    #loginBtn          — submit button
+    #loginSuccess      — success alert banner
+    #loginError        — error alert banner
+    #err-loginEmail    — email field error text
+    #err-loginPassword — password field error text
+
+  Path note: this file lives in pages/, so all asset paths
+  start with ../ to go one level up to the project root.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!--
+    viewport meta tag: tells mobile browsers not to zoom out.
+    width=device-width  = use the screen's actual pixel width
+    initial-scale=1.0   = don't zoom in or out by default
+  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+        content="Sign in to your Nova Finance account — secure digital banking for Nigerians.">
+  <!-- noindex: keeps auth pages out of search engine results -->
+  <meta name="robots" content="noindex, nofollow">
+  <title>Sign In — Nova Finance</title>
+
+  <!-- Google Fonts: Sora (headings) + Figtree (body)
+       Same fonts as the main site so everything looks consistent.
+       display=swap means text appears immediately in a fallback
+       font while the custom font loads in the background. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Figtree:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+  <!-- Bootstrap 5.3 CSS — provides the responsive grid system -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+  <!-- Nova Finance auth stylesheet — all our custom auth styles -->
+  <link rel="stylesheet" href="Css/sign.css">
+
+  <!-- Favicon link -->
+     <link rel="icon" type="image/png" href="favicon.png">
+</head>
+
+<!--
+  data-page="login" — a data attribute identifying the page.
+  auth.js also detects the page by looking for #loginForm.
+-->
+<body data-page="login">
+
+
+<!-- ============================================================
+     MAIN WRAPPER
+     ─────────────────────────────────────────────────────────
+     CSS class: .auth-wrapper
+     Layout:    display:flex  →  two panels side by side
+     On mobile: flex-direction switches to column (image on top,
+                form below) via a media query in auth.css.
+============================================================ -->
+<div class="auth-wrapper">
+
+
+  <!-- ==========================================================
+       LEFT PANEL — Form Side
+       ────────────────────────────────────────────────────────
+       CSS class: .auth-left
+       Takes up 50% of the page width on desktop.
+       Full width on mobile.
+       Background: deep navy (#0A1628) set in auth.css.
+  ========================================================== -->
+  <div class="auth-left">
+
+
+    <!-- ── Top Navigation Bar ──────────────────────────────────
+         role="navigation" — tells screen readers this is a nav.
+         aria-label       — names this nav region for accessibility
+                            (a page can have multiple navs, so naming
+                            them helps screen readers tell them apart).
+    ─────────────────────────────────────────────────────────── -->
+    <nav class="auth-nav"
+         role="navigation"
+         aria-label="Nova Finance site navigation">
+
+      <!-- Logo link — takes user back to the homepage -->
+      <a href="index.html"
+         class="auth-logo"
+         aria-label="Nova Finance — return to homepage">
+
+        <!--
+          <img> tag for the company logo.
+          - src: points to the logo SVG in the assets folder.
+          - alt: shown if the image fails to load; also read by
+                 screen readers to describe the image.
+          - onerror: if the image file is missing, hide the img
+                     element so it doesn't show a broken icon.
+          - class="brand-logo": our CSS sizes this to 36×36px.
+        -->
+        <img src="../assets/images/logo-dark.svg"
+             alt="Nova Finance Logo"
+             class="brand-logo"
+             onerror="this.style.display='none'">
+
+        <!-- Brand name: "Nova" + gold period (the signature element) -->
+        <span class="brand-name">
+          Nova<span class="brand-dot">.</span>
+        </span>
+      </a>
+
+      <!-- Right-side nav links -->
+      <div class="auth-nav-links">
+        <!-- Takes user back to the main marketing homepage -->
+        <a href="index.html"
+           aria-label="Go to Nova Finance homepage">
+          Home
+        </a>
+
+        <!--
+          class="active" — CSS colours this link gold to show
+          the user which page they are currently on.
+        -->
+        <a href="sign_up.html"
+           class="active"
+           aria-label="Create a new Nova Finance account">
+          Get Started
+        </a>
+      </div>
+
+    </nav><!-- /.auth-nav -->
+
+
+    <!-- ── Main Form Content ───────────────────────────────────
+         role="main"  — marks this as the page's primary content.
+         Screen readers jump to role="main" when navigating.
+    ─────────────────────────────────────────────────────────── -->
+    <main class="auth-form-container"
+          role="main"
+          aria-label="Sign in to your Nova Finance account">
+
+
+      <!-- SUCCESS ALERT
+           Hidden by default (no class "visible").
+           auth.js adds class "visible" after a successful login.
+           aria-live="polite" — screen reader announces the text
+           change without interrupting what it was already reading. -->
+      <div class="auth-alert auth-alert-success"
+           id="loginSuccess"
+           role="alert"
+           aria-live="polite">
+        <!-- Checkmark SVG icon -->
+        <svg xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="2.5"
+             stroke-linecap="round"
+             stroke-linejoin="round"
+             aria-hidden="true">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <!-- auth.js writes the success message into this span -->
+        <span class="auth-alert-msg"></span>
+      </div>
+
+      <!-- ERROR ALERT
+           aria-live="assertive" — announces immediately and
+           interrupts the screen reader (errors are urgent). -->
+      <div class="auth-alert auth-alert-error"
+           id="loginError"
+           role="alert"
+           aria-live="assertive">
+        <!-- Warning circle SVG icon -->
+        <svg xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="2.5"
+             stroke-linecap="round"
+             stroke-linejoin="round"
+             aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span class="auth-alert-msg"></span>
+      </div>
+
+
+      <!-- Eyebrow: small uppercase label above the main heading -->
+      <p class="auth-eyebrow">Welcome Back</p>
+
+      <!--
+        H1 — the page's main heading.
+        One H1 per page is best practice for SEO and accessibility.
+        The period is wrapped in .title-dot so CSS colours it gold.
+      -->
+      <h1 class="auth-title">
+        Sign in to your account<span class="title-dot">.</span>
+      </h1>
+
+      <!-- Subtitle — link to the signup page -->
+      <p class="auth-subtitle">
+        New to Nova Finance?
+        <a href="sign_up.html">Create a free account</a>
+      </p>
+
+
+      <!-- ── LOGIN FORM ──────────────────────────────────────────
+           id="loginForm"  — auth.js finds this with getElementById
+           novalidate      — disables the browser's built-in
+                             validation bubbles (we show our own)
+           aria-label      — describes the form for screen readers
+      ─────────────────────────────────────────────────────────── -->
+      <form id="loginForm"
+            class="auth-form"
+            novalidate
+            aria-label="Sign in to your Nova Finance account">
+
+
+        <!-- ── Email Field ──────────────────────────────────── -->
+        <div class="input-group">
+
+          <!--
+            <label for="loginEmail">:
+            The for attribute links this label to the <input>
+            with id="loginEmail". Clicking the label focuses
+            the input — better UX and required for accessibility.
+          -->
+          <label for="loginEmail">
+            Email address
+            <!-- Red asterisk indicates required field.
+                 aria-hidden="true" hides the asterisk from screen
+                 readers (the aria-required on the input handles this) -->
+            <span aria-hidden="true" style="color:#EF4444;"> *</span>
+          </label>
+
+          <!--
+            .input-wrap: position:relative container so the icon
+            can be positioned absolutely inside it on the right.
+          -->
+          <div class="input-wrap">
+            <input
+              type="email"
+              id="loginEmail"
+              class="auth-input"
+              placeholder="admin@nova.com"
+              autocomplete="email"
+              aria-required="true"
+              aria-describedby="err-loginEmail"
+            >
+            <!--
+              SVG envelope icon — purely decorative.
+              aria-hidden="true" tells screen readers to skip it.
+              pointer-events:none (set in CSS) means clicks pass
+              through to the input behind it.
+            -->
+            <span class="input-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   viewBox="0 0 24 24"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="2"
+                   stroke-linecap="round"
+                   stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+            </span>
+          </div>
+
+          <!--
+            Error message span: hidden by default (display:none in CSS).
+            auth.js adds class "visible" and sets textContent here
+            when this field fails validation.
+            id="err-loginEmail" matches the convention auth.js uses:
+            "err-" + fieldId.
+          -->
+          <span class="field-error"
+                id="err-loginEmail"
+                role="alert">
+          </span>
+
+        </div><!-- /.input-group (email) -->
+
+
+        <!-- ── Password Field ────────────────────────────────── -->
+        <div class="input-group">
+
+          <label for="loginPassword">
+            Password
+            <span aria-hidden="true" style="color:#EF4444;"> *</span>
+          </label>
+
+          <div class="input-wrap">
+            <!--
+              type="password" — browser renders characters as ●●●●●
+              auth.js toggles this to type="text" when the eye
+              button is clicked, making the password visible.
+              autocomplete="current-password" — tells the browser's
+              password manager this is a login password field
+              (vs "new-password" on the signup page).
+            -->
+            <input
+              type="password"
+              id="loginPassword"
+              class="auth-input"
+              placeholder="NovaSecure2026"
+              autocomplete="current-password"
+              aria-required="true"
+              aria-describedby="err-loginPassword"
+            >
+
+            <!--
+              Eye toggle button:
+              - type="button" prevents it from submitting the form
+              - id="loginEyeToggle" — auth.js finds this button
+              - aria-label — screen reader announces what the button does
+              auth.js replaces the SVG inside #loginEyeIcon when clicked.
+            -->
+            <button type="button"
+                    id="loginEyeToggle"
+                    class="eye-toggle"
+                    aria-label="Show password"
+                    title="Show password">
+              <!--
+                id="loginEyeIcon" — auth.js swaps the innerHTML of
+                this span between the eye-open and eye-closed SVG.
+              -->
+              <span id="loginEyeIcon">
+                <!-- Eye open SVG (default state: password is hidden) -->
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2"
+                     stroke-linecap="round"
+                     stroke-linejoin="round"
+                     aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </span>
+            </button>
+          </div>
+
+          <span class="field-error"
+                id="err-loginPassword"
+                role="alert">
+          </span>
+
+        </div><!-- /.input-group (password) -->
+
+
+        <!-- ── Remember Me + Forgot Password Row ─────────────── -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:8px;">
+
+          <!-- Remember me checkbox -->
+          <div class="checkbox-row" style="margin-bottom:0;">
+            <!--
+              type="checkbox" — a tick box input.
+              id="rememberMe" — auth.js reads .checked on this element.
+              When checked, auth.js saves the email to localStorage.
+            -->
+            <input type="checkbox"
+                   id="rememberMe"
+                   name="rememberMe"
+                   aria-label="Remember my email on this device">
+            <label for="rememberMe">Remember me</label>
+          </div>
+
+          <!-- Forgot password link -->
+          <a href="index.html#contact"
+             class="forgot-link"
+             aria-label="Reset your Nova Finance password">
+            Forgot password?
+          </a>
+
+        </div><!-- /.remember-row -->
+
+
+        <!-- ── Action Buttons ──────────────────────────────────
+             .auth-buttons: display:flex puts both buttons side
+             by side. On mobile, auth.css stacks them vertically.
+        ─────────────────────────────────────────────────────── -->
+        <div class="auth-buttons">
+
+          <!--
+            Secondary button: <a> tag styled as a button.
+            Takes the user back to the homepage without logging in.
+            role="button" tells screen readers it behaves like a button.
+          -->
+          <a href="index.html"
+             class="btn-secondary"
+             role="button"
+             aria-label="Return to Nova Finance homepage">
+            Back to Home
+          </a>
+
+          <!--
+            Primary submit button.
+            type="submit" triggers the form's submit event when clicked.
+            id="loginBtn" — auth.js finds this to show loading state.
+            auth.js disables this button while the request is processing
+            to prevent duplicate submissions.
+          -->
+          <button type="submit"
+                  id="loginBtn"
+                  class="btn-primary"
+                  aria-label="Sign in to your Nova Finance account">
+            Sign In
+          </button>
+
+        </div><!-- /.auth-buttons -->
+
+
+        <!-- ── Divider ────────────────────────────────────────
+             Visual separator between the main form and the
+             "no account" link below.
+        ─────────────────────────────────────────────────────── -->
+        <div class="auth-divider" aria-hidden="true">
+          <span class="auth-divider-line"></span>
+          <span class="auth-divider-text">or</span>
+          <span class="auth-divider-line"></span>
+        </div>
+
+
+        <!-- ── Create Account Link ─────────────────────────── -->
+        <p class="auth-switch" style="text-align:center;">
+          Don't have an account?
+          <a href="sign_up.html"
+             aria-label="Create a free Nova Finance account">
+            Create one for free
+          </a>
+        </p>
+
+
+      </form><!-- /#loginForm -->
+
+    </main><!-- /.auth-form-container -->
+
+  </div><!-- /.auth-left -->
+
+
+  <!-- ==========================================================
+       RIGHT PANEL — Background Image
+       ──────────────────────────────────────────────────────────
+       aria-hidden="true" — this panel is purely decorative.
+       Screen readers skip it entirely.
+
+       CSS class .auth-right--login sets the background image:
+         background-image: url('../assets/images/hero-bg-2-min.jpg')
+       defined in auth.css.
+
+       The ::after pseudo-element in auth.css adds a dark gradient
+       overlay on top of the image for visual depth.
+  ========================================================== -->
+  <div class="auth-right auth-right--login"
+       aria-hidden="true"
+       role="presentation">
+  </div>
+
+
+</div><!-- /.auth-wrapper -->
+
+
+<!--
+  Bootstrap 5 JS Bundle
+  Includes Popper.js (needed for dropdowns, tooltips etc.)
+  Loaded at the bottom so it doesn't block page rendering.
+-->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!--
+  Our auth JavaScript.
+  Must come AFTER the HTML elements above so getElementById
+  can find them. auth.js detects #loginForm exists and runs
+  initLogin() automatically.
+-->
+<script src="Assets/sign_login.js"></script>
+
+</body>
+</html>

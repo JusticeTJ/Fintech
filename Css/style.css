@@ -1,0 +1,2371 @@
+/*
+================================================================
+  NOVA FINANCE — Main Stylesheet
+  File:    css/style.css
+  Theme:   Navy Blue + Gold (Navy #1B2A4A · Gold #C9A84C)
+  Fonts:   Sora (headings) · Figtree (body)
+
+  TABLE OF CONTENTS
+  -----------------
+  1.  CSS Custom Properties (Design Tokens / Variables)
+  2.  Base Reset & Global Rules
+  3.  Typography
+  4.  Utility Classes
+  5.  Buttons
+  6.  Skip Link (Accessibility)
+  7.  Navbar
+  8.  Hero / Carousel
+  9.  Trust Strip
+  10. Section Shared Styles
+  11. About Section
+  12. Services Section
+  13. Transfers Section
+  14. Bills Section
+  15. Airtime Section
+  16. Stats Section
+  17. Marketplace / Escrow Section
+  18. Insurance Section
+  19. How It Works Section
+  20. Loans Section
+  21. Why Us Section
+  22. Testimonials Section
+  23. FAQ Section
+  24. CTA Banner
+  25. Contact Section
+  26. Footer
+  27. Back To Top Button
+  28. Low Data Mode overrides
+  29. Responsive / Media Queries
+================================================================
+*/
+
+
+/* ================================================================
+   1. CSS CUSTOM PROPERTIES (Design Tokens)
+
+   :root targets the <html> element — the highest level.
+   Every variable defined here is available ANYWHERE in the file.
+   Syntax: var(--variable-name)
+
+   WHY VARIABLES? Change --navy-700 once → updates everywhere.
+   This is the single source of truth for the design system.
+================================================================ */
+:root {
+
+  /* ---- NAVY BLUES (darkest → lightest) ---- */
+  --navy-950: #020C1B;     /* Deepest — used for hero slide overlays */
+  --navy-900: #0A1628;     /* Main page background */
+  --navy-800: #111E34;     /* Slightly lighter background */
+  --navy-700: #1B2A4A;     /* Card backgrounds */
+  --navy-600: #243558;     /* Hover state on cards */
+  --navy-500: #2F4470;     /* Lighter accent navy */
+  --navy-400: #3D5585;     /* Border highlights */
+
+  /* ---- GOLD ACCENTS ---- */
+  --gold-600:   #8A6E1F;                    /* Dark gold — used for text on light BG */
+  --gold-500:   #C9A84C;                    /* Primary gold — buttons, accents */
+  --gold-400:   #D9BC6A;                    /* Lighter gold — hover states */
+  --gold-300:   #E8CF88;                    /* Very light gold */
+  --gold-glow:  rgba(201, 168, 76, 0.20);  /* Gold glow — box-shadows */
+  --gold-subtle:rgba(201, 168, 76, 0.10);  /* Very subtle gold tint */
+
+  /* ---- TEXT COLOURS ---- */
+  --text-100: #FFFFFF;      /* Pure white — headings on dark */
+  --text-200: #E8F0FC;      /* Near-white — primary body text */
+  --text-300: #B4C5D8;      /* Light muted — secondary text */
+  --text-400: #7A8FAA;      /* Muted — captions, placeholders */
+  --text-500: #4A5D75;      /* Darkest muted — disabled states */
+
+  /* ---- BORDER COLOURS ---- */
+  --border:       rgba(255, 255, 255, 0.07); /* Subtle white border on dark BG */
+  --border-gold:  rgba(201, 168, 76, 0.30);  /* Gold-tinted border */
+  --border-hover: rgba(201, 168, 76, 0.50);  /* Stronger gold on hover */
+
+  /* ---- STATUS COLOURS ---- */
+  --success:       #22C55E;                    /* Green — confirmed/success */
+  --success-soft:  rgba(34, 197, 94, 0.15);    /* Soft green background */
+  --danger:        #EF4444;                    /* Red — errors/danger */
+  --danger-soft:   rgba(239, 68, 68, 0.15);    /* Soft red background */
+  --warning:       #F59E0B;                    /* Amber — warnings */
+
+  /* ---- TYPOGRAPHY ---- */
+  --font-heading: 'Sora',    -apple-system, sans-serif;
+  --font-body:    'Figtree', -apple-system, sans-serif;
+  --font-mono:    'Courier New', monospace;
+
+  /* ---- SPACING SCALE ---- */
+  --section-pad: 100px 0;        /* Default section top/bottom padding */
+  --section-pad-sm: 60px 0;      /* Reduced padding on mobile */
+  --nav-h: 75px;                 /* Navbar height — used for scroll-margin-top */
+
+  /* ---- BORDER RADIUS ---- */
+  --r-xs:  6px;    /* Tiny — badge pills */
+  --r-sm:  10px;   /* Small — input fields, small cards */
+  --r-md:  16px;   /* Medium — cards */
+  --r-lg:  24px;   /* Large — feature sections, modals */
+  --r-xl:  36px;   /* Extra large — hero mockup */
+  --r-full:9999px; /* Fully round — circular buttons, pills */
+
+  /* ---- SHADOWS ---- */
+  --shadow-sm:   0 2px 8px  rgba(0,0,0,0.25);
+  --shadow-md:   0 6px 24px rgba(0,0,0,0.35);
+  --shadow-lg:   0 16px 48px rgba(0,0,0,0.50);
+  --shadow-gold: 0 4px 24px rgba(201,168,76,0.30);
+
+  /* ---- TRANSITIONS ---- */
+  /* cubic-bezier(0.4,0,0.2,1) = Material Design standard easing
+     Starts quick, eases out → feels snappy & natural */
+  --ease: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+/* ================================================================
+   2. BASE RESET & GLOBAL RULES
+
+   These rules remove inconsistent browser defaults and create
+   a consistent foundation across Chrome, Firefox, Safari, Edge.
+================================================================ */
+
+/* box-sizing: border-box — the MOST important reset rule.
+   By default, CSS adds padding/border ON TOP of width.
+   border-box means padding + border are INSIDE the width.
+   Example: width:200px + padding:20px → still 200px wide total. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;      /* Remove default margins browsers add to elements */
+  padding: 0;     /* Remove default padding */
+}
+
+/* scroll-behavior: smooth — ALL anchor jumps (#section) animate.
+   This works alongside the JS smooth scroll for older browsers. */
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;          /* Base unit: 1rem = 16px */
+  -webkit-text-size-adjust: 100%; /* Prevents iOS zooming text in landscape */
+}
+
+body {
+  font-family: var(--font-body);           /* Figtree for all body text */
+  background-color: var(--navy-900);       /* Dark navy page background */
+  color: var(--text-200);                  /* Near-white default text */
+  line-height: 1.7;                        /* 1.7 × font-size = comfortable reading */
+  -webkit-font-smoothing: antialiased;     /* Smoother text rendering on Mac/iOS */
+  -moz-osx-font-smoothing: grayscale;      /* Firefox on Mac */
+  overflow-x: hidden;                      /* Hide horizontal scroll from animations */
+}
+
+/* scroll-margin-top: when browser jumps to a section via #anchor,
+   it offsets by this amount so the fixed navbar doesn't cover the heading.
+   var(--nav-h) = 75px */
+section {
+  scroll-margin-top: var(--nav-h);
+}
+
+/* Images: responsive by default */
+img {
+  max-width: 100%;    /* Never wider than container */
+  height: auto;       /* Scale proportionally */
+  display: block;     /* Removes phantom gap below inline images */
+}
+
+/* Links: remove underline, inherit colour, smooth hover */
+a {
+  text-decoration: none;
+  color: var(--gold-500);
+  transition: var(--ease);
+}
+a:hover { color: var(--gold-400); }
+
+/* Lists used for nav/footer: remove bullets and indentation */
+ul { list-style: none; margin: 0; padding: 0; }
+
+/* address: remove italic default */
+address { font-style: normal; }
+
+
+/* ================================================================
+   3. TYPOGRAPHY
+================================================================ */
+
+/* All headings use Sora (display font) */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--text-100);            /* Pure white headings */
+  line-height: 1.2;                  /* Tight line height for large text */
+  font-weight: 700;
+}
+
+/* ================================================================
+   4. UTILITY CLASSES
+================================================================ */
+
+/* .text-gold — reusable gold colour for span/text highlights */
+.text-gold { color: var(--gold-500) !important; }
+
+/* .section-label — small pill above every section heading.
+   display:inline-block = shrinks to text width.
+   letter-spacing spreads uppercase text for a polished look. */
+.section-label {
+  display: inline-block;
+  background: var(--gold-subtle);          /* Very subtle gold tint */
+  color: var(--gold-500);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;              /* ALL CAPS */
+  padding: 5px 16px;
+  border-radius: var(--r-full);           /* Fully rounded pill */
+  border: 1px solid var(--border-gold);
+  margin-bottom: 16px;
+}
+
+/* Gold variant used on the marketplace section */
+.section-label-gold {
+  background: var(--gold-glow);
+  font-size: 0.78rem;
+}
+
+/* .section-title — the H2 or H2-level heading for each section */
+.section-title {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  /* clamp(min, preferred, max): font scales with viewport,
+     never smaller than 1.8rem, never larger than 2.6rem */
+  font-weight: 800;
+  color: var(--text-100);
+  margin-bottom: 14px;
+  line-height: 1.15;
+}
+
+/* .section-sub — the paragraph below the section title */
+.section-sub {
+  font-size: 1.05rem;
+  color: var(--text-300);
+  max-width: 560px;        /* Limit line length for readability */
+  margin: 0 auto;          /* Centre it */
+  line-height: 1.75;
+}
+
+/* .section-text — body paragraphs inside sections */
+.section-text {
+  color: var(--text-300);
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 14px;
+}
+
+/* .section-padding — standard padding applied to all main sections */
+.section-padding { padding: var(--section-pad); }
+
+/* .section-dark — slightly lighter navy for alternating sections */
+.section-dark { background-color: var(--navy-800); }
+
+/* .gradient-text — makes heading text display as a colour gradient.
+   background-clip:text clips the gradient to the text outlines.
+   -webkit-text-fill-color:transparent makes the fill transparent
+   so the gradient background shows through. */
+.gradient-text {
+  background: linear-gradient(135deg, var(--gold-300), var(--gold-500));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Feature pills (small tag-like badges in service descriptions) */
+.fpill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--gold-subtle);
+  border: 1px solid var(--border-gold);
+  color: var(--gold-400);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: var(--r-full);
+}
+
+
+/* ================================================================
+   5. BUTTONS
+================================================================ */
+
+/* Base reset for all buttons */
+.btn {
+  font-family: var(--font-body);
+  font-weight: 600;
+  border-radius: var(--r-sm);
+  transition: var(--ease);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid transparent;
+  text-decoration: none;
+}
+
+/* ---- SOLID GOLD — primary CTA ---- */
+.btn-gold-solid {
+  background: var(--gold-500);         /* Gold background */
+  color: var(--navy-950) !important;   /* Very dark text for contrast */
+  border-color: var(--gold-500);
+  padding: 12px 28px;
+  box-shadow: var(--shadow-gold);      /* Gold glow beneath button */
+}
+.btn-gold-solid:hover {
+  background: var(--gold-400);         /* Lighter gold on hover */
+  border-color: var(--gold-400);
+  color: var(--navy-950) !important;
+  transform: translateY(-2px);         /* Subtle lift effect */
+  box-shadow: 0 8px 28px rgba(201,168,76,0.45); /* Stronger glow */
+}
+
+/* ---- OUTLINE GOLD — secondary CTA ---- */
+.btn-gold-outline {
+  background: transparent;
+  color: var(--gold-500) !important;
+  border-color: var(--border-gold);
+  padding: 12px 28px;
+}
+.btn-gold-outline:hover {
+  background: var(--gold-subtle);
+  border-color: var(--gold-500);
+  color: var(--gold-400) !important;
+  transform: translateY(-2px);
+}
+
+/* ---- GHOST WHITE — for dark hero overlay ---- */
+.btn-ghost-white {
+  background: rgba(255,255,255,0.10);
+  color: #fff !important;
+  border-color: rgba(255,255,255,0.25);
+  padding: 12px 28px;
+  backdrop-filter: blur(8px);   /* Frosted glass behind button */
+}
+.btn-ghost-white:hover {
+  background: rgba(255,255,255,0.18);
+  border-color: rgba(255,255,255,0.45);
+  color: #fff !important;
+  transform: translateY(-2px);
+}
+
+/* ---- HERO sized buttons ---- */
+.btn-hero {
+  font-size: 1rem;
+  padding: 14px 32px;
+  border-radius: var(--r-md);
+}
+
+/* ---- NAVBAR buttons ---- */
+.btn-nav-outline {
+  background: transparent;
+  color: rgba(255,255,255,0.85) !important;
+  border: 1px solid rgba(255,255,255,0.20);
+  padding: 8px 20px;
+  font-size: 0.88rem;
+  border-radius: var(--r-sm);
+}
+.btn-nav-outline:hover {
+  border-color: var(--gold-500);
+  color: var(--gold-400) !important;
+}
+.btn-nav-gold {
+  background: var(--gold-500);
+  color: var(--navy-950) !important;
+  border-color: var(--gold-500);
+  padding: 8px 20px;
+  font-size: 0.88rem;
+  border-radius: var(--r-sm);
+}
+.btn-nav-gold:hover {
+  background: var(--gold-400);
+  border-color: var(--gold-400);
+  color: var(--navy-950) !important;
+}
+
+/* ---- SUBMIT button ---- */
+.btn-submit { font-size: 1rem; padding: 14px; }
+
+/* ---- CTA BANNER white button ---- */
+.btn-cta-white {
+  background: #ffffff;
+  color: var(--navy-900) !important;
+  border-color: #fff;
+  font-weight: 700;
+  padding: 14px 32px;
+}
+.btn-cta-white:hover {
+  background: var(--gold-300);
+  border-color: var(--gold-300);
+  color: var(--navy-900) !important;
+  transform: translateY(-2px);
+}
+
+/* ---- INSURANCE card buttons ---- */
+.btn-insure-cta {
+  background: transparent;
+  color: var(--gold-500) !important;
+  border: 2px solid var(--border-gold);
+  padding: 11px;
+  border-radius: var(--r-sm);
+  font-weight: 600;
+}
+.btn-insure-cta:hover {
+  background: var(--gold-subtle);
+  color: var(--gold-400) !important;
+}
+.btn-insure-white {
+  background: #fff;
+  color: var(--navy-900) !important;
+  border: 2px solid #fff;
+  padding: 11px;
+  border-radius: var(--r-sm);
+  font-weight: 700;
+}
+.btn-insure-white:hover {
+  background: transparent;
+  color: #fff !important;
+  border-color: rgba(255,255,255,0.6);
+}
+
+
+/* ================================================================
+   6. SKIP LINK (Accessibility)
+
+   position:absolute takes it out of flow (invisible).
+   When focused (Tab key), it moves to visible position.
+   Allows keyboard users to skip the navbar and reach content.
+================================================================ */
+.skip-link {
+  position: absolute;
+  top: -100px;               /* Off-screen by default */
+  left: 20px;
+  background: var(--gold-500);
+  color: var(--navy-950);
+  padding: 10px 20px;
+  border-radius: 0 0 var(--r-sm) var(--r-sm);
+  font-weight: 700;
+  font-size: 0.9rem;
+  z-index: 99999;
+  transition: top 0.3s;      /* Slide down when focused */
+}
+/* :focus is triggered when the user presses Tab — moves link into view */
+.skip-link:focus { top: 0; }
+
+
+/* ================================================================
+   7. NAVBAR
+================================================================ */
+
+/* Fixed navbar: position:fixed keeps it at the top while scrolling.
+   z-index:1000 ensures it sits above all page content.
+   backdrop-filter:blur creates the frosted glass effect. */
+#mainNav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  padding: 18px 0;
+  background: transparent;         /* Fully transparent over the hero */
+  transition: var(--ease-slow);    /* Smooth change when scrolled */
+}
+
+/* .scrolled class added by JavaScript after 80px of scroll.
+   Applies a semi-transparent dark navy background + blur. */
+#mainNav.scrolled {
+  background: rgba(10, 22, 40, 0.92) !important;
+  backdrop-filter: blur(20px);    /* Blurs the content behind the navbar */
+  -webkit-backdrop-filter: blur(20px); /* Safari support */
+  padding: 12px 0;                /* Slightly smaller when scrolled */
+  box-shadow: 0 1px 0 var(--border); /* Subtle bottom border line */
+}
+
+/* Brand logo area */
+.navbar-brand {
+  text-decoration: none !important;
+}
+
+/* The inline SVG logo icon in the navbar */
+.nav-logo-icon {
+  width: 100px;
+  height: auto;
+  flex-shrink: 0;   /* Prevents the icon from shrinking in flex containers */
+  object-fit: contain;      /* Preserve aspect ratio — no distortion */
+  object-position: center;  /* Center image within the container */
+  display: block;           /* Ensure proper rendering */
+  max-width: 100%;          /* FIX: Prevent logo from overflowing on small screens */
+}
+
+/* Brand text: "NOVA" in gold + "Finance" in white */
+.nav-brand-text {
+  display: flex;
+  flex-direction: column;   /* Stack NOVA above Finance */
+  line-height: 1;
+}
+.brand-nova {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--gold-500);
+  letter-spacing: 2px;
+}
+.brand-finance {
+  font-family: var(--font-heading);
+  font-size: 0.6rem;
+  font-weight: 400;
+  color: var(--text-300);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+/* Individual nav link text */
+.navbar-nav .nav-link {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.80) !important;
+  padding: 8px 12px !important;
+  position: relative;          /* For the pseudo-element underline */
+  transition: var(--ease);
+}
+
+/* Animated underline on nav links:
+   ::after creates an invisible pseudo-element below the text.
+   width:0 hides it. On hover, JS adds .active or CSS sets width to calc(...). */
+.navbar-nav .nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 12px;
+  width: 0;                         /* Hidden by default */
+  height: 2px;
+  background: var(--gold-500);
+  transition: width 0.3s ease;     /* Animate width from 0 to full */
+  border-radius: 2px;
+}
+.navbar-nav .nav-link:hover::after,
+.navbar-nav .nav-link.active::after {
+  width: calc(100% - 24px);  /* Full link width minus left+right padding */
+}
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+  color: #fff !important;
+}
+
+/* Dropdown menu styling */
+.nav-dropdown {
+  background: var(--navy-700) !important;
+  border: 1px solid var(--border-gold) !important;
+  border-radius: var(--r-sm) !important;
+  padding: 8px !important;
+  margin-top: 8px;
+  box-shadow: var(--shadow-md) !important;
+  min-width: 220px;
+}
+.nav-dropdown .dropdown-item {
+  color: var(--text-300) !important;
+  font-size: 0.88rem;
+  padding: 9px 14px !important;
+  border-radius: var(--r-xs) !important;
+  transition: var(--ease);
+  display: flex;
+  align-items: center;
+}
+.nav-dropdown .dropdown-item:hover {
+  background: var(--gold-subtle) !important;
+  color: var(--gold-400) !important;
+}
+.nav-dropdown .dropdown-divider {
+  border-color: var(--border) !important;
+}
+
+/* Mobile hamburger button */
+.nav-hamburger {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xs);
+  padding: 6px 10px;
+  color: #fff;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+.nav-hamburger:focus { box-shadow: none; }
+
+/* Low Data Mode toggle button (in navbar) */
+.low-data-btn {
+  background: rgba(201,168,76,0.12);
+  border: 1px solid var(--border-gold);
+  color: var(--gold-500);
+  border-radius: var(--r-full);
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--ease);
+  white-space: nowrap;
+}
+.low-data-btn:hover,
+.low-data-btn.is-active {
+  background: var(--gold-500);
+  color: var(--navy-950);
+  border-color: var(--gold-500);
+}
+/* Hide the text label on very small screens; keep icon */
+.low-data-label { font-size: 0.75rem; }
+
+
+/* ================================================================
+   8. HERO / CAROUSEL
+================================================================ */
+
+/* Hero section: no top padding because navbar is transparent.
+   min-height:100vh = at least full viewport height.
+   FIX: Added height to ensure carousel container has proper height */
+#home {
+  min-height: 100vh;
+  height: 100vh;                  /* FIX: Explicit height for carousel container */
+  position: relative;
+  overflow: hidden;               /* FIX: Prevent horizontal overflow on small screens */
+}
+
+/* FIX: Carousel container needs explicit height to display slides
+   ERROR: Bootstrap carousel has no default height, causing slides to collapse
+   FIX: Set height to 100vh to match hero section */
+#heroCarousel {
+  height: 100vh;                  /* Full viewport height */
+  width: 100%;                    /* Full width */
+  overflow: hidden;               /* FIX: Prevent horizontal overflow */
+}
+
+/* Each slide's background layer
+   FIX: Added z-index to ensure background is behind content
+   FIX: Added height to ensure carousel items have proper height */
+.hero-slide-bg {
+  position: absolute;         /* Fills the entire slide */
+  inset: 0;                   /* shorthand for top:0 right:0 bottom:0 left:0 */
+  background-size: cover;     /* Image covers the full area */
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 0;                 /* Ensure background is behind content */
+  height: 100%;                /* FIX: Ensure background fills the slide height */
+}
+
+/* FIX: Carousel items need explicit height to display properly
+   ERROR: Without height, carousel items collapse and don't show content
+   FIX: Set height to 100vh (full viewport height) to match hero section */
+.carousel-item {
+  height: 100vh;              /* Full viewport height */
+  position: relative;         /* For positioning child elements */
+  opacity: 0;                 /* FIX: Start hidden for fade transition */
+  transition: opacity 0.8s ease-in-out; /* FIX: Smooth fade transition */
+}
+
+/* FIX: Active carousel item must be visible
+   ERROR: Bootstrap carousel-fade uses opacity to show/hide slides
+   FIX: Set opacity to 1 for active slide */
+.carousel-item.active {
+  opacity: 0;                 /* Visible when active */
+}
+
+/* FIX: Carousel inner wrapper needs height to contain items
+   ERROR: Bootstrap carousel-inner has no height by default
+   FIX: Set height to 100vh to ensure items display */
+.carousel-inner {
+  height: 100vh;              /* Full viewport height */
+  overflow: hidden;           /* FIX: Prevent horizontal overflow */
+}
+
+/* Slide-specific background images (using the template photos)
+   FIX: Removed leading slash from image paths.
+   ERROR: url('/images/...') looks for images from domain root (e.g., localhost/images/...)
+   FIX: url('images/...') uses relative path from current file location
+   This ensures images load correctly whether on localhost or live server */
+.slide-1-bg { background-image: url('/images/hero-bg-1-min.jpg'); }
+.slide-2-bg { background-image: url('/images/hero-bg-2-min.jpg'); }
+.slide-3-bg { background-image: url('/images/456b54ba7211e6114eaa3550cc2cbda8.jpg'); }
+
+/* Dark overlay on top of each background image.
+   Without this, white text would be unreadable on photos.
+   FIX: Added z-index to ensure overlay sits above background but below caption */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(2, 12, 27, 0.88) 0%,    /* Very dark left side */
+    rgba(10, 22, 40, 0.72) 60%,  /* Medium centre */
+    rgba(27, 42, 74, 0.60) 100%  /* Navy right side */
+  );
+  z-index: 5;                    /* FIX: Above background (z-index: 0), below caption (z-index: 10) */
+}
+
+/* Marketplace slide overlay: gold tint */
+.hero-overlay-market {
+  background: linear-gradient(
+    135deg,
+    rgba(2, 12, 27, 0.90) 0%,
+    rgba(139, 90, 20, 0.30) 100%  /* Gold tint */
+  );
+}
+
+/* Insurance slide overlay: deeper navy */
+.hero-overlay-insure {
+  background: linear-gradient(
+    135deg,
+    rgba(2, 12, 27, 0.92) 0%,
+    rgba(10, 22, 40, 0.80) 100%
+  );
+}
+
+/* Carousel caption: Bootstrap positions this at the bottom-centre by default.
+   We override to centre it vertically with flexbox.
+   FIX: Added z-index to ensure caption appears above background image and overlay
+   FIX: Removed Bootstrap's default display:none that hides caption on mobile */
+.hero-caption {
+  position: absolute !important;      /* Override Bootstrap's relative */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex !important;          /* FIX: Force flex display (Bootstrap hides this by default) */
+  align-items: center;                /* Vertical centre */
+  padding-top: var(--nav-h);         /* Push content below the navbar */
+  text-align: center;
+  color: #fff;
+  z-index: 10;                       /* FIX: Ensure caption is above background (z-index: 0) */
+  pointer-events: none;              /* FIX: Allow clicks to pass through to carousel controls */
+}
+
+/* FIX: Re-enable pointer events for interactive elements within caption
+   ERROR: pointer-events: none on caption would disable button clicks
+   FIX: Re-enable pointer events for buttons and links inside caption */
+.hero-caption a,
+.hero-caption button {
+  pointer-events: auto;              /* Re-enable clicks for interactive elements */
+}
+
+/* Hero badge (pill above headline) */
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(201,168,76,0.15);
+  border: 1px solid var(--border-gold);
+  color: var(--gold-400);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 7px 18px;
+  border-radius: var(--r-full);
+  margin-bottom: 20px;
+}
+
+/* Variants for other slides */
+.badge-market  { background: rgba(201,168,76,0.20); }
+.badge-insure  { background: rgba(34,197,94,0.15); border-color: rgba(34,197,94,0.30); color: #4ade80; }
+
+/* Pulsing green dot in the badge */
+.badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold-500);
+  display: inline-block;
+  animation: pulse 2s infinite; /* Keyframe defined below */
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(1.5); }
+}
+
+/* Main hero headline */
+.hero-title {
+  font-size: clamp(2.2rem, 6vw, 4rem);  /* Responsive: scales with viewport */
+  font-weight: 900;
+  line-height: 1.1;
+  color: #fff;
+  margin-bottom: 22px;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.5); /* Soft shadow improves readability */
+}
+
+/* Gold word in the headline */
+.title-gold { color: var(--gold-400); }
+
+/* Hero description paragraph */
+.hero-desc {
+  font-size: 1.05rem;
+  color: rgba(255,255,255,0.80);
+  max-width: 580px;
+  margin: 0 auto 32px;
+  line-height: 1.75;
+}
+
+/* Trust stat bar below hero CTAs */
+.hero-trust { margin-top: 32px; }
+.trust-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.trust-stat strong {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--gold-400);
+  line-height: 1;
+}
+.trust-stat span {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.60);
+  letter-spacing: 0.5px;
+}
+/* Vertical divider line between trust stats */
+.trust-divider {
+  width: 1px;
+  height: 32px;
+  background: rgba(255,255,255,0.15);
+  align-self: center;
+}
+
+/* Carousel indicators (dots): override Bootstrap defaults with gold */
+.hero-indicators {
+  bottom: 24px !important;
+}
+.hero-indicators [data-bs-target] {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: rgba(255,255,255,0.35) !important;
+  border: none !important;
+  transition: var(--ease) !important;
+  margin: 0 4px !important;
+}
+.hero-indicators .active {
+  background: var(--gold-500) !important;
+  width: 24px !important;
+  border-radius: 4px !important;  /* Active indicator is wider + rounded rect */
+}
+
+/* Carousel arrows: make them gold
+   FIX: Added z-index to ensure controls appear above all content */
+.hero-ctrl {
+  width: 44px !important;
+  opacity: 0.7;
+  transition: var(--ease);
+  z-index: 20;                    /* FIX: Above caption (z-index: 10) */
+}
+.hero-ctrl:hover { opacity: 1; }
+.hero-ctrl .carousel-control-prev-icon,
+.hero-ctrl .carousel-control-next-icon {
+  /* filter creates a gold tint on the default Bootstrap SVG arrow */
+  filter: invert(78%) sepia(33%) saturate(636%) hue-rotate(10deg) brightness(97%);
+}
+
+
+/* ================================================================
+   9. TRUST STRIP
+================================================================ */
+.trust-strip {
+  padding: 36px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.015);  /* Very subtle light stripe */
+}
+.trust-strip-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-400);
+  margin-bottom: 20px;
+}
+.trust-logo-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-400);
+  transition: var(--ease);
+}
+.trust-logo-item i { font-size: 1.1rem; color: var(--gold-600); }
+.trust-logo-item:hover { color: var(--gold-500); }
+
+
+/* ================================================================
+   10. SECTION SHARED — Checklist / Feature list
+================================================================ */
+
+/* Checklist used in About + Airtime sections */
+.about-checklist { display: flex; flex-direction: column; gap: 16px; }
+
+.check-item {
+  display: flex;              /* Side by side: icon | text */
+  gap: 14px;
+  align-items: flex-start;
+}
+.check-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--gold-500);
+  color: var(--navy-950);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  flex-shrink: 0;            /* Never shrinks even if text is long */
+  margin-top: 2px;
+}
+.check-item strong {
+  display: block;
+  color: var(--text-100);
+  font-size: 0.95rem;
+  margin-bottom: 3px;
+}
+.check-item p {
+  color: var(--text-400);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+
+/* ================================================================
+   11. ABOUT SECTION
+================================================================ */
+
+/* Wrapper: relative positioning so the float card can be absolute inside */
+.about-img-wrap {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.about-main-img {
+  width: 100%;
+  height: 500px;
+  object-fit: cover;         /* Crop image to fill container without stretching */
+  object-position: center;
+  border-radius: var(--r-lg);
+  filter: brightness(0.88); /* Slightly dark for aesthetic cohesion */
+}
+
+/* Floating stat card on top of the image */
+.about-float-card {
+  position: absolute;    /* Float over the image */
+  bottom: -18px;
+  right: -18px;
+  background: var(--navy-700);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--r-md);
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--shadow-md), var(--shadow-gold);
+}
+.float-card-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--gold-subtle);
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  color: var(--gold-500);
+}
+.about-float-card strong {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--gold-500);
+  line-height: 1;
+}
+.about-float-card p {
+  font-size: 0.78rem;
+  color: var(--text-400);
+  margin: 4px 0 0;
+}
+
+
+/* ================================================================
+   12. SERVICES SECTION
+================================================================ */
+
+/* The <a> wrapping each card: makes the whole card clickable */
+.service-card-link { text-decoration: none; display: block; height: 100%; }
+
+/* Service card */
+.service-card {
+  background: var(--navy-700);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 30px 26px;
+  height: 100%;
+  transition: var(--ease);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Gold left border stripe that slides in on hover */
+.service-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--gold-500);
+  transform: scaleY(0);         /* Hidden: 0% height */
+  transform-origin: bottom;
+  transition: transform 0.35s ease;
+}
+.service-card:hover::before { transform: scaleY(1); }  /* Full height on hover */
+
+.service-card:hover {
+  transform: translateY(-6px);              /* Card lifts up */
+  border-color: var(--border-gold);
+  background: linear-gradient(160deg, var(--navy-600) 0%, var(--navy-700) 100%);
+  box-shadow: var(--shadow-gold);
+}
+
+/* Service icon circle */
+.svc-icon {
+  width: 54px;
+  height: 54px;
+  background: var(--gold-subtle);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  color: var(--gold-500);
+  transition: var(--ease);
+  flex-shrink: 0;
+}
+.service-card:hover .svc-icon {
+  background: var(--gold-500);
+  border-color: var(--gold-500);
+  color: var(--navy-950);
+}
+
+.svc-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-100);
+  margin: 0;
+}
+.svc-desc {
+  font-size: 0.88rem;
+  color: var(--text-400);
+  line-height: 1.65;
+  margin: 0;
+  flex: 1;   /* Takes remaining space, pushing .svc-arrow to the bottom */
+}
+.svc-arrow {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gold-500);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: var(--ease);
+}
+.service-card:hover .svc-arrow { gap: 8px; } /* Arrow shifts right on hover */
+
+
+/* ================================================================
+   13. FEATURE MOCKUP (used in Transfers + Airtime sections)
+================================================================ */
+
+/* The "app window" mockup built entirely with HTML + CSS */
+.feature-mockup {
+  background: var(--navy-700);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg), var(--shadow-gold);
+}
+
+/* Top bar (mimics a browser/app title bar) */
+.mockup-header-bar {
+  background: rgba(0,0,0,0.35);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+/* Three coloured dots (like macOS window buttons) */
+.mockup-bar-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.d-red    { background: #FF5F57; }
+.d-yellow { background: #FFBD2E; }
+.d-green  { background: #28CA41; }
+.mockup-bar-title { font-size: 0.78rem; color: var(--text-400); font-weight: 500; }
+
+/* Mockup content area */
+.mockup-body { padding: 20px; }
+
+/* Balance row inside mockup */
+.mock-balance-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+.mock-label {
+  font-size: 0.72rem;
+  color: var(--text-400);
+  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+}
+.mock-amount {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--gold-400);
+}
+
+/* User avatar circle with initials */
+.mock-avatar-circle {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--gold-glow);
+  border: 2px solid var(--gold-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--gold-400);
+}
+
+/* Input row in mockup (simulates form fields) */
+.mock-input-row {
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.mock-input-label { font-size: 0.7rem; color: var(--text-400); }
+.mock-input-val {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-200);
+  display: flex;
+  align-items: center;
+}
+.mock-input-val.verified { color: var(--success); }
+
+.mock-amount-big {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--gold-500);
+}
+
+/* Fake "Send" button inside the mockup (disabled — it's a demo) */
+.mock-send-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--gold-500);
+  color: var(--navy-950);
+  border: none;
+  border-radius: var(--r-sm);
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-top: 14px;
+  cursor: default;    /* default cursor since it's disabled/demo */
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* ================================================================
+   14. BILLS SECTION
+================================================================ */
+
+/* Individual bill card */
+.bill-card {
+  background: var(--navy-700);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 24px 16px;
+  text-align: center;
+  transition: var(--ease);
+  height: 100%;
+}
+.bill-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-gold);
+}
+.bill-icon {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--gold-subtle);
+  color: var(--gold-500);
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+  transition: var(--ease);
+}
+.bill-card:hover .bill-icon { background: var(--gold-500); color: var(--navy-950); }
+
+/* Gold icon variant (for Betting card) */
+.icon-gold { background: var(--gold-glow) !important; color: var(--gold-400) !important; }
+
+.bill-name { font-size: 0.9rem; font-weight: 700; color: var(--text-100); margin-bottom: 4px; }
+.bill-sub  { font-size: 0.75rem; color: var(--text-400); margin: 0; }
+
+
+/* ================================================================
+   15. AIRTIME SECTION
+================================================================ */
+
+/* Network badges */
+.net-badge {
+  display: inline-block;
+  font-weight: 800;
+  font-size: 0.88rem;
+  padding: 7px 20px;
+  border-radius: var(--r-full);
+  border: 2px solid transparent;
+}
+.net-mtn     { background: rgba(255,204,0,0.15); color: #FFCC00; border-color: rgba(255,204,0,0.3); }
+.net-airtel  { background: rgba(239,68,68,0.15); color: #EF4444; border-color: rgba(239,68,68,0.3); }
+.net-glo     { background: rgba(34,197,94,0.15); color: #22C55E; border-color: rgba(34,197,94,0.3); }
+.net-9mobile { background: rgba(251,146,60,0.15); color: #FB923C; border-color: rgba(251,146,60,0.3); }
+
+/* Airtime mockup variant */
+.airtime-mockup { max-width: 100%; }
+
+/* Network selector tabs (inside mockup) */
+.net-selector { flex-wrap: wrap; }
+.net-tab {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+  color: var(--text-400);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: default;   /* Demo only */
+  transition: var(--ease);
+}
+.net-tab.active {
+  background: var(--gold-subtle);
+  border-color: var(--gold-500);
+  color: var(--gold-400);
+}
+
+/* Quick amount buttons inside mockup */
+.quick-amounts { flex-wrap: wrap; }
+.quick-amt {
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-300);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: default;
+}
+.quick-amt.active-amt {
+  background: var(--gold-subtle);
+  border-color: var(--gold-500);
+  color: var(--gold-400);
+}
+
+
+/* ================================================================
+   16. STATS SECTION
+================================================================ */
+
+/* Full-width navy/gold gradient strip */
+.stats-section {
+  background: linear-gradient(135deg, var(--navy-700) 0%, var(--navy-600) 100%);
+  padding: 80px 0;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--border-gold);
+  border-bottom: 1px solid var(--border-gold);
+}
+
+/* Decorative circle behind the stats */
+.stats-section::before {
+  content: '';
+  position: absolute;
+  width: 500px; height: 500px;
+  border: 1px solid var(--border-gold);
+  border-radius: 50%;
+  right: -150px; top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;   /* Can't accidentally click it */
+  opacity: 0.4;
+}
+
+.stat-block { position: relative; }
+
+/* The big animated number */
+.stat-num {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 900;
+  color: var(--gold-400);
+  line-height: 1;
+  display: inline;
+}
+.stat-label {
+  font-size: 0.82rem;
+  color: var(--text-300);
+  margin-top: 8px;
+  letter-spacing: 0.5px;
+}
+
+
+/* ================================================================
+   17. MARKETPLACE / ESCROW SECTION
+================================================================ */
+
+/* 4-step escrow process card */
+.escrow-step {
+  background: var(--navy-700);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 30px 22px;
+  text-align: center;
+  height: 100%;
+  transition: var(--ease);
+  position: relative;
+}
+.escrow-step:hover {
+  transform: translateY(-6px);
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-gold);
+}
+
+/* Large faint step number — decorative */
+.escrow-num {
+  font-family: var(--font-heading);
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: rgba(201,168,76,0.12);   /* Very faint gold */
+  line-height: 1;
+  margin-bottom: -8px;
+  display: block;
+}
+
+/* Escrow step icon */
+.escrow-icon {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: rgba(201,168,76,0.12);
+  border: 2px solid var(--border-gold);
+  color: var(--gold-500);
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  transition: var(--ease);
+}
+.escrow-icon-hold    { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.3); color: #818CF8; }
+.escrow-icon-deliver { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); color: var(--warning); }
+.escrow-icon-release { background: var(--success-soft); border-color: rgba(34,197,94,0.3); color: var(--success); }
+
+.escrow-step:hover .escrow-icon { background: var(--gold-subtle); border-color: var(--gold-500); color: var(--gold-400); }
+
+.escrow-title { font-size: 0.95rem; font-weight: 700; color: var(--text-100); margin-bottom: 10px; }
+.escrow-desc  { font-size: 0.84rem; color: var(--text-400); line-height: 1.65; margin: 0; }
+
+/* Marketplace feature cards (bottom row) */
+.market-feature-card {
+  background: var(--navy-700);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 28px 24px;
+  height: 100%;
+  transition: var(--ease);
+}
+.market-feature-card:hover {
+  border-color: var(--border-gold);
+  transform: translateY(-4px);
+}
+.mfc-icon {
+  font-size: 2rem;
+  color: var(--gold-500);
+  display: block;
+  margin-bottom: 14px;
+}
+.mfc-icon-gold { color: var(--gold-400); }
+.mfc-featured {
+  background: linear-gradient(145deg, var(--navy-600), var(--navy-700));
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-gold);
+}
+.market-feature-card h4 { font-size: 1rem; font-weight: 700; color: var(--text-100); margin-bottom: 10px; }
+.market-feature-card p  { font-size: 0.88rem; color: var(--text-400); line-height: 1.65; margin: 0; }
+
+
+/* ================================================================
+   18. INSURANCE SECTION
+================================================================ */
+
+/* Insurance product card */
+.insure-card {
+  background: var(--navy-700);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 32px 26px;
+  height: 100%;
+  transition: var(--ease);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+}
+.insure-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-gold);
+}
+
+/* Featured card (Generator cover — "Most Popular") */
+.insure-featured {
+  background: linear-gradient(145deg, var(--navy-600), var(--navy-500));
+  border-color: var(--gold-500);
+  box-shadow: var(--shadow-gold);
+}
+
+/* "Most Popular" ribbon badge at the top of featured card */
+.insure-popular-badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold-500);
+  color: var(--navy-950);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 16px;
+  border-radius: var(--r-full);
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+/* Insurance icon badge */
+.insure-badge {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--gold-subtle);
+  border: 2px solid var(--border-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: var(--gold-500);
+}
+.insure-badge-gold { background: var(--gold-glow); }
+
+.insure-title    { font-size: 1rem; font-weight: 700; color: var(--text-100); margin: 0; }
+.insure-tagline  { font-size: 0.78rem; color: var(--gold-400); font-style: italic; margin: 0; }
+.insure-desc     { font-size: 0.88rem; color: var(--text-400); line-height: 1.65; margin: 0; flex: 1; }
+
+.insure-list     { display: flex; flex-direction: column; gap: 8px; font-size: 0.84rem; color: var(--text-300); }
+.insure-list i   { color: var(--success); }
+.insure-list-white     { color: rgba(255,255,255,0.80); }
+.insure-list-white i   { color: var(--gold-300); }
+
+
+/* ================================================================
+   19. HOW IT WORKS SECTION
+================================================================ */
+
+.hiw-card {
+  background: var(--navy-700);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 32px 22px;
+  text-align: center;
+  height: 100%;
+  transition: var(--ease);
+  position: relative;
+}
+.hiw-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-gold);
+}
+
+/* Large faint number behind icon */
+.hiw-num {
+  font-family: var(--font-heading);
+  font-size: 4rem;
+  font-weight: 900;
+  color: rgba(201,168,76,0.10);
+  line-height: 1;
+  margin-bottom: -10px;
+  display: block;
+}
+
+/* Step icon */
+.hiw-icon {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--gold-subtle);
+  border: 2px solid var(--border-gold);
+  color: var(--gold-500);
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  transition: var(--ease);
+}
+.hiw-card:hover .hiw-icon { background: var(--gold-500); border-color: var(--gold-500); color: var(--navy-950); }
+/* Highlighted last step */
+.hiw-icon-active { background: var(--gold-glow); border-color: var(--gold-500); color: var(--gold-400); }
+
+.hiw-title { font-size: 1rem; font-weight: 700; color: var(--text-100); margin-bottom: 10px; }
+.hiw-desc  { font-size: 0.86rem; color: var(--text-400); line-height: 1.65; margin: 0; }
+
+
+/* ================================================================
+   20. LOANS SECTION
+================================================================ */
+
+/* Loan tier rows */
+.loan-tiers { display: flex; flex-direction: column; gap: 12px; }
+.loan-tier {
+  background: var(--navy-700);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  transition: var(--ease);
+}
+.loan-tier:hover { border-color: var(--border-gold); }
+.tier-range { font-weight: 700; color: var(--text-100); font-size: 0.95rem; }
+.tier-details { display: flex; gap: 8px; flex-wrap: wrap; }
+.tier-tag {
+  background: var(--gold-subtle);
+  border: 1px solid var(--border-gold);
+  color: var(--gold-500);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--r-full);
+}
+
+/* Loan stat cards (2×2 grid) */
+.loan-stat-card {
+  background: var(--navy-700);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 22px 18px;
+  text-align: center;
+  transition: var(--ease);
+}
+.loan-stat-card:hover { border-color: var(--border-gold); transform: translateY(-4px); }
+.lsc-icon {
+  width: 44px; height: 44px;
+  border-radius: var(--r-sm);
+  background: var(--gold-subtle);
+  color: var(--gold-500);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+.loan-stat-card h4 { font-size: 1rem; font-weight: 800; color: var(--text-100); margin-bottom: 4px; }
+.loan-stat-card p  { font-size: 0.75rem; color: var(--text-400); margin: 0; }
+/* Gold variant stat card */
+.lsc-gold { background: linear-gradient(135deg, var(--navy-600), var(--navy-700)); border-color: var(--border-gold); }
+.lsc-gold .lsc-icon { background: var(--gold-glow); }
+.lsc-gold h4 { color: var(--gold-400); }
+
+
+/* ================================================================
+   21. WHY CHOOSE US SECTION
+================================================================ */
+
+.why-card {
+  background: var(--navy-700);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 22px 20px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  height: 100%;
+  transition: var(--ease);
+}
+.why-card:hover { border-color: var(--border-gold); transform: translateY(-4px); }
+/* Gold highlighted card (Low Data Mode card) */
+.why-card-gold {
+  background: linear-gradient(145deg, var(--navy-600), var(--navy-700));
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-gold);
+}
+.why-icon {
+  width: 44px; height: 44px;
+  border-radius: var(--r-sm);
+  background: var(--gold-subtle);
+  color: var(--gold-500);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.why-icon-dark { background: var(--navy-800); color: var(--gold-400); }
+.why-text h4 { font-size: 0.95rem; font-weight: 700; color: var(--text-100); margin-bottom: 6px; }
+.why-text p  { font-size: 0.86rem; color: var(--text-400); line-height: 1.65; margin: 0; }
+
+
+/* ================================================================
+   22. TESTIMONIALS SECTION
+================================================================ */
+
+/* Testimonial card */
+.testi-card {
+  background: var(--navy-700);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 26px 22px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: var(--ease);
+}
+.testi-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-gold);
+}
+
+/* Gold stars */
+.testi-stars { display: flex; gap: 3px; font-size: 0.85rem; color: var(--gold-500); }
+
+/* The quote/review text */
+.testi-text {
+  font-size: 0.9rem;
+  color: var(--text-300);
+  line-height: 1.75;
+  font-style: italic;
+  flex: 1;   /* Pushes author to the bottom of the card */
+  margin: 0;
+}
+
+/* Author row: photo + name */
+.testi-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+  margin-top: auto;
+}
+.testi-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-gold);
+  flex-shrink: 0;
+}
+.testi-info strong { display: block; font-size: 0.88rem; color: var(--text-100); }
+.testi-info span   { font-size: 0.74rem; color: var(--text-400); }
+
+
+/* ================================================================
+   23. FAQ SECTION
+================================================================ */
+
+/* Override Bootstrap accordion default styles */
+.nova-accordion .faq-item {
+  background: transparent !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--r-sm) !important;
+  overflow: hidden;
+  margin-bottom: 10px;
+  transition: var(--ease);
+}
+.nova-accordion .faq-item:hover { border-color: var(--border-gold) !important; }
+
+.nova-accordion .faq-btn {
+  background: var(--navy-700) !important;
+  color: var(--text-100) !important;
+  font-size: 0.96rem;
+  font-weight: 600;
+  padding: 18px 22px;
+  box-shadow: none !important;
+  border: none;
+}
+.nova-accordion .faq-btn:not(.collapsed) { color: var(--gold-400) !important; }
+
+/* Replace Bootstrap's default chevron with a gold + / – icon */
+.nova-accordion .faq-btn::after {
+  content: '\f4fe' !important;           /* Bootstrap icons: plus-circle */
+  font-family: 'bootstrap-icons' !important;
+  font-size: 1.1rem;
+  background-image: none !important;
+  color: var(--gold-500);
+  transform: none !important;
+}
+.nova-accordion .faq-btn:not(.collapsed)::after {
+  content: '\f2ea' !important;           /* Bootstrap icons: dash-circle */
+}
+
+.nova-accordion .faq-body {
+  background: rgba(255,255,255,0.02);
+  color: var(--text-300);
+  font-size: 0.92rem;
+  line-height: 1.75;
+  padding: 18px 22px;
+  border-top: 1px solid var(--border);
+}
+
+
+/* ================================================================
+   24. CTA BANNER
+================================================================ */
+
+.cta-banner { padding: 60px 0; }
+
+.cta-inner {
+  background: linear-gradient(135deg, var(--navy-600) 0%, var(--navy-700) 100%);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--r-xl);
+  padding: 54px 60px;
+  box-shadow: var(--shadow-gold);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative rings inside the CTA banner */
+.cta-inner::before,
+.cta-inner::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid var(--border-gold);
+  pointer-events: none;
+}
+.cta-inner::before { width: 400px; height: 400px; right: -100px; top: -100px; opacity: 0.4; }
+.cta-inner::after  { width: 260px; height: 260px; right: 60px;   top: -30px;  opacity: 0.25; }
+
+.cta-title {
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-weight: 800;
+  color: var(--text-100);
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+.cta-title span { color: var(--gold-400); }
+.cta-desc { color: var(--text-300); font-size: 0.96rem; margin: 0; }
+
+
+/* ================================================================
+   25. CONTACT SECTION
+================================================================ */
+
+/* Contact info item: icon | text */
+.contact-info-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+.contact-icon {
+  width: 46px; height: 46px;
+  background: var(--gold-subtle);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: var(--gold-500);
+  flex-shrink: 0;
+}
+.contact-info-item strong {
+  display: block;
+  color: var(--text-100);
+  font-size: 0.88rem;
+  margin-bottom: 4px;
+}
+.contact-info-item p,
+.contact-info-item address,
+.contact-info-item a {
+  font-size: 0.88rem;
+  color: var(--text-400);
+  margin: 0;
+}
+.contact-info-item a:hover { color: var(--gold-400); }
+
+/* Social icon buttons in contact section */
+.contact-socials { display: flex; gap: 10px; flex-wrap: wrap; }
+.social-link {
+  width: 40px; height: 40px;
+  background: var(--navy-700);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-400);
+  font-size: 1rem;
+  transition: var(--ease);
+}
+.social-link:hover {
+  background: var(--gold-subtle);
+  border-color: var(--gold-500);
+  color: var(--gold-500);
+  transform: translateY(-3px);
+}
+
+/* Contact form card */
+.contact-form-card {
+  background: var(--navy-700);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--r-lg);
+  padding: 36px;
+  box-shadow: var(--shadow-gold);
+}
+
+/* Form labels */
+.form-label {
+  color: var(--text-300);
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+
+/* Custom input / select / textarea styles */
+.nova-input {
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--r-sm) !important;
+  color: var(--text-200) !important;
+  padding: 11px 15px !important;
+  font-size: 0.9rem;
+  transition: var(--ease);
+  font-family: var(--font-body);
+}
+.nova-input:focus {
+  border-color: var(--gold-500) !important;
+  /* box-shadow creates a "focus ring" around the focused input */
+  box-shadow: 0 0 0 3px var(--gold-glow) !important;
+  outline: none;
+}
+.nova-input::placeholder { color: rgba(122,143,170,0.60); }
+/* dropdown arrow colour fix */
+.form-select.nova-input { background-image: none !important; }
+.form-select.nova-input option { background: var(--navy-700); }
+
+
+/* ================================================================
+   26. FOOTER
+================================================================ */
+
+.site-footer {
+  background: var(--navy-800);
+  border-top: 1px solid var(--border);
+  padding: 64px 0 0;
+}
+
+/* Newsletter section at the top of footer */
+.footer-top { padding-bottom: 40px; }
+.footer-newsletter-title { color: var(--text-100); font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+.footer-newsletter-sub   { color: var(--text-400); font-size: 0.86rem; margin: 0; }
+
+.newsletter-form { max-width: 480px; width: 100%; }
+.newsletter-input { flex: 1; min-width: 0; }
+.newsletter-btn   { white-space: nowrap; flex-shrink: 0; }
+
+/* Horizontal divider lines */
+.footer-hr { border-color: var(--border) !important; margin: 0 0 40px !important; }
+
+/* Brand repeat */
+.footer-brand { margin-bottom: 14px; }
+
+.footer-about-text {
+  font-size: 0.86rem;
+  color: var(--text-400);
+  line-height: 1.75;
+  max-width: 300px;
+}
+
+/* Regulatory badges in footer */
+.reg-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--gold-subtle);
+  border: 1px solid var(--border-gold);
+  color: var(--gold-500);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: var(--r-full);
+}
+
+/* Footer column heading */
+.footer-col-heading {
+  color: var(--text-100);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+/* Footer link list */
+.footer-links { display: flex; flex-direction: column; gap: 9px; }
+.footer-links a {
+  color: var(--text-400);
+  font-size: 0.86rem;
+  transition: var(--ease);
+  display: inline-block;
+}
+.footer-links a:hover {
+  color: var(--gold-500);
+  padding-left: 5px;   /* Slight indent animation */
+}
+
+/* Footer contact paragraph lines */
+.footer-contact p,
+.footer-contact a {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.86rem;
+  color: var(--text-400);
+  margin-bottom: 8px;
+}
+.footer-contact a:hover { color: var(--gold-500); }
+
+/* Footer social icons */
+.footer-socials { display: flex; gap: 12px; }
+.footer-socials a {
+  color: var(--text-400);
+  font-size: 1.05rem;
+  transition: var(--ease);
+}
+.footer-socials a:hover {
+  color: var(--gold-500);
+  transform: translateY(-3px);
+}
+
+/* Footer bottom bar */
+.footer-bottom { padding: 20px 0 24px; }
+.footer-copyright { font-size: 0.78rem; color: var(--text-500); margin: 0; }
+.footer-legal { display: flex; gap: 16px; flex-wrap: wrap; }
+.footer-legal a { font-size: 0.78rem; color: var(--text-500); }
+.footer-legal a:hover { color: var(--gold-400); }
+
+
+/* ================================================================
+   27. BACK TO TOP BUTTON
+================================================================ */
+
+.back-to-top {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 44px;
+  height: 44px;
+  background: var(--gold-500);
+  color: var(--navy-950);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  opacity: 0;                    /* Hidden by default */
+  visibility: hidden;
+  transform: translateY(12px);   /* Below final position */
+  transition: var(--ease);
+  z-index: 999;
+  box-shadow: var(--shadow-gold);
+}
+/* .visible class toggled by JS when user scrolls 300px+ */
+.back-to-top.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+.back-to-top:hover   { background: var(--gold-400); transform: translateY(-3px); }
+
+
+/* ================================================================
+   28. LOW DATA MODE OVERRIDES
+
+   When JS adds class "low-data-mode" to <body>, these rules
+   override the normal animated styles. All animations and
+   heavy background effects are stripped out so the page works
+   fast on slow 3G connections.
+================================================================ */
+
+/* Disable ALL CSS animations and transitions site-wide */
+body.low-data-mode *,
+body.low-data-mode *::before,
+body.low-data-mode *::after {
+  animation-duration:    0.001ms !important;
+  animation-delay:       0.001ms !important;
+  transition-duration:   0.001ms !important;
+  transition-delay:      0.001ms !important;
+}
+
+/* Override AOS: all elements become immediately visible
+   (normally AOS hides them until they scroll into view) */
+body.low-data-mode [data-aos] {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* Remove decorative background images on hero slides */
+body.low-data-mode .hero-slide-bg {
+  background-image: none !important;
+  background: var(--navy-900) !important;
+}
+
+/* Remove backdrop blur (expensive GPU operation) */
+body.low-data-mode #mainNav,
+body.low-data-mode #mainNav.scrolled {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: var(--navy-900) !important;
+}
+
+/* Remove card hover lifts (transform) */
+body.low-data-mode .service-card:hover,
+body.low-data-mode .bill-card:hover,
+body.low-data-mode .hiw-card:hover,
+body.low-data-mode .insure-card:hover,
+body.low-data-mode .escrow-step:hover,
+body.low-data-mode .testi-card:hover { transform: none !important; }
+
+/* Remove box-shadows (rendering cost) */
+body.low-data-mode .feature-mockup,
+body.low-data-mode .about-float-card,
+body.low-data-mode .cta-inner { box-shadow: none !important; }
+
+/* Remove gradient backgrounds — solid colours only */
+body.low-data-mode .stats-section {
+  background: var(--navy-700) !important;
+}
+
+
+/* ================================================================
+   29. RESPONSIVE / MEDIA QUERIES
+
+   Bootstrap breakpoints:
+     xs:  < 576px   (tiny phones)
+     sm:  ≥ 576px   (phones landscape)
+     md:  ≥ 768px   (tablets)
+     lg:  ≥ 992px   (desktops)
+     xl:  ≥ 1200px  (large desktops)
+
+   max-width means the rule applies BELOW that width.
+================================================================ */
+
+/* Tablets and below (< 992px) */
+@media (max-width: 991.98px) {
+  :root { --section-pad: 70px 0; }  /* Reduce section padding */
+
+  .about-float-card { right: 10px; bottom: 10px; } /* Reposition float card */
+  .about-main-img   { height: 360px; }
+
+  .cta-inner { padding: 36px 28px; }  /* Reduce CTA banner padding */
+}
+
+/* Phones (< 768px) */
+@media (max-width: 767.98px) {
+  :root { --section-pad: 50px 0; }
+
+  /* FIX: Hero carousel stretching on small phones */
+  /* ERROR: Carousel width causes horizontal scroll on phones */
+  /* FIX: Ensure proper containment and spacing */
+  
+  /* Navbar adjustments for small phones */
+  #mainNav { padding: 14px 0; }
+  .container { padding: 0 16px; }
+  .nav-logo-icon { width: 40px; height: 40px; }
+  
+  /* Hero section adjustments */
+  #home { overflow: hidden; }
+  #heroCarousel { overflow: hidden; }
+  .carousel-inner { overflow: hidden; }
+  
+  /* Hide trust stat dividers on mobile (they stack vertically) */
+  .trust-divider { display: none; }
+
+  /* Hero: smaller font */
+  .hero-title { font-size: 2rem; }
+  .hero-desc  { font-size: 0.95rem; }
+
+  /* Float card: move inside the image on mobile */
+  .about-float-card { position: static; margin-top: 16px; }
+  .about-main-img   { height: 260px; }
+
+  /* Feature mockup: full width on mobile */
+  .feature-mockup { max-width: 100% !important; }
+
+  /* CTA banner: smaller padding on mobile */
+  .cta-inner { padding: 28px 20px; }
+  .cta-title { font-size: 1.4rem; }
+
+  /* Contact form card: smaller padding on mobile */
+  .contact-form-card { padding: 22px 16px; }
+
+  /* Stat numbers: slightly smaller on very small screens */
+  .stat-num { font-size: 1.8rem; }
+}
+
+/* Very small phones (< 576px) */
+@media (max-width: 575.98px) {
+  /* FIX: Hero carousel stretching issue on small phones */
+  /* ERROR: Carousel stretches too wide, pushing hamburger button far right */
+  /* FIX: Force navbar layout changes with !important to override Bootstrap */
+  
+  /* Global overflow fix - prevent horizontal scroll */
+  html, body { overflow-x: hidden !important; }
+  
+  /* FIX: Navbar - completely override Bootstrap flexbox */
+  #mainNav { padding: 8px 0 !important; }
+  #mainNav .container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 10px !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  
+  /* Navbar brand - force it to stay on left */
+  .navbar-brand {
+    margin-right: 0 !important;
+    flex: 0 0 auto !important;
+    max-width: 45% !important;
+    width: auto !important;
+  }
+  .nav-logo-icon { 
+    width: 32px !important; 
+    height: 32px !important; 
+    max-width: 32px !important;
+  }
+  .nav-brand-text { display: none !important; }
+  
+  /* Mobile controls - force them to stay visible and accessible */
+  .d-flex.d-lg-none {
+    display: flex !important;
+    margin-left: auto !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+    order: 2 !important;  /* Force to right side */
+  }
+  
+  /* Hamburger button - make it more visible */
+  .nav-hamburger { 
+    padding: 8px 10px !important; 
+    font-size: 1.5rem !important; 
+    width: 44px !important;
+    height: 44px !important;
+    border: 1px solid rgba(255,255,255,0.3) !important;
+    background: rgba(255,255,255,0.1) !important;
+  }
+  .low-data-btn { 
+    padding: 6px 10px !important; 
+    font-size: 0.7rem !important; 
+    width: auto !important;
+  }
+  
+  /* Hero section - force width constraints */
+  #home { 
+    width: 100% !important; 
+    max-width: 100vw !important; 
+    overflow: hidden !important;
+    height: auto !important; 
+    min-height: 100vh !important; 
+  }
+  #heroCarousel { 
+    width: 100% !important; 
+    max-width: 100vw !important; 
+    overflow: hidden !important;
+    height: auto !important; 
+    min-height: 100vh !important; 
+  }
+  .carousel-item { 
+    width: 100% !important; 
+    max-width: 100vw !important; 
+    overflow: hidden !important;
+    height: auto !important; 
+    min-height: 100vh !important; 
+  }
+  .carousel-inner { 
+    width: 100% !important; 
+    max-width: 100vw !important; 
+    overflow: hidden !important;
+    height: auto !important; 
+    min-height: 100vh !important; 
+  }
+  .hero-slide-bg { 
+    width: 100% !important; 
+    max-width: 100vw !important; 
+    overflow: hidden !important;
+  }
+  
+  /* Hero caption */
+  .hero-caption { 
+    padding-top: 60px !important; 
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+  .hero-caption .container { 
+    padding: 0 10px !important; 
+    max-width: 100% !important;
+  }
+  
+  /* Stack hero CTA buttons vertically */
+  .hero-actions { flex-direction: column !important; align-items: center !important; }
+  .btn-hero     { width: 100% !important; max-width: 260px !important; justify-content: center !important; }
+
+  /* Hide brand text */
+  .brand-finance { display: none !important; }
+
+  /* Smaller escrow number */
+  .escrow-num { font-size: 2.5rem; }
+
+  /* Additional responsive adjustments */
+  .hero-badge { font-size: 0.7rem; padding: 5px 12px; }
+  .hero-trust { gap: 16px; }
+  .trust-stat strong { font-size: 1.1rem; }
+  .trust-stat span { font-size: 0.65rem; }
+  
+  .section-title { font-size: 1.6rem; }
+  .section-sub { font-size: 0.9rem; }
+  .section-text { font-size: 0.9rem; }
+  
+  .trust-strip { padding: 24px 0; }
+  .trust-logos { gap: 16px; }
+  .trust-logo-item { font-size: 0.7rem; }
+  
+  .service-card { padding: 20px 16px; }
+  .svc-icon { width: 44px; height: 44px; font-size: 1.2rem; }
+  
+  .btn { font-size: 0.85rem; padding: 10px 20px; }
+  .btn-hero { font-size: 0.9rem; padding: 12px 24px; }
+  
+  .form-control { font-size: 0.9rem; }
+  
+  .footer { padding: 40px 0 20px; }
+  .footer-col { margin-bottom: 24px; }
+  .footer-about-text { font-size: 0.8rem; }
+  .footer-links a { font-size: 0.8rem; }
+}
+
+/* FIX: Add medium screen breakpoint (768px - 991px) */
+/* ERROR: Missing responsive styles for tablets in portrait mode */
+/* FIX: Add specific adjustments for medium screens */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  /* Hero adjustments */
+  .hero-title { font-size: 2.4rem; }
+  .hero-desc { font-size: 1rem; }
+  
+  /* Section adjustments */
+  .section-title { font-size: 2rem; }
+  
+  /* Service cards */
+  .svc-icon { width: 48px; height: 48px; }
+  
+  /* About section */
+  .about-main-img { height: 400px; }
+  .about-float-card { right: 20px; bottom: 20px; }
+  
+  /* Trust strip */
+  .trust-logos { gap: 20px; }
+}
+
+/* FIX: Add large screen breakpoint (1200px - 1399px) */
+/* ERROR: Missing responsive styles for large desktops */
+/* FIX: Add specific adjustments for large screens */
+@media (min-width: 1200px) and (max-width: 1399.98px) {
+  /* Container adjustments */
+  .container { max-width: 1140px; }
+  
+  /* Hero adjustments */
+  .hero-title { font-size: 3.2rem; }
+  
+  /* Section adjustments */
+  .section-title { font-size: 2.4rem; }
+}
+
+/* FIX: Add extra large screen breakpoint (1400px+) */
+/* ERROR: Missing responsive styles for very large desktops */
+/* FIX: Add specific adjustments for extra large screens */
+@media (min-width: 1400px) {
+  /* Container adjustments */
+  .container { max-width: 1320px; }
+  
+  /* Hero adjustments */
+  .hero-title { font-size: 3.8rem; }
+  .hero-desc { font-size: 1.1rem; }
+  
+  /* Section adjustments */
+  .section-title { font-size: 2.8rem; }
+  
+  /* Service cards */
+  .service-card { padding: 28px 24px; }
+  
+  /* About section */
+  .about-main-img { height: 550px; }
+}
+
+/* FIX: Add landscape orientation adjustments for mobile */
+/* ERROR: Mobile landscape mode has layout issues */
+/* FIX: Add specific adjustments for landscape mode */
+@media (max-height: 500px) and (orientation: landscape) {
+  /* Hero section adjustments for landscape */
+  #home { min-height: auto; height: auto; }
+  #heroCarousel { height: auto; min-height: 100vh; }
+  .carousel-item { height: auto; min-height: 100vh; }
+  .carousel-inner { height: auto; min-height: 100vh; }
+  
+  /* Reduce padding in landscape */
+  .hero-caption { padding-top: 60px; }
+  .hero-title { font-size: 1.8rem; margin-bottom: 16px; }
+  .hero-desc { font-size: 0.9rem; margin-bottom: 20px; }
+  .hero-actions { margin-top: 20px; }
+  
+  /* Section padding adjustments */
+  .section-padding { padding: 40px 0; }
+}
+
+/* FIX: Add high DPI/Retina display adjustments */
+/* ERROR: Images may appear blurry on high DPI screens */
+/* FIX: Add specific adjustments for high DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Ensure images are crisp on retina displays */
+  img { image-rendering: -webkit-optimize-contrast; }
+}

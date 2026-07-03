@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Console &middot; NOVA Finance</title>
+
+  <!-- ===================================================================
+       GOOGLE FONTS
+       Sora  = headings, used the same way across all of NOVA Finance
+       Figtree = body copy / form labels
+  ==================================================================== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+
+  <!-- ===================================================================
+       BOOTSTRAP ICONS — icon font only, NOT the full Bootstrap framework.
+       This page does not load bootstrap.css or bootstrap.bundle.js at all.
+       Icons used: bi-shield-lock, bi-arrow-left, bi-person-fill,
+       bi-lock-fill, bi-eye, bi-eye-slash
+  ==================================================================== -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Page-specific stylesheet (kept separate from css/auth.css on purpose,
+       so the user login and admin login can change independently). -->
+  <link rel="stylesheet" href="Css/adminlogin.css">
+
+  <!-- Favicon link -->
+     <link rel="icon" type="image/png" href="favicon.png">
+</head>
+<body>
+
+  <!--
+    There is no <nav> on this page, intentionally. The admin console is a
+    restricted entry point, not a marketing page, so it shouldn't carry
+    the public site's navigation. A small "back to site" link sits inside
+    the form panel instead, for anyone who landed here by mistake.
+  -->
+
+  <main class="admin-auth-wrapper">
+
+    <!-- ================================================================
+         LEFT PANEL — decorative / brand side.
+         On the user login this panel sits on the RIGHT — it's mirrored
+         here on purpose, so the admin page reads as a different context
+         at a glance, even though it shares the same colours and fonts.
+         aria-hidden="true" because nothing in here is essential content;
+         a screen reader can skip straight to the form below.
+    ================================================================= -->
+    <section class="admin-auth-visual" aria-hidden="true">
+      <div class="visual-grid"></div>
+      <div class="visual-rings"></div>
+      <i class="bi bi-shield-lock visual-icon"></i>
+      <p class="visual-caption">Secure access for authorized personnel only.</p>
+    </section>
+
+    <!-- ================================================================
+         RIGHT PANEL — the actual sign-in form.
+    ================================================================= -->
+    <section class="admin-auth-form-panel">
+      <div class="form-inner">
+
+        <a href="../index.html" class="back-link">
+          <i class="bi bi-arrow-left"></i> Back to NOVA Finance
+        </a>
+
+        <p class="form-eyebrow">NOVA FINANCE</p>
+        <h1 class="form-heading">Admin Console<span class="gold-period">.</span></h1>
+        <p class="form-subtext">Sign in with your administrator credentials.</p>
+
+        <form id="adminLoginForm" novalidate>
+
+          <!-- Email field -->
+          <div class="form-group">
+            <label for="adminEmail">Email address</label>
+            <div class="input-with-icon">
+              <i class="bi bi-person-fill"></i>
+              <input
+                type="email"
+                id="adminEmail"
+                name="adminEmail"
+                placeholder="you@novafinance.com"
+                autocomplete="username"
+                required
+              >
+            </div>
+          </div>
+
+          <!-- Password field, with a show/hide toggle button inside it -->
+          <div class="form-group">
+            <label for="adminPassword">Password</label>
+            <div class="input-with-icon">
+              <i class="bi bi-lock-fill"></i>
+              <input
+                type="password"
+                id="adminPassword"
+                name="adminPassword"
+                placeholder="••••••••"
+                autocomplete="current-password"
+                required
+              >
+              <button type="button" class="toggle-password" id="togglePassword" aria-label="Show password">
+                <i class="bi bi-eye" id="toggleIcon"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Empty until js/admin-auth.js fills it in; role="alert" makes
+               screen readers announce it automatically the moment it appears. -->
+          <p class="form-error" id="formError" role="alert"></p>
+
+          <button type="submit" class="btn-pill" id="submitBtn">Sign In</button>
+
+        </form>
+
+        <p class="form-footnote">
+          Admin accounts are provisioned by your system administrator.
+          There is no public sign-up for this console.
+        </p>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script src="Assets/adminlogin.js"></script>
+</body>
+</html>

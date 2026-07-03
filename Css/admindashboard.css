@@ -1,0 +1,1449 @@
+/*
+================================================================================
+  NOVA FINANCE — ADMIN DASHBOARD STYLESHEET
+  File:    admin-dashboard.css
+  Pairs with: admin-dashboard.html, admin-dashboard.js
+
+  WHY THE TOKENS BELOW LOOK FAMILIAR
+  ------------------------------------
+  Section 1 (Design Tokens) below is intentionally an exact copy of the
+  :root variables used in the customer-facing dashboard1.css. This is not
+  an accident — it is how we guarantee the admin "Command Center" and the
+  customer app feel like ONE product instead of two unrelated tools.
+  If you ever want a single shared source of truth, you could move this
+  :root block into its own "tokens.css" and @import/link it from both
+  dashboard1.html and admin-dashboard.html — for now it's duplicated here
+  so this admin panel works as a fully standalone file.
+
+  LAYOUT METHOD
+  --------------
+  Flexbox for one-dimensional rows/columns (header bar, button groups).
+  CSS Grid for two-dimensional layouts (the app shell, metric card grids,
+  two-column panels). No framework grid system is used anywhere.
+================================================================================
+*/
+
+
+/* ================================================================
+   1. DESIGN TOKENS
+   Single source of truth for every colour, font, radius and shadow.
+================================================================ */
+:root {
+
+  /* ---- Brand navy scale (same as customer dashboard) ---- */
+  --navy-950: #020C1B;
+  --navy-900: #0A1628;
+  --navy-800: #111E34;
+  --navy-700: #1B2A4A;
+  --navy-600: #243558;
+  --navy-500: #2F4470;
+
+  /* ---- Brand gold scale (same as customer dashboard) ---- */
+  --gold-500: #C9A84C;
+  --gold-400: #D9BC6A;
+  --gold-300: #E8CF88;
+  --gold-glow:   rgba(201, 168, 76, 0.20);
+  --gold-subtle: rgba(201, 168, 76, 0.10);
+
+  /* ---- Light workspace tokens (the off-white admin workspace) ---- */
+  --bg-page:        #F2F4F9;
+  --bg-card:        #FFFFFF;
+  --bg-card-soft:   #F7F8FC;
+  --ink-900: #0A1628;
+  --ink-700: #38415A;
+  --ink-500: #6B7488;
+  --ink-400: #9AA2B5;
+  --line:        rgba(10, 22, 40, 0.08);
+  --line-strong: rgba(10, 22, 40, 0.16);
+
+  /* ---- Text colours used on dark navy backgrounds (sidebar, cards) ---- */
+  --mist-100: #FFFFFF;
+  --mist-300: #B9C3D9;
+  --mist-500: #7587A8;
+
+  /* ---- Semantic status colours: every status badge maps to one of these ---- */
+  --success:      #1E9E5A;
+  --success-soft: rgba(30, 158, 90, 0.12);
+  --danger:       #D9483B;
+  --danger-soft:  rgba(217, 72, 59, 0.12);
+  --warning:      #C9821C;
+  --warning-soft: rgba(201, 130, 28, 0.12);
+  --info:         #3B6FD6;
+  --info-soft:    rgba(59, 111, 214, 0.12);
+
+  /* ---- Typography: Sora for headings, Figtree for everything else ---- */
+  --font-heading: 'Sora', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body:    'Figtree', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* ---- Sizing ---- */
+  --sidebar-w: 264px;
+  --header-h:  68px;
+
+  /* ---- Corner radius scale ---- */
+  --r-xs:   6px;
+  --r-sm:   10px;
+  --r-md:   14px;
+  --r-lg:   20px;
+  --r-full: 999px;
+
+  /* ---- Shadows ---- */
+  --shadow-card:       0 1px 2px rgba(16,24,40,0.04), 0 4px 14px rgba(16,24,40,0.06);
+  --shadow-card-hover: 0 2px 4px rgba(16,24,40,0.06), 0 10px 24px rgba(16,24,40,0.10);
+  --shadow-gold-glow:  0 10px 30px rgba(201,168,76,0.22);
+  --shadow-modal:      0 24px 60px rgba(2,12,27,0.35);
+
+  /* ---- Shared transition — this is the ONLY animation speed used
+         anywhere in this file. Keeping one variable means every hover/
+         transition in the whole admin panel feels identical. ---- */
+  --ease: all 0.16s ease;
+}
+
+
+/* ================================================================
+   2. BASE RESET
+   Removes browser default spacing/sizing inconsistencies so our own
+   spacing system (the tokens above) is the only thing in control.
+================================================================ */
+*, *::before, *::after {
+  box-sizing: border-box; /* padding/border are included in an element's width, not added on top */
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px; /* the root size every "rem" unit below is calculated from */
+  -webkit-text-size-adjust: 100%; /* stops iOS Safari auto-zooming text */
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-page);
+  color: var(--ink-900);
+  line-height: 1.55; /* generous line-height improves readability for everyone, especially low-vision users */
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden; /* prevents an accidental horizontal scrollbar from a slightly-too-wide element */
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--ink-900);
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+button { font-family: inherit; } /* buttons don't inherit fonts by default in some browsers — force it */
+img { max-width: 100%; display: block; }
+input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+
+
+/* ================================================================
+   3. ACCESSIBILITY HELPERS
+   Small reusable utility classes that exist purely to make the page
+   easier to use for keyboard users and people with visual impairments.
+================================================================ */
+
+/* The "skip to content" link: sits off-screen until focused, then jumps into view */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--gold-500);
+  color: var(--navy-950);
+  padding: 10px 16px;
+  font-weight: 700;
+  border-radius: 0 0 var(--r-sm) 0;
+  z-index: 1000;
+}
+.skip-link:focus { left: 0; } /* becomes visible the moment a keyboard user Tabs onto it */
+
+/* Generic "hide visually but not from the DOM/screen-readers" helper for plain labels */
+.visually-hidden-label {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+  clip: rect(0,0,0,0);
+}
+
+.is-hidden { display: none !important; }
+
+/* Visible focus ring for every interactive element when navigated to via keyboard.
+   This is the single most important accessibility rule on the whole page — it
+   guarantees a keyboard-only user always knows exactly where they are. */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--gold-400);
+  outline-offset: 2px;
+}
+
+/* Respect the operating-system "reduce motion" accessibility setting:
+   if a user has told their OS they get dizzy/distracted by motion, we
+   disable our (already light) transitions and transforms entirely. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+  }
+}
+
+.text-center { text-align: center; }
+.text-gold    { color: var(--gold-500); }
+.text-success { color: var(--success); }
+.text-warning { color: var(--warning); }
+.text-danger  { color: var(--danger); }
+
+
+/* ================================================================
+   4. APP SHELL
+   The outer 2-column CSS Grid: a fixed-width sidebar + a flexible
+   main area that takes up the remaining space.
+================================================================ */
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr; /* sidebar is fixed width, main area fills the rest */
+  min-height: 100vh;
+}
+
+/* Dark dimming layer shown behind the sidebar on mobile/tablet when it's open as an overlay */
+.sidebar-overlay {
+  display: none; /* hidden by default; JS adds .is-visible to show it on small screens */
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 12, 27, 0.55);
+  z-index: 150;
+}
+.sidebar-overlay.is-visible { display: block; }
+
+
+/* ================================================================
+   5. SIDEBAR
+================================================================ */
+.sidebar {
+  background: var(--navy-950);
+  display: flex;
+  flex-direction: column; /* stacks brand → user card → nav list → footer vertically */
+  position: fixed; /* stays put while the main content area scrolls */
+  top: 0; left: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 200;
+  scrollbar-width: none; /* hide the scrollbar visually (Firefox) — sidebar content rarely overflows */
+  transition: transform 0.25s ease; /* powers the slide-in/out animation on mobile */
+}
+.sidebar::-webkit-scrollbar { display: none; } /* hide scrollbar (Chrome/Safari) */
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0; /* never lets this row shrink even if the nav list below is tall */
+}
+.brand-link { display: flex; align-items: center; gap: 10px; }
+/* FIX: Updated .brand-logo to handle image-based logos properly */
+/* ERROR: Original styling was designed for SVG logos */
+/* FIX: Added object-fit and border-radius to ensure cover.png displays correctly */
+.brand-logo {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.brand-text {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 1px;
+  color: var(--gold-500);
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+.brand-text small {
+  font-size: 0.55rem;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mist-500);
+  margin-top: 3px;
+}
+
+.sidebar-close-btn {
+  display: none; /* only shown on small screens — see the responsive section */
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: none;
+  color: var(--mist-300);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--ease);
+}
+.sidebar-close-btn:hover { background: var(--danger-soft); color: var(--danger); }
+
+.sidebar-user-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+.sidebar-user-meta { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.sidebar-user-meta strong {
+  color: var(--mist-100);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* long admin names truncate with "…" instead of breaking the layout */
+}
+
+.sidebar-nav {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  flex: 1; /* lets the nav list absorb extra vertical space, pushing the footer down */
+}
+
+.sidebar-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  border-radius: var(--r-sm);
+  color: var(--mist-300);
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  position: relative; /* needed so the ::before "active" stripe below can be positioned against it */
+  transition: var(--ease);
+}
+.sidebar-nav-link:hover { background: rgba(255,255,255,0.06); color: var(--mist-100); }
+
+/* The currently-open panel's nav button: gold-tinted background + text */
+.sidebar-nav-link.is-active {
+  background: var(--gold-subtle);
+  color: var(--gold-400);
+}
+/* A thin gold "current page" stripe down the left edge of the active nav button */
+.sidebar-nav-link.is-active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 18%; bottom: 18%;
+  width: 3px;
+  background: var(--gold-500);
+  border-radius: 0 3px 3px 0;
+}
+
+.nav-icon { width: 18px; text-align: center; font-size: 1rem; flex-shrink: 0; }
+.nav-text { flex: 1; }
+.nav-badge {
+  background: var(--gold-500);
+  color: var(--navy-950);
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: var(--r-full);
+}
+
+.sidebar-footer {
+  margin-top: auto; /* combined with .sidebar-nav's flex:1, this pins Log Out to the very bottom */
+  padding: 10px 10px 14px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.sidebar-footer-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  border-radius: var(--r-sm);
+  color: var(--mist-300);
+  font-size: 0.86rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: var(--ease);
+}
+.sidebar-footer-link.is-logout:hover { background: var(--danger-soft); color: #FF8A80; }
+
+
+/* ================================================================
+   6. SHARED AVATAR & BADGE COMPONENTS
+   Used across the sidebar, header, tables, and modals.
+================================================================ */
+/* FIX: Updated .avatar to handle image-based avatars properly */
+/* ERROR: Original styling was designed for text-based avatars */
+/* FIX: Added object-fit to ensure person-sq-1-min.jpg and person-sq-2-min.jpg display correctly */
+/* Note: When using <img> tags with .avatar class, the text styling is ignored */
+.avatar {
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--navy-500), var(--navy-700));
+  border: 2px solid var(--gold-500);
+  color: var(--gold-300);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+  object-fit: cover; /* Ensures images fill the avatar circle properly */
+}
+.avatar-sm { width: 32px; height: 32px; font-size: 0.68rem; border-width: 1.5px; }
+.avatar-md { width: 44px; height: 44px; font-size: 0.8rem; }
+.avatar-lg { width: 64px; height: 64px; font-size: 1.2rem; border-width: 2.5px; }
+
+/* A small coloured "pill" used for statuses everywhere: KYC, account state, biller status, etc.
+   IMPORTANT for accessibility: every badge always carries readable TEXT, never colour alone. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+  white-space: nowrap;
+}
+.badge-pill { text-transform: none; }
+.badge-success { background: var(--success-soft); color: var(--success); }
+.badge-danger  { background: var(--danger-soft);  color: var(--danger); }
+.badge-warning { background: var(--warning-soft); color: var(--warning); }
+.badge-neutral { background: rgba(10,22,40,0.08); color: var(--ink-500); }
+.badge-gold    { background: var(--gold-subtle);  color: var(--gold-400); } /* used for the "Super Admin" role badge */
+
+
+/* ================================================================
+   7. TOP HEADER BAR
+================================================================ */
+.main-area {
+  grid-column: 2; /* the grid from section 4 already positions this after the sidebar — no extra margin needed */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dash-header {
+  position: sticky; /* stays visible at the top while the content below it scrolls */
+  top: 0;
+  z-index: 80;
+  height: var(--header-h);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 480px) 1fr; /* left controls | centred search | right controls */
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px;
+}
+
+.header-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
+
+.hamburger-btn {
+  display: none; /* only shown on tablet/mobile — see responsive section */
+  width: 38px; height: 38px;
+  border-radius: var(--r-sm);
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  color: var(--ink-700);
+  font-size: 1.25rem;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.header-page-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-center { display: flex; justify-content: center; }
+.header-search {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+  padding: 9px 18px;
+  transition: var(--ease);
+}
+.header-search:focus-within { border-color: var(--gold-500); background: var(--bg-card); }
+.header-search i { color: var(--ink-400); flex-shrink: 0; }
+.header-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.86rem;
+  color: var(--ink-900);
+}
+.header-search input::placeholder { color: var(--ink-400); }
+
+.header-right { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+
+.icon-btn {
+  position: relative; /* anchors the little notification-count badge below */
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  color: var(--ink-700);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--ease);
+}
+.icon-btn:hover { background: var(--gold-subtle); border-color: var(--gold-500); color: var(--gold-500); }
+
+.notif-badge {
+  position: absolute;
+  top: -3px; right: -3px;
+  width: 16px; height: 16px;
+  background: var(--danger);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.56rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--bg-card);
+}
+
+.notif-wrap, .user-menu { position: relative; } /* anchors their dropdown panels below */
+
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 330px;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card-hover);
+  overflow: hidden;
+  z-index: 90;
+}
+.notif-dropdown-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.notif-mark-read-btn { background: none; border: none; color: var(--gold-500); font-size: 0.74rem; font-weight: 700; cursor: pointer; }
+.notif-list { list-style: none; max-height: 320px; overflow-y: auto; }
+.notif-item { display: flex; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.notif-item:last-child { border-bottom: none; }
+.notif-item.is-unread { background: var(--gold-subtle); }
+.notif-icon {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem;
+}
+.notif-icon.is-success { background: var(--success-soft); color: var(--success); }
+.notif-icon.is-warning { background: var(--warning-soft); color: var(--warning); }
+.notif-icon.is-info    { background: var(--info-soft);    color: var(--info); }
+.notif-icon.is-danger  { background: var(--danger-soft);  color: var(--danger); }
+.notif-item-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.notif-item-body strong { font-size: 0.82rem; }
+.notif-item-body p { font-size: 0.78rem; color: var(--ink-500); }
+.notif-item-time { font-size: 0.7rem; color: var(--ink-400); margin-top: 1px; }
+
+.user-menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+  padding: 4px 12px 4px 4px;
+  cursor: pointer;
+  color: var(--ink-900);
+  transition: var(--ease);
+}
+.user-menu-btn:hover { border-color: var(--gold-500); }
+.user-menu-name { font-size: 0.82rem; font-weight: 600; }
+.user-menu-btn i { color: var(--ink-400); font-size: 0.78rem; }
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 200px;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card-hover);
+  padding: 8px;
+  z-index: 90;
+}
+.user-dropdown-link {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 9px 10px;
+  background: none; border: none; border-radius: var(--r-xs);
+  font-size: 0.84rem; color: var(--ink-700); text-align: left; cursor: pointer;
+}
+.user-dropdown-link:hover { background: var(--bg-card-soft); }
+.user-dropdown-link.is-logout:hover { background: var(--danger-soft); color: var(--danger); }
+.dropdown-divider { border: none; border-top: 1px solid var(--line); margin: 6px 0; }
+
+
+/* ================================================================
+   8. CONTENT AREA + PANEL SHOW/HIDE SYSTEM
+   This is the entire visual mechanism behind the SPA: only the
+   ".dash-panel" that ALSO has ".is-active" is shown. admin-dashboard.js
+   is responsible for moving the ".is-active" class between panels.
+================================================================ */
+.dash-content {
+  flex: 1; /* fills all remaining vertical space below the sticky header */
+  padding: 26px 24px 60px;
+}
+
+.dash-panel { display: none; }       /* every panel starts hidden... */
+.dash-panel.is-active { display: block; } /* ...except the one JS marks active */
+
+
+/* ================================================================
+   9. PANEL INTRO ROW (title + period selector / primary action)
+================================================================ */
+.panel-intro-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.panel-intro-title { font-size: 1.5rem; margin-bottom: 4px; }
+.panel-intro-sub { font-size: 0.88rem; color: var(--ink-500); }
+.period-select-wrap { min-width: 160px; }
+.period-select { font-weight: 600; }
+
+
+/* ================================================================
+   10. GENERIC CARD
+   The single visual "container" component used everywhere: tables,
+   forms, widgets. A white rounded box with a soft shadow.
+================================================================ */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card);
+  padding: 18px;
+}
+.card-spaced-bottom { margin-bottom: 20px; }
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.card-title { font-size: 0.98rem; font-weight: 700; }
+.card-title-spaced { margin-bottom: 18px; }
+.card-sub { font-size: 0.82rem; color: var(--ink-500); margin: -8px 0 16px; }
+.card-link-action {
+  background: none; border: none;
+  color: var(--gold-500);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: var(--ease);
+}
+.card-link-action:hover { color: var(--gold-400); }
+
+
+/* ================================================================
+   11. METRIC CARDS (the big KPI numbers at the top of every panel)
+   A CSS Grid that automatically wraps to fewer columns on small
+   screens — see the responsive section near the bottom of this file.
+================================================================ */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 equal-width cards on desktop */
+  gap: 18px;
+  margin-bottom: 22px;
+}
+.metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card);
+  padding: 18px;
+  transition: var(--ease); /* powers the gentle lift-on-hover below */
+}
+/* A subtle "lift" on hover — exactly the kind of light, professional
+   motion the brief asked for (transform + shadow, no heavy animation) */
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+}
+.metric-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.metric-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--ink-500);
+}
+.metric-icon {
+  width: 38px; height: 38px;
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+.metric-icon.is-success { background: var(--success-soft); color: var(--success); }
+.metric-icon.is-danger  { background: var(--danger-soft);  color: var(--danger); }
+.metric-icon.is-warning { background: var(--warning-soft); color: var(--warning); }
+.metric-icon.is-info    { background: var(--info-soft);    color: var(--info); }
+.metric-icon.is-gold    { background: var(--gold-glow);    color: var(--gold-500); }
+.metric-value { display: block; font-size: 1.55rem; font-weight: 800; margin-bottom: 6px; }
+.metric-change { font-size: 0.76rem; display: flex; align-items: center; gap: 4px; color: var(--ink-500); }
+.metric-change.is-positive { color: var(--success); }
+.metric-change.is-negative { color: var(--danger); }
+
+
+/* ================================================================
+   12. MINI METRIC STRIP (smaller inline stats, e.g. atop Users & KYC)
+================================================================ */
+.mini-metric-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.mini-metric {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 12px 16px;
+  box-shadow: var(--shadow-card);
+}
+.mini-metric span { display: block; font-size: 0.7rem; color: var(--ink-500); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+.mini-metric strong { font-size: 1.05rem; font-weight: 800; }
+
+
+/* ================================================================
+   13. SECTION-SPECIFIC LAYOUT GRIDS
+================================================================ */
+.overview-mid-grid {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr; /* live table gets more room than the side widget */
+  gap: 20px;
+}
+.two-col-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* Re-used "merged page" pattern from the customer dashboard (Owealth /
+   Billers each combine two logical sub-sections, exactly like the
+   customer-side OWealth and Pay Bills pages do). */
+.panel-section { margin-bottom: 32px; }
+.panel-section:last-child { margin-bottom: 0; }
+.panel-section-spaced { margin-top: 32px; padding-top: 32px; border-top: 1px solid var(--line); }
+.panel-section-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filters-row { display: grid; gap: 10px; margin-bottom: 18px; }
+.filters-row-users  { grid-template-columns: 1.4fr 1fr 1fr; }
+.filters-row-ledger { grid-template-columns: 1.4fr 1fr 1fr 1fr; }
+
+
+/* ================================================================
+   14. BUTTONS
+================================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 11px 22px;
+  border-radius: var(--r-sm);
+  font-size: 0.86rem;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  transition: var(--ease);
+  white-space: nowrap;
+}
+.btn-primary { background: var(--gold-500); color: var(--navy-950); }
+.btn-primary:hover { background: var(--gold-400); transform: translateY(-1px); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--gold-500);
+  border: 1.5px solid var(--gold-500);
+  padding: 9.5px 20.5px;
+}
+.btn-outline:hover { background: var(--gold-subtle); }
+
+.btn-danger-outline {
+  background: transparent;
+  color: var(--danger);
+  border: 1.5px solid var(--danger);
+  padding: 9.5px 20.5px;
+}
+.btn-danger-outline:hover { background: var(--danger-soft); }
+
+.btn-success-outline {
+  background: transparent;
+  color: var(--success);
+  border: 1.5px solid var(--success);
+  padding: 9.5px 20.5px;
+}
+.btn-success-outline:hover { background: var(--success-soft); }
+
+.btn-sm { padding: 7px 14px; font-size: 0.78rem; }
+.btn-block { width: 100%; }
+.btn[disabled] { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+.table-action-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.modal-action-row { display: flex; gap: 10px; margin-top: 6px; }
+
+
+/* ================================================================
+   15. FORM FIELDS
+================================================================ */
+.field { margin-bottom: 16px; }
+.field-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-700);
+  margin-bottom: 6px;
+}
+.field-input {
+  width: 100%;
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 11px 14px;
+  font-size: 0.86rem;
+  color: var(--ink-900);
+  transition: var(--ease);
+}
+.field-input:focus {
+  outline: none; /* replaced by the box-shadow ring below, plus the global :focus-visible rule */
+  border-color: var(--gold-500);
+  background: var(--bg-card);
+  box-shadow: 0 0 0 3px var(--gold-glow);
+}
+.field-input::placeholder { color: var(--ink-400); }
+
+.input-prefix-wrap { position: relative; }
+.input-prefix {
+  position: absolute;
+  left: 14px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-500);
+  font-weight: 700;
+  pointer-events: none; /* lets clicks pass through the ₦ symbol straight into the input below it */
+}
+.input-prefix-wrap .field-input { padding-left: 30px; }
+
+.empty-filter-msg { text-align: center; color: var(--ink-500); padding: 18px 0 4px; font-size: 0.84rem; }
+
+
+/* ================================================================
+   16. TOGGLE SWITCH (used for Enabled/Disabled and Maintenance Mode)
+================================================================ */
+.switch { position: relative; display: inline-flex; cursor: pointer; }
+.switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.switch-track {
+  width: 42px; height: 24px;
+  background: var(--line-strong);
+  border-radius: var(--r-full);
+  position: relative;
+  transition: var(--ease);
+}
+.switch-thumb {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 18px; height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  transition: var(--ease);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+.switch input:checked + .switch-track { background: var(--gold-500); }
+.switch input:checked + .switch-track .switch-thumb { transform: translateX(18px); }
+.switch input:focus-visible + .switch-track { outline: 3px solid var(--gold-400); outline-offset: 2px; }
+
+.security-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 8px;
+}
+.security-body strong { display: block; font-size: 0.88rem; margin-bottom: 2px; }
+.security-body p { font-size: 0.78rem; color: var(--ink-500); }
+
+
+/* ================================================================
+   17. DATA TABLE + STATUS BADGES
+   The single most-reused component in the whole admin panel — every
+   one of the 7 panels contains at least one of these.
+================================================================ */
+.table-wrap { overflow-x: auto; } /* lets wide tables scroll horizontally on narrow screens instead of breaking the layout */
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+.data-table thead th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink-500);
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.data-table tbody td {
+  padding: 13px 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-700);
+  vertical-align: middle;
+}
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover td { background: var(--bg-card-soft); } /* row highlight makes wide tables easier to scan */
+.table-loading-row td { text-align: center; color: var(--ink-400); padding: 26px 12px; }
+.table-loading-row-inline { text-align: center; color: var(--ink-400); padding: 16px 0; font-size: 0.84rem; }
+
+.amt-debit  { color: var(--danger);  font-weight: 700; }
+.amt-credit { color: var(--success); font-weight: 700; }
+
+.cell-user-name { font-weight: 700; color: var(--ink-900); }
+.cell-user-sub  { font-size: 0.74rem; color: var(--ink-500); display: block; }
+
+/* A small inline input used inside table cells (e.g. the VTU profit-margin column) */
+.table-inline-input {
+  width: 80px;
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xs);
+  padding: 6px 8px;
+  font-size: 0.82rem;
+  text-align: right;
+}
+.table-inline-input:focus { outline: none; border-color: var(--gold-500); box-shadow: 0 0 0 3px var(--gold-glow); }
+
+
+/* ================================================================
+   18. PAGINATION ROW (Users & KYC, Transaction Ledger)
+================================================================ */
+.pagination-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.pagination-info { font-size: 0.8rem; color: var(--ink-500); font-weight: 600; }
+
+
+/* ================================================================
+   19. API / BILLER HEALTH WIDGET (Overview side panel)
+================================================================ */
+.api-health-card { display: flex; flex-direction: column; }
+.chart-period-tag {
+  font-size: 0.72rem;
+  color: var(--ink-500);
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+  padding: 4px 12px;
+}
+.chart-svg-wrap { position: relative; margin-bottom: 14px; }
+.chart-svg { width: 100%; height: 100px; display: block; }
+.chart-line { stroke: var(--gold-500); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+
+.api-health-list { list-style: none; margin-bottom: 10px; }
+.api-health-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.82rem;
+}
+.api-health-item:last-child { border-bottom: none; }
+.api-health-item-name { font-weight: 600; }
+.api-health-item-rate { color: var(--ink-500); font-size: 0.78rem; }
+.api-health-view-all { margin-top: auto; align-self: flex-start; } /* sticks to the bottom of the card */
+
+
+/* ================================================================
+   20. VAULT / SAVINGS GOAL CARDS (Owealth panel)
+   Visually echoes the "goal-card" component from the customer-side
+   Smart Savings page, for cross-app consistency.
+================================================================ */
+.vault-card { padding: 14px 0; border-bottom: 1px solid var(--line); }
+.vault-card:last-child { border-bottom: none; }
+.vault-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.vault-icon {
+  width: 38px; height: 38px;
+  border-radius: var(--r-sm);
+  background: var(--gold-subtle);
+  color: var(--gold-500);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+.vault-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.vault-meta strong { font-size: 0.88rem; }
+.vault-meta small { font-size: 0.76rem; color: var(--ink-500); }
+.vault-amount { font-size: 0.82rem; font-weight: 700; white-space: nowrap; }
+.vault-progress-row { display: flex; align-items: center; gap: 10px; }
+.progress-track { flex: 1; height: 8px; background: var(--line-strong); border-radius: var(--r-full); overflow: hidden; }
+.progress-fill { height: 100%; background: var(--gold-500); border-radius: var(--r-full); transition: width 0.3s ease; }
+.progress-pct { font-size: 0.76rem; font-weight: 700; color: var(--ink-700); width: 36px; text-align: right; }
+
+
+/* ================================================================
+   21. MODALS
+   One shared visual system for every modal — only the inner content
+   changes per modal (see admin-dashboard.js for how content swaps).
+================================================================ */
+.modal-backdrop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 12, 27, 0.55);
+  padding: 20px;
+  z-index: 500;
+}
+.modal-backdrop[hidden] { display: none; } /* the [hidden] attribute is how JS truly removes it, not just visually */
+
+.modal-panel {
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-modal);
+}
+.modal-sm { max-width: 380px; }
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.modal-title { display: flex; align-items: center; gap: 8px; font-size: 1rem; }
+.modal-close-btn {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--bg-card-soft);
+  border: none;
+  color: var(--ink-500);
+  cursor: pointer;
+}
+.modal-close-btn:hover { background: var(--danger-soft); color: var(--danger); }
+.modal-body { padding: 20px; }
+
+.pin-desc { font-size: 0.86rem; color: var(--ink-500); margin-bottom: 18px; }
+.pin-summary { background: var(--bg-card-soft); border-radius: var(--r-sm); padding: 14px 16px; }
+.pin-summary-row { display: flex; justify-content: space-between; gap: 12px; font-size: 0.84rem; padding: 5px 0; }
+.pin-summary-row strong { text-align: right; }
+
+/* User Profile modal header (avatar + name + email) */
+.profile-modal-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.profile-name { font-size: 1.05rem; margin-bottom: 2px; }
+.profile-email { font-size: 0.82rem; color: var(--ink-500); }
+.profile-detail-grid { grid-template-columns: 1fr 1fr; }
+.vc-details-grid { display: grid; gap: 10px; }
+.vc-detail-item { background: var(--bg-card-soft); border-radius: var(--r-sm); padding: 10px 12px; }
+.vc-detail-label {
+  display: block;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink-500);
+  margin-bottom: 4px;
+}
+.vc-detail-value { font-family: var(--font-heading); font-weight: 700; font-size: 0.85rem; color: var(--ink-900); }
+
+
+/* ================================================================
+   24. TWO-FACTOR AUTHENTICATION SECTION STYLES
+   NEW: Added styles for the 2-step verification settings section
+================================================================ */
+/* FIX: Added styles for the new 2FA section as requested */
+/* ERROR: No existing styles for two-factor authentication settings */
+/* FIX: Created new styles for .two-factor-section and .two-factor-item */
+.two-factor-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.two-factor-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  background: var(--bg-card-soft);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+}
+.two-factor-info {
+  flex: 1;
+  min-width: 0;
+}
+.two-factor-info strong {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin-bottom: 4px;
+}
+.two-factor-info p {
+  font-size: 0.78rem;
+  color: var(--ink-500);
+  line-height: 1.4;
+  margin: 0;
+}
+
+
+/* ================================================================
+   22. TOAST NOTIFICATIONS
+================================================================ */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 999;
+  max-width: 340px;
+}
+.toast {
+  background: var(--navy-950);
+  color: #fff;
+  padding: 13px 18px;
+  border-radius: var(--r-sm);
+  font-size: 0.84rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-modal);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.toast.is-visible { opacity: 1; transform: translateY(0); }
+.toast.is-success { border-left: 3px solid var(--success); }
+.toast.is-warning { border-left: 3px solid var(--warning); }
+.toast.is-error   { border-left: 3px solid var(--danger); }
+.toast.is-info    { border-left: 3px solid var(--gold-500); }
+
+
+/* ================================================================
+   23. MOBILE BOTTOM NAVIGATION
+================================================================ */
+.bottom-nav {
+  display: none; /* only shown on small screens — see responsive section */
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--bg-card);
+  border-top: 1px solid var(--line);
+  justify-content: space-around;
+  padding: 8px 4px;
+  z-index: 120;
+}
+.bottom-nav-link {
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: var(--ink-500);
+  font-size: 0.64rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+}
+.bottom-nav-link i { font-size: 1.05rem; }
+.bottom-nav-link.is-active { color: var(--gold-500); }
+
+
+/* ================================================================
+   24. RESPONSIVE BREAKPOINTS
+   Same breakpoints as the customer dashboard, so both apps "snap"
+   between layouts at the same device sizes — another consistency win.
+================================================================ */
+
+/* ---- Global overflow fix for all screens ---- */
+html, body { overflow-x: hidden; }
+
+/* ---- Tablet and below: sidebar becomes an overlay drawer ---- */
+@media (max-width: 991.98px) {
+  /* FIX: Force layout changes with !important */
+  .app-shell { grid-template-columns: 1fr !important; }
+  .main-area { grid-column: 1 !important; }
+
+  .sidebar { 
+    transform: translateX(-100%) !important; 
+    position: fixed !important;
+    z-index: 1000 !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100vh !important;
+  }
+  .app-shell.sidebar-open .sidebar { transform: translateX(0) !important; }
+
+  .sidebar-close-btn { display: flex !important; }
+  .hamburger-btn { display: flex !important; }
+
+  .header-center { display: none !important; }
+  .dash-header { grid-template-columns: 1fr auto !important; }
+
+  .metric-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .mini-metric-row { grid-template-columns: repeat(2, 1fr) !important; }
+  .overview-mid-grid,
+  .two-col-grid,
+  .field-row,
+  .filters-row-users,
+  .filters-row-ledger,
+  .profile-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dash-content { padding-bottom: 90px !important; }
+  .bottom-nav { display: flex !important; }
+}
+
+/* ---- Small phones ---- */
+@media (max-width: 575.98px) {
+  /* FIX: Force all responsive changes with !important */
+  
+  /* Global container */
+  .app-shell { 
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow: hidden !important;
+  }
+  
+  /* Content area */
+  .dash-content { 
+    padding: 16px 12px 90px !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Sidebar - full screen overlay */
+  .sidebar { 
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+  .sidebar-brand { padding: 16px 12px !important; }
+  .brand-logo { width: 32px !important; height: 32px !important; }
+  .sidebar-user-card { padding: 14px 12px !important; }
+  .avatar { width: 32px !important; height: 32px !important; }
+  
+  /* Header - compact */
+  .dash-header { 
+    padding: 12px 12px !important;
+    grid-template-columns: 1fr auto !important;
+    gap: 8px !important;
+  }
+  .hamburger-btn { 
+    padding: 8px 10px !important; 
+    font-size: 1.3rem !important;
+    width: 40px !important;
+    height: 40px !important;
+  }
+  .user-menu-btn { padding: 6px 8px !important; }
+  
+  /* Cards - reduced padding */
+  .card { padding: 14px 12px !important; }
+  .balance-card { padding: 16px 12px !important; }
+  
+  /* Buttons - smaller */
+  .btn { font-size: 0.8rem !important; padding: 10px 14px !important; }
+  .btn-sm { font-size: 0.75rem !important; padding: 8px 12px !important; }
+  
+  /* Forms - smaller inputs */
+  .field-input { font-size: 0.85rem !important; padding: 10px 12px !important; }
+  .field-label { font-size: 0.75rem !important; }
+  
+  /* Tables - scrollable */
+  .table-responsive { overflow-x: auto !important; }
+  table { font-size: 0.8rem !important; }
+  
+  /* Metrics - 2 column grid */
+  .metric-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .mini-metric-row { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .metric-value { font-size: 1.2rem !important; }
+  .metric-label { font-size: 0.7rem !important; }
+  
+  /* Marketplace */
+  .market-category-title { font-size: 0.95rem !important; }
+  .product-body h5 { font-size: 0.75rem !important; }
+  .product-seller { font-size: 0.6rem !important; }
+  .product-price { font-size: 0.8rem !important; }
+  
+  /* User table */
+  .user-table th, .user-table td { padding: 8px 6px !important; }
+  .user-table th { font-size: 0.75rem !important; }
+  .user-table td { font-size: 0.7rem !important; }
+  
+  /* 2FA section */
+  .two-factor-item { padding: 10px !important; }
+  .two-factor-info strong { font-size: 0.8rem !important; }
+  .two-factor-info p { font-size: 0.65rem !important; }
+  
+  /* Modal */
+  .modal-panel { 
+    max-width: 100% !important;
+    width: 95% !important;
+    margin: 0 auto !important;
+  }
+  .panel-intro-row { flex-direction: column !important; align-items: stretch !important; }
+  .pagination-row { flex-direction: column !important; gap: 10px !important; }
+}
+
+/* ---- Medium screens (tablets portrait) ---- */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  /* Sidebar */
+  .sidebar { width: 260px !important; }
+  
+  /* Grids */
+  .overview-mid-grid { grid-template-columns: 1fr !important; }
+  .metric-grid { grid-template-columns: repeat(3, 1fr) !important; }
+  
+  /* Cards */
+  .card { padding: 18px !important; }
+  
+  /* Content */
+  .dash-content { padding: 20px 16px 90px !important; }
+}
+
+/* ---- Large screens (desktops) ---- */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  /* Sidebar */
+  .sidebar { width: 260px !important; }
+  
+  /* Content container */
+  .dash-content { max-width: 100% !important; }
+  
+  /* Metrics */
+  .metric-grid { grid-template-columns: repeat(3, 1fr) !important; }
+}
+
+/* ---- Large screens (1200px - 1399px) ---- */
+@media (min-width: 1200px) and (max-width: 1399.98px) {
+  /* Container */
+  .dash-content { max-width: 1140px !important; margin: 0 auto !important; }
+  
+  /* Grids */
+  .overview-mid-grid { grid-template-columns: 1.8fr 1fr !important; }
+  
+  /* Sidebar */
+  .sidebar { width: 280px !important; }
+  
+  /* Metrics */
+  .metric-grid { grid-template-columns: repeat(4, 1fr) !important; }
+}
+
+/* ---- Extra large screens (1400px+) ---- */
+@media (min-width: 1400px) {
+  /* Container */
+  .dash-content { max-width: 1320px !important; margin: 0 auto !important; }
+  
+  /* Grids */
+  .overview-mid-grid { grid-template-columns: 2fr 1fr !important; }
+  
+  /* Sidebar */
+  .sidebar { width: 300px !important; }
+  
+  /* Metrics */
+  .metric-grid { grid-template-columns: repeat(4, 1fr) !important; }
+  .metric-value { font-size: 2rem !important; }
+}
+
+/* ---- Landscape orientation for mobile ---- */
+@media (max-height: 500px) and (orientation: landscape) {
+  /* Header */
+  .dash-header { padding: 8px 12px !important; }
+  
+  /* Content */
+  .dash-content { padding: 8px 12px 80px !important; }
+  
+  /* Cards */
+  .card { padding: 12px !important; }
+  
+  /* Sections */
+  .panel-section { padding: 12px 0 !important; }
+}
+
+/* ---- High DPI/Retina displays ---- */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  img { image-rendering: -webkit-optimize-contrast !important; }
+  .avatar img { image-rendering: -webkit-optimize-contrast !important; }
+  .brand-logo img { image-rendering: -webkit-optimize-contrast !important; }
+}

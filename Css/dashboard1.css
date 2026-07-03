@@ -1,0 +1,2082 @@
+/*
+================================================================================
+  NOVA FINANCE — DASHBOARD STYLESHEET (UPDATED)
+  File:    dashboard.css
+  Pairs with: dashboard.html
+
+  UPDATES IN THIS VERSION:
+  ------------------------
+  1. New panel-section styles for merged pages (Transactions, Pay Bills, OWealth)
+  2. Virtual card styles for Overview and Profile panels
+  3. Redesigned Marketplace category grid with compact padding
+  4. Navigation button styles for category carousels
+
+  All original styles (cards, forms, tables, modals, sidebar, etc.) remain
+  unchanged and are preserved below.
+================================================================================
+*/
+
+
+/* ================================================================
+   1. DESIGN TOKENS
+   These are the single source of truth for every colour, font,
+   radius and shadow used below.
+================================================================ */
+:root {
+
+  /* ---- Brand navy scale (unchanged) ---- */
+  --navy-950: #020C1B;
+  --navy-900: #0A1628;
+  --navy-800: #111E34;
+  --navy-700: #1B2A4A;
+  --navy-600: #243558;
+  --navy-500: #2F4470;
+
+  /* ---- Brand gold scale (unchanged) ---- */
+  --gold-500: #C9A84C;
+  --gold-400: #D9BC6A;
+  --gold-300: #E8CF88;
+  --gold-glow:   rgba(201, 168, 76, 0.20);
+  --gold-subtle: rgba(201, 168, 76, 0.10);
+
+  /* ---- Light workspace tokens ---- */
+  --bg-page:        #F2F4F9;
+  --bg-card:        #FFFFFF;
+  --bg-card-soft:   #F7F8FC;
+  --ink-900: #0A1628;
+  --ink-700: #38415A;
+  --ink-500: #6B7488;
+  --ink-400: #9AA2B5;
+  --line:        rgba(10, 22, 40, 0.08);
+  --line-strong: rgba(10, 22, 40, 0.16);
+
+  /* ---- Text colours for dark navy backgrounds ---- */
+  --mist-100: #FFFFFF;
+  --mist-300: #B9C3D9;
+  --mist-500: #7587A8;
+
+  /* ---- Semantic status colours ---- */
+  --success:      #1E9E5A;
+  --success-soft: rgba(30, 158, 90, 0.12);
+  --danger:       #D9483B;
+  --danger-soft:  rgba(217, 72, 59, 0.12);
+  --warning:      #C9821C;
+  --warning-soft: rgba(201, 130, 28, 0.12);
+  --info:         #3B6FD6;
+  --info-soft:    rgba(59, 111, 214, 0.12);
+
+  /* ---- Typography ---- */
+  --font-heading: 'Sora', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body:    'Figtree', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* ---- Sizing ---- */
+  --sidebar-w: 264px;
+  --header-h:  68px;
+
+  /* ---- Corner radius scale ---- */
+  --r-xs:   6px;
+  --r-sm:   10px;
+  --r-md:   14px;
+  --r-lg:   20px;
+  --r-full: 999px;
+
+  /* ---- Shadows ---- */
+  --shadow-card:       0 1px 2px rgba(16,24,40,0.04), 0 4px 14px rgba(16,24,40,0.06);
+  --shadow-card-hover: 0 2px 4px rgba(16,24,40,0.06), 0 10px 24px rgba(16,24,40,0.10);
+  --shadow-gold-glow:  0 10px 30px rgba(201,168,76,0.22);
+  --shadow-modal:      0 24px 60px rgba(2,12,27,0.35);
+
+  /* ---- Shared transition ---- */
+  --ease: all 0.16s ease;
+}
+
+
+/* ================================================================
+   2. BASE RESET
+================================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-page);
+  color: var(--ink-900);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--ink-900);
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+a { color: var(--gold-500); text-decoration: none; transition: var(--ease); }
+a:hover { color: var(--gold-400); }
+
+button { font-family: inherit; }
+
+img { max-width: 100%; display: block; }
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+
+/* ================================================================
+   3. ACCESSIBILITY + UTILITY HELPERS
+================================================================ */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--gold-500);
+  color: var(--navy-950);
+  padding: 10px 16px;
+  font-weight: 700;
+  border-radius: 0 0 var(--r-sm) 0;
+  z-index: 1000;
+}
+.skip-link:focus { left: 0; }
+
+.is-hidden { display: none !important; }
+
+.visually-hidden-input {
+  position: absolute;
+  width: 1px; height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.text-center { text-align: center; }
+.text-gold   { color: var(--gold-500); }
+
+
+/* ================================================================
+   4. APP SHELL
+================================================================ */
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  min-height: 100vh;
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 12, 27, 0.55);
+  z-index: 150;
+}
+.sidebar-overlay.is-visible { display: block; }
+
+
+/* ================================================================
+   5. SIDEBAR
+================================================================ */
+.sidebar {
+  background: var(--navy-950);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 200;
+  scrollbar-width: none;
+  transition: transform 0.25s ease;
+}
+.sidebar::-webkit-scrollbar { display: none; }
+
+/* FIX: Reduced sidebar brand padding for cleaner header
+   ERROR: padding: 22px 20px 18px was adding excessive vertical spacing
+   FIX: Reduced to 18px 20px 14px for more compact, professional header */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 14px; /* Reduced from 22px 20px 18px for cleaner spacing */
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+.brand-link { display: flex; align-items: center; gap: 10px; }
+/* FIX: Updated .brand-logo to handle image-based logos properly */
+/* ERROR: Original styling was designed for SVG logos */
+/* FIX: Added object-fit and border-radius to ensure cover.png displays correctly */
+.brand-logo {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.brand-text {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 1px;
+  color: var(--gold-500);
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+.brand-text small {
+  font-size: 0.55rem;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mist-500);
+  margin-top: 3px;
+}
+
+.sidebar-close-btn {
+  display: none;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: none;
+  color: var(--mist-300);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--ease);
+}
+.sidebar-close-btn:hover { background: var(--danger-soft); color: var(--danger); }
+
+/* FIX: Reduced sidebar user card padding for cleaner layout
+   ERROR: padding: 16px 20px was adding excessive vertical spacing
+   FIX: Reduced to 12px 20px for more compact, professional appearance */
+.sidebar-user-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px; /* Reduced top/bottom padding from 16px to 12px */
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+.sidebar-user-meta { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.sidebar-user-meta strong {
+  color: var(--mist-100);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* FIX: Reduced sidebar nav padding for cleaner navigation
+   ERROR: padding: 12px 10px was adding excessive vertical spacing
+   FIX: Reduced to 8px 10px for more compact, professional navigation */
+.sidebar-nav {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px; /* Reduced top/bottom padding from 12px to 8px */
+}
+
+.sidebar-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  border-radius: var(--r-sm);
+  color: var(--mist-300);
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  transition: var(--ease);
+}
+.sidebar-nav-link:hover { background: rgba(255,255,255,0.06); color: var(--mist-100); }
+
+.sidebar-nav-link.is-active {
+  background: var(--gold-subtle);
+  color: var(--gold-400);
+}
+.sidebar-nav-link.is-active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 18%; bottom: 18%;
+  width: 3px;
+  background: var(--gold-500);
+  border-radius: 0 3px 3px 0;
+}
+
+.nav-icon { width: 18px; text-align: center; font-size: 1rem; flex-shrink: 0; }
+.nav-text { flex: 1; }
+.nav-badge {
+  background: var(--gold-500);
+  color: var(--navy-950);
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: var(--r-full);
+}
+.nav-badge-inline { margin-left: 6px; }
+
+/* FIX: Reduced sidebar footer padding for cleaner footer section
+   ERROR: padding: 12px 10px 18px had excessive bottom padding
+   FIX: Reduced to 10px 10px 14px for more balanced footer spacing */
+.sidebar-footer {
+  margin-top: auto;
+  padding: 10px 10px 14px; /* Reduced from 12px 10px 18px for cleaner spacing */
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sidebar-footer-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  border-radius: var(--r-sm);
+  color: var(--mist-300);
+  font-size: 0.86rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: var(--ease);
+}
+.sidebar-footer-link:hover { background: rgba(255,255,255,0.06); color: var(--mist-100); }
+.sidebar-footer-link.is-logout:hover { background: var(--danger-soft); color: #FF8A80; }
+
+
+/* ================================================================
+   6. SHARED AVATAR & BADGE COMPONENTS
+================================================================ */
+/* FIX: Updated .avatar to handle image-based avatars properly */
+/* ERROR: Original styling was designed for text-based avatars */
+/* FIX: Added object-fit to ensure person-sq-1-min.jpg and person-sq-2-min.jpg display correctly */
+/* Note: When using <img> tags with .avatar class, the text styling is ignored */
+.avatar {
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--navy-500), var(--navy-700));
+  border: 2px solid var(--gold-500);
+  color: var(--gold-300);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+  object-fit: cover; /* Ensures images fill the avatar circle properly */
+}
+.avatar-sm { width: 32px;  height: 32px;  font-size: 0.68rem; border-width: 1.5px; }
+.avatar-md { width: 44px;  height: 44px;  font-size: 0.8rem; }
+.avatar-lg { width: 84px;  height: 84px;  font-size: 1.5rem; border-width: 3px; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+  white-space: nowrap;
+}
+.badge-pill { text-transform: none; }
+.badge-success { background: var(--success-soft); color: var(--success); }
+.badge-danger  { background: var(--danger-soft);  color: var(--danger); }
+.badge-warning { background: var(--warning-soft); color: var(--warning); }
+.badge-neutral { background: rgba(10,22,40,0.08); color: var(--ink-500); }
+
+
+/* ================================================================
+   7. TOP HEADER BAR
+================================================================ */
+/* FIX: Removed excessive margin-left from .main-area
+   ERROR: .main-area had both grid-column: 2 AND margin-left: var(--sidebar-w)
+   This caused double spacing - the grid already positions it after the sidebar,
+   so the additional 264px margin was pushing content too far to the right.
+   FIX: Removed margin-left since grid-column: 2 is sufficient for positioning */
+.main-area {
+  grid-column: 2;
+  /* margin-left: var(--sidebar-w); REMOVED - causing excessive left spacing */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* FIX: Reduced excessive header padding
+   ERROR: padding: 0 24px was adding too much horizontal spacing
+   FIX: Reduced to 0 20px for cleaner, more compact alignment */
+.dash-header {
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  height: var(--header-h);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 480px) 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px; /* Reduced from 24px to 20px for cleaner spacing */
+}
+
+.header-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
+
+.hamburger-btn {
+  display: none;
+  width: 38px; height: 38px;
+  border-radius: var(--r-sm);
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  color: var(--ink-700);
+  font-size: 1.25rem;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.header-page-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-center { display: flex; justify-content: center; }
+.header-search {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+  padding: 9px 18px;
+  transition: var(--ease);
+}
+.header-search:focus-within { border-color: var(--gold-500); background: var(--bg-card); }
+.header-search i { color: var(--ink-400); flex-shrink: 0; }
+.header-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.86rem;
+  color: var(--ink-900);
+}
+.header-search input::placeholder { color: var(--ink-400); }
+
+.header-right { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+
+.icon-btn {
+  position: relative;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  color: var(--ink-700);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--ease);
+}
+.icon-btn:hover { background: var(--gold-subtle); border-color: var(--gold-500); color: var(--gold-500); }
+
+.notif-badge {
+  position: absolute;
+  top: -3px; right: -3px;
+  width: 16px; height: 16px;
+  background: var(--danger);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.56rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--bg-card);
+}
+
+.notif-wrap, .user-menu { position: relative; }
+
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 330px;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card-hover);
+  overflow: hidden;
+  z-index: 90;
+}
+.notif-dropdown-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.notif-mark-read-btn {
+  background: none; border: none;
+  color: var(--gold-500);
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.notif-list { list-style: none; max-height: 320px; overflow-y: auto; }
+.notif-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-item.is-unread { background: var(--gold-subtle); }
+.notif-icon {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem;
+}
+.notif-icon.is-success { background: var(--success-soft); color: var(--success); }
+.notif-icon.is-warning { background: var(--warning-soft); color: var(--warning); }
+.notif-icon.is-info    { background: var(--info-soft);    color: var(--info); }
+.notif-item-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.notif-item-body strong { font-size: 0.82rem; }
+.notif-item-body p { font-size: 0.78rem; color: var(--ink-500); }
+.notif-item-time { font-size: 0.7rem; color: var(--ink-400); margin-top: 1px; }
+
+.user-menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+  padding: 4px 12px 4px 4px;
+  cursor: pointer;
+  color: var(--ink-900);
+  transition: var(--ease);
+}
+.user-menu-btn:hover { border-color: var(--gold-500); }
+.user-menu-name { font-size: 0.82rem; font-weight: 600; }
+.user-menu-btn i { color: var(--ink-400); font-size: 0.78rem; }
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 200px;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card-hover);
+  padding: 8px;
+  z-index: 90;
+}
+.user-dropdown-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  background: none;
+  border: none;
+  border-radius: var(--r-xs);
+  font-size: 0.84rem;
+  color: var(--ink-700);
+  text-align: left;
+  cursor: pointer;
+}
+.user-dropdown-link:hover { background: var(--bg-card-soft); }
+.user-dropdown-link.is-logout:hover { background: var(--danger-soft); color: var(--danger); }
+.dropdown-divider { border: none; border-top: 1px solid var(--line); margin: 6px 0; }
+
+
+/* ================================================================
+   8. DASHBOARD CONTENT & PANEL SHOW/HIDE SYSTEM
+================================================================ */
+/* FIX: Reduced excessive content padding
+   ERROR: padding: 26px 28px 60px had 28px left padding which was too much
+   FIX: Reduced to 24px for more balanced, professional spacing */
+.dash-content {
+  flex: 1;
+  padding: 26px 24px 60px; /* Reduced left/right padding from 28px to 24px */
+}
+
+.dash-panel { display: none; }
+.dash-panel.is-active { display: block; }
+
+
+/* ================================================================
+   9. GENERIC CARD
+================================================================ */
+/* FIX: Reduced card padding for cleaner, more compact layout
+   ERROR: padding: 22px was adding excessive internal spacing
+   FIX: Reduced to 18px for more professional, balanced appearance */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card);
+  padding: 18px; /* Reduced from 22px to 18px for cleaner spacing */
+}
+.card-spaced-bottom { margin-bottom: 20px; }
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.card-title { font-size: 0.98rem; font-weight: 700; }
+.card-title-spaced { margin-bottom: 18px; }
+.card-sub { font-size: 0.82rem; color: var(--ink-500); margin: -10px 0 16px; }
+.card-link-action {
+  background: none; border: none;
+  color: var(--gold-500);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.card-link-action:hover { color: var(--gold-400); }
+
+
+/* ================================================================
+   10. SECTION-SPECIFIC LAYOUT GRIDS
+================================================================ */
+.overview-hero-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.overview-mid-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+/* NEW: Virtual card row on Overview */
+.overview-virtual-card-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.two-col-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+.two-col-grid-wide-left { grid-template-columns: 1.7fr 1fr; }
+
+.centered-narrow { max-width: 480px; margin: 0 auto; }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.panel-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filters-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+/* ---- NEW: Panel section headers for merged pages ---- */
+.panel-section {
+  margin-bottom: 32px;
+}
+.panel-section:last-child { margin-bottom: 0; }
+.panel-section-spaced { margin-top: 32px; padding-top: 32px; border-top: 1px solid var(--line); }
+
+.panel-section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.panel-section-title i { font-size: 1.2rem; }
+
+
+/* ================================================================
+   11. BUTTONS
+================================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 11px 22px;
+  border-radius: var(--r-sm);
+  font-size: 0.86rem;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  transition: var(--ease);
+  white-space: nowrap;
+}
+.btn-primary { background: var(--gold-500); color: var(--navy-950); }
+.btn-primary:hover { background: var(--gold-400); transform: translateY(-1px); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--gold-500);
+  border: 1.5px solid var(--gold-500);
+  padding: 9.5px 20.5px;
+}
+.btn-outline:hover { background: var(--gold-subtle); }
+
+.btn-danger-outline {
+  background: transparent;
+  color: var(--danger);
+  border: 1.5px solid var(--danger);
+  padding: 9.5px 20.5px;
+}
+.btn-danger-outline:hover { background: var(--danger-soft); }
+
+.btn-sm { padding: 7px 14px; font-size: 0.78rem; }
+.btn-block { width: 100%; }
+
+.modal-action-row { display: flex; gap: 10px; margin-top: 6px; }
+
+
+/* ================================================================
+   12. FORM FIELDS
+================================================================ */
+.field { margin-bottom: 16px; }
+.field-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-700);
+  margin-bottom: 6px;
+}
+
+.field-input {
+  width: 100%;
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 11px 14px;
+  font-size: 0.86rem;
+  color: var(--ink-900);
+  transition: var(--ease);
+}
+.field-input:focus {
+  outline: none;
+  border-color: var(--gold-500);
+  background: var(--bg-card);
+  box-shadow: 0 0 0 3px var(--gold-glow);
+}
+.field-input::placeholder { color: var(--ink-400); }
+textarea.field-input { resize: vertical; min-height: 80px; }
+
+.field-hint { font-size: 0.74rem; color: var(--ink-500); margin-top: 6px; min-height: 16px; }
+.field-hint.is-error { color: var(--danger); }
+.field-spaced-top { margin-top: 16px; }
+
+.input-prefix-wrap { position: relative; }
+.input-prefix {
+  position: absolute;
+  left: 14px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-500);
+  font-weight: 700;
+  pointer-events: none;
+}
+.input-prefix-wrap .field-input { padding-left: 30px; }
+
+.input-with-action { display: flex; gap: 8px; }
+.input-with-action .field-input { flex: 1; }
+
+.verified-name-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--success-soft);
+  color: var(--success);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  margin-top: 8px;
+}
+
+
+/* ================================================================
+   13. TOGGLE SWITCH
+================================================================ */
+.switch {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+}
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 100%; height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+.switch-track {
+  width: 42px; height: 24px;
+  background: var(--line-strong);
+  border-radius: var(--r-full);
+  position: relative;
+  transition: var(--ease);
+}
+.switch-thumb {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 18px; height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  transition: var(--ease);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+.switch input:checked + .switch-track { background: var(--gold-500); }
+.switch input:checked + .switch-track .switch-thumb { transform: translateX(18px); }
+.switch input:focus-visible + .switch-track { box-shadow: 0 0 0 3px var(--gold-glow); }
+
+
+/* ================================================================
+   14. PILL TABS / AMOUNT CHIPS / NETWORK CARDS / BUNDLE CARDS
+================================================================ */
+.pill-tab-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.pill-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--ink-500);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--ease);
+}
+.pill-tab:hover { border-color: var(--gold-500); color: var(--ink-900); }
+.pill-tab.is-active { background: var(--gold-subtle); border-color: var(--gold-500); color: var(--gold-500); }
+
+.amount-chip-group { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.amount-chip {
+  padding: 7px 14px;
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--ink-700);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--ease);
+}
+.amount-chip:hover { border-color: var(--gold-500); }
+.amount-chip.is-active { background: var(--gold-500); border-color: var(--gold-500); color: var(--navy-950); }
+
+.network-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px; }
+.network-card {
+  padding: 12px 6px;
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: var(--ease);
+  text-align: center;
+}
+.network-card:hover { border-color: var(--gold-500); }
+.network-card.is-active { background: var(--gold-subtle); border-color: var(--gold-500); }
+.network-name { font-size: 0.8rem; font-weight: 800; color: var(--ink-900); }
+
+.bundle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+.bundle-card {
+  padding: 12px 6px;
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  text-align: center;
+  transition: var(--ease);
+}
+.bundle-card:hover { border-color: var(--gold-500); }
+.bundle-card.is-active { background: var(--gold-subtle); border-color: var(--gold-500); }
+.bundle-card strong { display: block; font-size: 0.92rem; font-weight: 800; color: var(--ink-900); }
+.bundle-card span   { display: block; font-size: 0.72rem; color: var(--gold-500); font-weight: 700; margin: 2px 0; }
+.bundle-card small  { display: block; font-size: 0.66rem; color: var(--ink-500); }
+
+
+/* ================================================================
+   15. HERO BALANCE CARD
+================================================================ */
+/* FIX: Reduced balance card padding for cleaner appearance
+   ERROR: padding: 26px was excessive for the card content
+   FIX: Reduced to 20px for more balanced, professional look */
+.balance-card {
+  background: linear-gradient(150deg, var(--navy-700), var(--navy-950));
+  border-radius: var(--r-lg);
+  padding: 20px; /* Reduced from 26px to 20px for cleaner spacing */
+  color: var(--mist-100);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-gold-glow);
+  height: 100%;
+}
+.balance-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; }
+.balance-label { font-size: 0.76rem; color: var(--mist-500); text-transform: uppercase; letter-spacing: 1px; }
+.balance-amount { font-size: 1.9rem; font-weight: 800; margin-top: 6px; }
+.balance-eye-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: var(--mist-300);
+  cursor: pointer;
+  transition: var(--ease);
+}
+.balance-eye-btn:hover { background: var(--gold-subtle); color: var(--gold-400); }
+.balance-change { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: #6FE3A0; margin-bottom: 18px; }
+.balance-account-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  margin-bottom: 16px;
+}
+.balance-acct-label { font-size: 0.68rem; color: var(--mist-500); text-transform: uppercase; letter-spacing: 0.5px; }
+.balance-acct-num { display: block; font-size: 0.92rem; font-weight: 700; margin-top: 3px; letter-spacing: 0.5px; }
+.copy-btn { background: rgba(255,255,255,0.1); border: none; border-radius: var(--r-xs); color: var(--gold-400); width: 32px; height: 32px; cursor: pointer; transition: var(--ease); }
+.copy-btn:hover { background: var(--gold-500); color: var(--navy-950); }
+.balance-card-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: var(--mist-300); position: relative; z-index: 1; }
+.balance-card-brand { display: flex; align-items: center; gap: 5px; font-weight: 800; color: var(--gold-500); letter-spacing: 1px; }
+.balance-card-circle { position: absolute; border-radius: 50%; background: rgba(201,168,76,0.08); pointer-events: none; }
+.balance-card-circle-1 { width: 140px; height: 140px; bottom: -50px; right: -40px; }
+.balance-card-circle-2 { width: 90px; height: 90px; top: -30px; left: 30%; }
+
+
+/* ================================================================
+   16. QUICK-STAT STACKED CARDS
+================================================================ */
+.stat-stack { display: flex; flex-direction: column; gap: 12px; height: 100%; }
+.stat-card {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: var(--ease);
+}
+.stat-card:hover { box-shadow: var(--shadow-card-hover); }
+.stat-icon {
+  width: 42px; height: 42px;
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+.stat-icon.is-income  { background: var(--success-soft); color: var(--success); }
+.stat-icon.is-expense { background: var(--danger-soft);  color: var(--danger); }
+.stat-icon.is-savings { background: var(--gold-glow);     color: var(--gold-500); }
+.stat-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.stat-label { font-size: 0.7rem; color: var(--ink-500); text-transform: uppercase; letter-spacing: 0.4px; }
+.stat-value { font-size: 1.05rem; font-weight: 800; }
+.stat-change { font-size: 0.7rem; display: flex; align-items: center; gap: 3px; }
+.stat-change.is-positive { color: var(--success); }
+.stat-change.is-negative { color: var(--danger); }
+
+
+/* ================================================================
+   17. ANALYTICS LINE CHART
+================================================================ */
+.chart-period-tag {
+  font-size: 0.72rem;
+  color: var(--ink-500);
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+  padding: 4px 12px;
+}
+.chart-svg-wrap { position: relative; }
+.chart-svg { width: 100%; height: 200px; display: block; }
+.chart-grid-line { stroke: var(--line); stroke-width: 1; }
+.chart-line {
+  stroke: var(--gold-500);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.chart-point {
+  fill: #FFFFFF;
+  stroke: var(--gold-500);
+  stroke-width: 2.5;
+  cursor: pointer;
+  transition: r 0.12s ease;
+}
+.chart-point:hover, .chart-point:focus { r: 7; }
+.chart-point.is-current { fill: var(--gold-500); }
+
+.chart-x-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2px;
+  margin-top: 6px;
+}
+.chart-x-labels span { font-size: 0.72rem; color: var(--ink-500); font-weight: 600; }
+
+.chart-tooltip {
+  position: absolute;
+  background: var(--navy-950);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: var(--r-xs);
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, -130%);
+  z-index: 5;
+}
+
+
+/* ================================================================
+   18. QUICK TRANSFER / BENEFICIARY LIST
+================================================================ */
+.beneficiary-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.beneficiary-list-vertical { margin-top: 4px; }
+.beneficiary-chip {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: var(--ease);
+}
+.beneficiary-chip:hover { border-color: var(--gold-500); background: var(--gold-subtle); }
+.beneficiary-meta { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
+.beneficiary-meta strong { font-size: 0.84rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.beneficiary-meta small { font-size: 0.72rem; color: var(--ink-500); }
+.beneficiary-send-icon { color: var(--gold-500); font-size: 0.85rem; flex-shrink: 0; }
+
+
+/* ================================================================
+   19. DATA TABLE + STATUS BADGES
+================================================================ */
+.table-wrap { overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+.data-table thead th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink-500);
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.data-table tbody td {
+  padding: 13px 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-700);
+  vertical-align: middle;
+}
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover td { background: var(--bg-card-soft); }
+.table-loading-row td { text-align: center; color: var(--ink-400); padding: 26px 12px; }
+
+.amt-debit  { color: var(--danger);  font-weight: 700; }
+.amt-credit { color: var(--success); font-weight: 700; }
+
+.empty-filter-msg { text-align: center; color: var(--ink-500); padding: 18px 0 4px; font-size: 0.84rem; }
+
+
+/* ================================================================
+   20. SEND MONEY SPECIFICS
+================================================================ */
+.send-balance-row {
+  display: flex;
+  justify-content: space-between;
+  background: var(--bg-card-soft);
+  border-radius: var(--r-sm);
+  padding: 12px 16px;
+  font-size: 0.84rem;
+  margin-bottom: 18px;
+}
+
+
+/* ================================================================
+   21. RECEIVE MONEY SPECIFICS
+================================================================ */
+.receive-acct-block { margin-bottom: 20px; }
+.receive-bank-name { font-size: 0.82rem; color: var(--ink-500); }
+.receive-acct-num { font-size: 1.5rem; font-weight: 800; margin: 6px 0; letter-spacing: 1px; }
+.receive-acct-holder { font-size: 0.86rem; color: var(--ink-500); }
+.qr-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 20px 0; }
+.qr-svg { width: 160px; height: 160px; }
+.qr-hint { font-size: 0.78rem; color: var(--ink-500); max-width: 260px; }
+.receive-action-row { display: flex; gap: 10px; justify-content: center; }
+
+
+/* ================================================================
+   22. BILL PAYMENTS SPECIFICS
+================================================================ */
+.bill-form { display: none; }
+.bill-form.is-active { display: block; }
+
+.mini-list { list-style: none; display: flex; flex-direction: column; gap: 0; }
+.mini-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.mini-list-item:last-child { border-bottom: none; }
+.mini-list-icon {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.mini-list-icon.is-electricity { background: var(--warning-soft); color: var(--warning); }
+.mini-list-icon.is-tv          { background: rgba(168,85,247,0.12); color: #9333EA; }
+.mini-list-icon.is-school      { background: var(--info-soft); color: var(--info); }
+.mini-list-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.mini-list-body strong { font-size: 0.84rem; }
+.mini-list-body small { font-size: 0.72rem; color: var(--ink-500); }
+.mini-list-amount { font-size: 0.86rem; font-weight: 700; }
+
+
+/* ================================================================
+   23. MARKETPLACE SPECIFICS (UPDATED)
+   Redesigned with categories, compact padding, and navigation buttons.
+================================================================ */
+.market-tab-panel { display: none; text-align: left; }
+.market-tab-panel.is-active { display: block; }
+
+/* FIX: Force left alignment for specific marketplace tabs */
+/* ERROR: My Listings and Orders tabs were centered instead of left-aligned like Browse */
+/* FIX: Add specific ID selectors to override any inherited centering */
+#market-listings, #market-orders {
+  text-align: left !important;
+  align-items: flex-start !important;
+}
+
+/* ---- Category container with reduced padding ---- */
+.market-category {
+  margin-bottom: 28px;
+}
+.market-category:last-child { margin-bottom: 0; }
+
+.market-category-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--ink-700);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.market-category-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+/* ---- Product grid: compact, balanced alignment ---- */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  padding: 0; /* removed left/right padding for compact alignment */
+}
+
+.product-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition: var(--ease);
+}
+.product-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-card-hover); }
+/* FIX: Updated .product-thumb to handle image-based product thumbnails */
+/* ERROR: Original styling was designed for icon-based thumbnails with flex centering */
+/* FIX: Removed flex centering and added object-fit to ensure images display properly */
+.product-thumb {
+  height: 100px;
+  overflow: hidden;
+}
+.product-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.product-body { padding: 12px 14px 14px; }
+.product-body h5 { font-size: 0.84rem; margin-bottom: 3px; }
+.product-seller { font-size: 0.7rem; color: var(--ink-500); margin-bottom: 5px; }
+.product-price { display: block; font-size: 0.95rem; font-weight: 800; color: var(--gold-500); margin-bottom: 6px; }
+.escrow-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.62rem; font-weight: 700;
+  color: var(--success);
+  background: var(--success-soft);
+  padding: 2px 8px;
+  border-radius: var(--r-full);
+  margin-bottom: 8px;
+}
+
+/* ---- Category navigation buttons ---- */
+.category-nav {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  justify-content: flex-start;
+}
+
+.empty-state { 
+  text-align: left; 
+  padding: 20px 0; 
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.empty-state-icon { 
+  font-size: 2.4rem; 
+  color: var(--ink-400); 
+  display: block; 
+  margin-bottom: 14px; 
+}
+.empty-state h4 { 
+  margin-bottom: 6px; 
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--ink-700);
+}
+.empty-state p { 
+  color: var(--ink-500); 
+  font-size: 0.86rem; 
+  margin-bottom: 18px; 
+  max-width: 100%; 
+  margin-left: 0; 
+  margin-right: 0; 
+}
+
+.order-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card);
+  padding: 18px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  text-align: left;
+}
+/* FIX: Updated .order-thumb to handle image-based order thumbnails */
+/* ERROR: Original styling was designed for icon-based thumbnails with flex centering */
+/* FIX: Removed flex centering and added object-fit to ensure images display properly */
+.order-thumb {
+  width: 48px; height: 48px;
+  border-radius: var(--r-sm);
+  background: var(--bg-card-soft);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.order-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.order-body { flex: 1; min-width: 160px; }
+.order-body strong { display: block; font-size: 0.92rem; margin-bottom: 2px; }
+.order-body p { font-size: 0.78rem; color: var(--ink-500); }
+.order-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.order-actions { display: flex; gap: 8px; }
+.order-escrow-note { font-size: 0.76rem; color: var(--ink-500); }
+
+
+/* ================================================================
+   24. INSURANCE SPECIFICS
+================================================================ */
+.policy-row, .plan-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.policy-row:last-of-type { border-bottom: none; }
+.plan-row { background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--r-md); padding: 16px; margin-bottom: 10px; border-bottom: 1px solid var(--line); box-shadow: var(--shadow-card); }
+.plan-row.is-active { border-color: var(--gold-500); background: var(--gold-subtle); }
+.policy-icon {
+  width: 44px; height: 44px;
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.policy-icon.is-generator { background: var(--warning-soft); color: var(--warning); }
+.policy-icon.is-life      { background: var(--danger-soft);  color: var(--danger); }
+.policy-icon.is-fire      { background: rgba(234,88,12,0.12); color: #C2410C; }
+.policy-body { flex: 1; min-width: 0; }
+.policy-body strong { display: block; font-size: 0.88rem; }
+.policy-body p { font-size: 0.78rem; color: var(--ink-500); margin-top: 2px; }
+
+
+/* ================================================================
+   25. QUICK LOANS SPECIFICS
+================================================================ */
+.eligibility-banner {
+  background: var(--gold-subtle);
+  border: 1px solid var(--gold-glow);
+  border-radius: var(--r-sm);
+  padding: 12px 16px;
+  font-size: 0.86rem;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.eligibility-banner i { color: var(--gold-500); }
+
+.slider-input {
+  width: 100%;
+  accent-color: var(--gold-500);
+  cursor: pointer;
+  height: 6px;
+}
+.slider-input::-webkit-slider-thumb {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--gold-500);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  cursor: pointer;
+}
+.slider-input::-moz-range-thumb {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--gold-500);
+  border: 2px solid #fff;
+  cursor: pointer;
+}
+
+.loan-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 18px 0;
+}
+.loan-summary-cell {
+  background: var(--bg-card-soft);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+}
+.loan-summary-cell span { display: block; font-size: 0.7rem; color: var(--ink-500); margin-bottom: 3px; }
+.loan-summary-cell strong { font-size: 0.94rem; font-weight: 800; }
+
+.active-loan-card { background: var(--bg-card-soft); border-radius: var(--r-md); padding: 18px; }
+.active-loan-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+.active-loan-type { font-size: 0.78rem; color: var(--ink-500); margin-bottom: 4px; }
+.active-loan-due { font-size: 0.82rem; color: var(--ink-700); margin: 14px 0 16px; }
+
+.progress-row { margin-bottom: 4px; }
+.progress-labels { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.74rem; color: var(--ink-500); }
+.progress-track {
+  height: 8px;
+  background: var(--line-strong);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.progress-fill { height: 100%; background: var(--success); border-radius: var(--r-full); transition: width 0.3s ease; }
+.progress-fill.is-gold { background: var(--gold-500); }
+.progress-fill.is-blue { background: var(--info); }
+
+
+/* ================================================================
+   26. SMART SAVINGS SPECIFICS
+================================================================ */
+.goal-card { padding: 16px 0; border-bottom: 1px solid var(--line); }
+.goal-card:last-child { border-bottom: none; }
+.goal-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.goal-icon {
+  width: 38px; height: 38px;
+  border-radius: var(--r-sm);
+  background: var(--gold-subtle);
+  color: var(--gold-500);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+.goal-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.goal-meta strong { font-size: 0.88rem; }
+.goal-meta small { font-size: 0.76rem; color: var(--ink-500); }
+.goal-date { font-size: 0.74rem; color: var(--ink-500); white-space: nowrap; }
+.goal-card .progress-row { display: flex; align-items: center; gap: 10px; }
+.goal-card .progress-track { flex: 1; }
+.progress-pct { font-size: 0.76rem; font-weight: 700; color: var(--ink-700); width: 36px; text-align: right; }
+
+.interest-display { text-align: center; padding: 18px 0 22px; border-bottom: 1px solid var(--line); margin-bottom: 16px; }
+.interest-display strong { font-size: 1.7rem; display: block; margin-bottom: 4px; }
+.interest-display p { font-size: 0.8rem; color: var(--ink-500); }
+.limit-row { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 0.84rem; }
+.limit-row:last-child { border-bottom: none; }
+.limit-row span { color: var(--ink-500); }
+
+
+/* ================================================================
+   27. TRANSACTION HISTORY SPECIFICS
+================================================================ */
+
+
+/* ================================================================
+   28. PROFILE & SETTINGS SPECIFICS
+   UPDATED: Added virtual card management styles.
+================================================================ */
+.profile-avatar-wrap { position: relative; display: inline-block; margin-bottom: 14px; }
+.change-photo-btn {
+  position: absolute;
+  bottom: -4px; right: -4px;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--gold-500);
+  color: var(--navy-950);
+  border: 3px solid var(--bg-card);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem;
+}
+.profile-name { margin-bottom: 4px; }
+.profile-email { font-size: 0.84rem; color: var(--ink-500); margin-bottom: 12px; }
+
+.security-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.security-row:last-child { border-bottom: none; }
+.security-body strong { display: block; font-size: 0.88rem; margin-bottom: 2px; }
+.security-body p { font-size: 0.78rem; color: var(--ink-500); }
+
+.item-photo-preview {
+  width: 100%;
+  max-height: 160px;
+  object-fit: cover;
+  border-radius: var(--r-sm);
+  margin-top: 10px;
+  border: 1px solid var(--line);
+}
+.escrow-note { font-size: 0.78rem; color: var(--ink-500); margin: 4px 0 16px; line-height: 1.5; }
+
+/* ---- Virtual Card management (Profile panel) ---- */
+.vc-profile-card {
+  margin-bottom: 16px;
+}
+.vc-profile-card-inner {
+  background: linear-gradient(145deg, var(--navy-700), var(--navy-950));
+  border-radius: var(--r-md);
+  padding: 18px 20px 16px;
+  color: var(--mist-100);
+  position: relative;
+  overflow: hidden;
+  min-height: 110px;
+  box-shadow: var(--shadow-card);
+}
+.vc-profile-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+.vc-chip-sm { width: 32px; height: 24px; }
+.vc-profile-brand {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  color: var(--gold-500);
+}
+.vc-profile-number {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+}
+.vc-profile-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--mist-300);
+}
+.vc-profile-holder { font-weight: 600; }
+
+/* ---- Card details grid (toggleable fields) ---- */
+.vc-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+}
+.vc-detail-item {
+  background: var(--bg-card-soft);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+}
+.vc-detail-label {
+  display: block;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink-500);
+  margin-bottom: 4px;
+}
+.vc-detail-value-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.vc-detail-value {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--ink-900);
+  letter-spacing: 0.5px;
+}
+.vc-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--ink-400);
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 0.8rem;
+  transition: var(--ease);
+}
+.vc-toggle-btn:hover { color: var(--gold-500); }
+
+/* ---- Actions row ---- */
+.vc-actions-row {
+  display: flex;
+  gap: 10px;
+  margin: 12px 0 8px;
+  flex-wrap: wrap;
+}
+
+/* ---- Card status ---- */
+.vc-status {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--success);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+.vc-status.is-blocked { color: var(--danger); }
+
+
+/* ================================================================
+   29. VIRTUAL CARD (Overview panel)
+   NEW: A compact, realistic card preview on the overview page.
+================================================================ */
+.virtual-card-preview {
+  flex: 1;
+  min-width: 220px;
+  max-width: 340px;
+}
+.virtual-card-inner {
+  background: linear-gradient(145deg, var(--navy-700), var(--navy-950));
+  border-radius: var(--r-md);
+  padding: 18px 20px 16px;
+  color: var(--mist-100);
+  position: relative;
+  overflow: hidden;
+  min-height: 130px;
+  box-shadow: var(--shadow-card-hover);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.vc-chip {
+  width: 36px;
+  height: 26px;
+  margin-bottom: 12px;
+  display: block;
+}
+.vc-number {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+.vc-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--mist-300);
+}
+.vc-holder { font-weight: 600; }
+.vc-expiry { opacity: 0.8; }
+.vc-brand {
+  position: absolute;
+  bottom: 16px;
+  right: 20px;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  color: var(--gold-500);
+  opacity: 0.7;
+}
+.vc-hint {
+  font-size: 0.74rem;
+  color: var(--ink-500);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.vc-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+
+/* ================================================================
+   30. MODALS
+================================================================ */
+.modal-backdrop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 12, 27, 0.55);
+  padding: 20px;
+  z-index: 500;
+}
+.modal-backdrop[hidden] { display: none; }
+
+.modal-panel {
+  width: 100%;
+  max-width: 460px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-modal);
+}
+.modal-sm { max-width: 380px; }
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.modal-title { display: flex; align-items: center; gap: 8px; font-size: 1rem; }
+.modal-close-btn {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--bg-card-soft);
+  border: none;
+  color: var(--ink-500);
+  cursor: pointer;
+}
+.modal-close-btn:hover { background: var(--danger-soft); color: var(--danger); }
+.modal-body { padding: 20px; }
+
+.pin-desc { font-size: 0.86rem; color: var(--ink-500); margin-bottom: 18px; }
+.pin-box-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 14px; }
+.pin-box {
+  width: 44px; height: 52px;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 800;
+  background: var(--bg-card-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+}
+.pin-box:focus { outline: none; border-color: var(--gold-500); box-shadow: 0 0 0 3px var(--gold-glow); }
+
+.pin-summary { background: var(--bg-card-soft); border-radius: var(--r-sm); padding: 14px 16px; margin: 16px 0; }
+.pin-summary-row { display: flex; justify-content: space-between; font-size: 0.84rem; padding: 5px 0; }
+
+.modal-success-state { text-align: center; padding: 10px 0; }
+.modal-success-icon { font-size: 3rem; color: var(--success); display: block; margin-bottom: 12px; }
+.modal-success-state h4 { margin-bottom: 6px; }
+.modal-success-state p { font-size: 0.86rem; color: var(--ink-500); margin-bottom: 18px; }
+
+
+/* ================================================================
+   31. TOAST NOTIFICATIONS
+================================================================ */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 999;
+  max-width: 340px;
+}
+.toast {
+  background: var(--navy-950);
+  color: #fff;
+  padding: 13px 18px;
+  border-radius: var(--r-sm);
+  font-size: 0.84rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-modal);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.toast.is-visible { opacity: 1; transform: translateY(0); }
+.toast.is-success { border-left: 3px solid var(--success); }
+.toast.is-warning { border-left: 3px solid var(--warning); }
+.toast.is-error   { border-left: 3px solid var(--danger); }
+.toast.is-info    { border-left: 3px solid var(--gold-500); }
+
+
+/* ================================================================
+   32. MOBILE BOTTOM NAVIGATION
+================================================================ */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--bg-card);
+  border-top: 1px solid var(--line);
+  justify-content: space-around;
+  padding: 8px 4px;
+  z-index: 120;
+}
+.bottom-nav-link {
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: var(--ink-500);
+  font-size: 0.64rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+}
+.bottom-nav-link i { font-size: 1.05rem; }
+.bottom-nav-link.is-active { color: var(--gold-500); }
+
+
+/* ================================================================
+   33. RESPONSIVE BREAKPOINTS
+================================================================ */
+
+/* ---- Global overflow fix for all screens ---- */
+html, body { overflow-x: hidden; }
+
+/* ---- Tablet and below: sidebar becomes an overlay drawer ---- */
+@media (max-width: 991.98px) {
+  /* FIX: Force layout changes with !important */
+  .app-shell { grid-template-columns: 1fr !important; }
+  .main-area { grid-column: 1 !important; }
+
+  .sidebar { 
+    transform: translateX(-100%) !important; 
+    position: fixed !important;
+    z-index: 1000 !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100vh !important;
+  }
+  .app-shell.sidebar-open .sidebar { transform: translateX(0) !important; }
+
+  .sidebar-close-btn { display: flex !important; }
+  .hamburger-btn { display: flex !important; }
+
+  .header-center { display: none !important; }
+  .dash-header { grid-template-columns: 1fr auto !important; }
+
+  .overview-hero-grid,
+  .overview-mid-grid,
+  .two-col-grid,
+  .two-col-grid-wide-left,
+  .field-row,
+  .filters-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .product-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  .dash-content { padding-bottom: 90px !important; }
+  .bottom-nav { display: flex !important; }
+
+  /* Virtual card row stacks on tablet */
+  .overview-virtual-card-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .virtual-card-preview { max-width: 100% !important; }
+
+  /* Profile virtual card details grid becomes 1 column on tablet */
+  .vc-details-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ---- Small phones ---- */
+@media (max-width: 575.98px) {
+  /* FIX: Force all responsive changes with !important */
+  
+  /* Global container */
+  .app-shell { 
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow: hidden !important;
+  }
+  
+  /* Content area */
+  .dash-content { 
+    padding: 16px 12px 90px !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Sidebar - full screen overlay */
+  .sidebar { 
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+  .sidebar-brand { padding: 16px 12px !important; }
+  .brand-logo { width: 32px !important; height: 32px !important; }
+  .sidebar-user-card { padding: 14px 12px !important; }
+  .avatar { width: 32px !important; height: 32px !important; }
+  
+  /* Header - compact */
+  .dash-header { 
+    padding: 12px 12px !important;
+    grid-template-columns: 1fr auto !important;
+    gap: 8px !important;
+  }
+  .hamburger-btn { 
+    padding: 8px 10px !important; 
+    font-size: 1.3rem !important;
+    width: 40px !important;
+    height: 40px !important;
+  }
+  .user-menu-btn { padding: 6px 8px !important; }
+  
+  /* Cards - reduced padding */
+  .card { padding: 14px 12px !important; }
+  .balance-card { padding: 16px 12px !important; }
+  
+  /* Buttons - smaller */
+  .btn { font-size: 0.8rem !important; padding: 10px 14px !important; }
+  .btn-sm { font-size: 0.75rem !important; padding: 8px 12px !important; }
+  
+  /* Forms - smaller inputs */
+  .field-input { font-size: 0.85rem !important; padding: 10px 12px !important; }
+  .field-label { font-size: 0.75rem !important; }
+  
+  /* Tables - scrollable */
+  .table-responsive { overflow-x: auto !important; }
+  table { font-size: 0.8rem !important; }
+  
+  /* Balance amount */
+  .balance-amount { font-size: 1.4rem !important; }
+  
+  /* Network and bundle grids */
+  .network-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .bundle-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  
+  /* Marketplace */
+  .market-category-title { font-size: 0.95rem !important; }
+  .product-body h5 { font-size: 0.75rem !important; }
+  .product-seller { font-size: 0.6rem !important; }
+  .product-price { font-size: 0.8rem !important; }
+  .product-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  
+  /* Order cards */
+  .order-card { padding: 12px !important; }
+  .order-thumb { width: 36px !important; height: 36px !important; }
+  .order-body strong { font-size: 0.8rem !important; }
+  .order-body p { font-size: 0.7rem !important; }
+  
+  /* Beneficiary chips */
+  .beneficiary-chip { padding: 10px !important; }
+  .beneficiary-meta strong { font-size: 0.8rem !important; }
+  .beneficiary-meta small { font-size: 0.65rem !important; }
+  
+  /* Modal */
+  .modal-panel { 
+    max-width: 100% !important;
+    width: 95% !important;
+    margin: 0 auto !important;
+  }
+  
+  /* Virtual card details */
+  .vc-details-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ---- Medium screens (tablets portrait) ---- */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  /* Sidebar */
+  .sidebar { width: 260px !important; }
+  
+  /* Grids */
+  .overview-hero-grid { grid-template-columns: 1fr !important; }
+  .overview-mid-grid { grid-template-columns: 1fr !important; }
+  
+  /* Cards */
+  .card { padding: 18px !important; }
+  
+  /* Balance */
+  .balance-amount { font-size: 1.8rem !important; }
+  
+  /* Product grid */
+  .product-grid { grid-template-columns: repeat(3, 1fr) !important; }
+  
+  /* Virtual card */
+  .virtual-card-preview { max-width: 350px !important; }
+  
+  /* Content */
+  .dash-content { padding: 20px 16px 90px !important; }
+}
+
+/* ---- Large screens (desktops) ---- */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  /* Sidebar */
+  .sidebar { width: 260px !important; }
+  
+  /* Content container */
+  .dash-content { max-width: 100% !important; }
+  
+  /* Grids */
+  .overview-hero-grid { grid-template-columns: 1.6fr 1fr !important; }
+}
+
+/* ---- Large screens (1200px - 1399px) ---- */
+@media (min-width: 1200px) and (max-width: 1399.98px) {
+  /* Container */
+  .dash-content { max-width: 1140px !important; margin: 0 auto !important; }
+  
+  /* Grids */
+  .overview-hero-grid { grid-template-columns: 1.8fr 1fr !important; }
+  
+  /* Sidebar */
+  .sidebar { width: 280px !important; }
+}
+
+/* ---- Extra large screens (1400px+) ---- */
+@media (min-width: 1400px) {
+  /* Container */
+  .dash-content { max-width: 1320px !important; margin: 0 auto !important; }
+  
+  /* Grids */
+  .overview-hero-grid { grid-template-columns: 2fr 1fr !important; }
+  
+  /* Sidebar */
+  .sidebar { width: 300px !important; }
+  
+  /* Cards */
+  .balance-amount { font-size: 2.2rem !important; }
+  
+  /* Product grid */
+  .product-grid { grid-template-columns: repeat(4, 1fr) !important; }
+}
+
+/* ---- Landscape orientation for mobile ---- */
+@media (max-height: 500px) and (orientation: landscape) {
+  /* Header */
+  .dash-header { padding: 8px 12px !important; }
+  
+  /* Content */
+  .dash-content { padding: 8px 12px 80px !important; }
+  
+  /* Cards */
+  .card { padding: 12px !important; }
+  
+  /* Sections */
+  .panel-section { padding: 12px 0 !important; }
+}
+
+/* ---- High DPI/Retina displays ---- */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  img { image-rendering: -webkit-optimize-contrast !important; }
+  .avatar img { image-rendering: -webkit-optimize-contrast !important; }
+  .product-thumb img { image-rendering: -webkit-optimize-contrast !important; }
+  .order-thumb img { image-rendering: -webkit-optimize-contrast !important; }
+}

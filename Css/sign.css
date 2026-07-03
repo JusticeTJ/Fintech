@@ -1,0 +1,677 @@
+/*
+================================================================
+  NOVA FINANCE — Auth Pages Stylesheet
+  File:    css/auth.css
+  Pages:   pages/signup.html  |  pages/login.html
+
+  LAYOUT CONCEPT (mirrors the reference image):
+  ┌─────────────────────┬──────────────────────┐
+  │   FORM  (left 50%)  │  BG IMAGE (right 50%)│
+  └─────────────────────┴──────────────────────┘
+
+  MOBILE: image moves to top strip, form fills full width below.
+
+  FONTS: Sora (headings) + Figtree (body) — same as index.html
+  COLOURS: Navy Blue (#0A1628) primary | Gold (#C9A84C) accent
+================================================================
+*/
+
+
+/* ── Google Fonts import ──────────────────────────────────────
+   Imports Sora (bold headings) and Figtree (body text).
+   Both are loaded from Google's CDN so no file download needed.
+   display=swap means text shows immediately in a fallback font
+   while the custom font loads in the background.
+─────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Figtree:wght@400;500;600;700&display=swap');
+
+
+/* ── CSS Custom Properties (variables) ───────────────────────
+   Variables defined once here, reused everywhere below.
+   Changing one value here updates the whole stylesheet.
+─────────────────────────────────────────────────────────────── */
+:root {
+  --navy-900:  #0A1628;  /* Darkest navy — main background */
+  --navy-800:  #111E34;  /* Slightly lighter navy — card surfaces */
+  --navy-700:  #1B2A4A;  /* Input background colour */
+  --gold:      #C9A84C;  /* Brand gold accent */
+  --gold-dark: #A8872E;  /* Darker gold for hover states */
+  --white:     #FFFFFF;
+  --text-muted: #8A9BB0; /* Dim text for labels and hints */
+  --border:    rgba(255, 255, 255, 0.08); /* Subtle white border on dark bg */
+  --border-focus: #C9A84C;               /* Gold border on input focus */
+  --danger:    #EF4444;  /* Red for error messages */
+  --success:   #22C55E;  /* Green for success messages */
+  --font-head: 'Sora', sans-serif;
+  --font-body: 'Figtree', sans-serif;
+}
+
+
+/* ── Global Reset ─────────────────────────────────────────────
+   box-sizing: border-box makes padding + border included in the
+   element's total width/height. This prevents layout surprises.
+   Without this, a 200px wide element with 10px padding would
+   actually be 220px wide. border-box keeps it at 200px.
+─────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box; /* Include padding/border in element size */
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body); /* Figtree for all body text */
+  background-color: var(--navy-900);
+  color: var(--white);
+  /* antialiased = smoother font rendering on screens */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Remove default underline on links; add transition for hover */
+a {
+  text-decoration: none;
+  color: var(--gold);
+  transition: color 0.25s ease; /* Smooth colour change on hover */
+}
+a:hover { color: var(--gold-dark); }
+
+
+/* ── Page Wrapper ─────────────────────────────────────────────
+   display: flex puts the two children (left + right) side by side.
+   min-height: 100vh makes it fill the full screen height.
+   flex-direction: row = children placed left to right (default).
+─────────────────────────────────────────────────────────────── */
+.auth-wrapper {
+  display: flex;          /* Flexbox: lays out children in a row */
+  flex-direction: row;    /* Left-to-right layout */
+  min-height: 100vh;      /* Fill full browser height */
+  width: 100%;
+}
+
+
+/* ── LEFT SIDE — Form Panel ───────────────────────────────────
+   flex: 0 0 50% means: don't grow, don't shrink, be exactly 50%.
+   This fixes the left panel at exactly half the screen width.
+   overflow-y: auto allows the form to scroll if it's taller
+   than the screen (e.g. on small laptops).
+─────────────────────────────────────────────────────────────── */
+.auth-left {
+  flex: 0 0 50%;          /* Fixed at 50% of the wrapper width */
+  background-color: var(--navy-900); /* Deep navy background */
+  display: flex;
+  flex-direction: column; /* Stack nav + form vertically */
+  padding: 0;
+  overflow-y: auto;       /* Allow vertical scrolling if content overflows */
+  position: relative;     /* Needed for any absolutely-positioned children */
+}
+
+
+/* ── RIGHT SIDE — Background Image Panel ─────────────────────
+   flex: 1 means: take all remaining space after the left panel.
+   background-size: cover stretches the image to fill the area
+   without distorting it (may crop edges).
+   background-position: center keeps the most important part
+   of the image (the centre) always visible.
+─────────────────────────────────────────────────────────────── */
+.auth-right {
+  flex: 1;                 /* Fill all remaining horizontal space */
+  background-size: cover;  /* Stretch image to fill, crop edges */
+  background-position: center center; /* Centre the image */
+  background-repeat: no-repeat;
+  position: relative;
+  min-height: 300px;       /* Minimum height so it doesn't collapse */
+}
+
+/* Dark overlay on top of background image for visual depth.
+   ::after creates a pseudo-element (a virtual child div).
+   inset: 0 is shorthand for top:0 right:0 bottom:0 left:0.
+   This makes the overlay cover the entire parent element. */
+.auth-right::after {
+  content: '';             /* Required for pseudo-elements to show */
+  position: absolute;
+  inset: 0;                /* Cover the full right panel */
+  background: linear-gradient(
+    to right,
+    rgba(10, 22, 40, 0.65) 0%,   /* Darker navy fade from left edge */
+    rgba(10, 22, 40, 0.10) 100%  /* Nearly transparent at right edge */
+  );
+}
+
+/* Signup page uses hero-bg-1 */
+.auth-right--signup {
+  background-image: url('/images/business/business-img-3-min.jpg');
+}
+
+/* Login page uses hero-bg-2 */
+.auth-right--login {
+  background-image: url('/images/business/business-img-4-min.jpg');
+}
+
+
+/* ── Top Navigation Bar ───────────────────────────────────────
+   display: flex + align-items: center + justify-content:
+   space-between puts the logo on the left and nav links on
+   the right, with space between them.
+─────────────────────────────────────────────────────────────── */
+.auth-nav {
+  display: flex;
+  align-items: center;            /* Vertically centre logo + links */
+  justify-content: space-between; /* Logo left, links right */
+  padding: 24px 40px;             /* Space inside nav */
+  border-bottom: 1px solid var(--border); /* Thin separator line */
+  flex-shrink: 0;                 /* Don't shrink when form is tall */
+}
+
+/* Logo wrapper — flex to put img and text side by side */
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;              /* Space between image and text */
+  text-decoration: none;
+}
+
+/* The actual logo image — user will replace src with their logo */
+.brand-logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;    /* Fit within the box without cropping */
+  border-radius: 6px;
+}
+
+/* "Nova" brand name text */
+.brand-name {
+  font-family: var(--font-head);
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--white);
+  letter-spacing: 1px;
+}
+
+/* The gold period after "Nova" — the signature brand element */
+.brand-dot {
+  color: var(--gold); /* Makes only the period gold */
+}
+
+/* Nav links container */
+.auth-nav-links {
+  display: flex;
+  gap: 28px; /* Space between each nav link */
+}
+
+/* Individual nav link */
+.auth-nav-links a {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: color 0.25s ease;
+}
+.auth-nav-links a:hover { color: var(--white); }
+/* Highlight the active/current page link */
+.auth-nav-links a.active { color: var(--gold); }
+
+
+/* ── Form Content Container ───────────────────────────────────
+   This div holds everything below the nav: eyebrow, title,
+   subtitle, and the form itself.
+   flex: 1 makes it fill all remaining vertical space in
+   .auth-left after the nav takes its height.
+   We then use flex + justify-content: center to vertically
+   centre the form content in that remaining space.
+─────────────────────────────────────────────────────────────── */
+.auth-form-container {
+  flex: 1;                 /* Fill remaining height after nav */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Vertically centre the form */
+  padding: 40px 40px;      /* Space around the form content */
+  max-width: 460px;        /* Never wider than 460px */
+}
+
+
+/* ── Eyebrow text ─────────────────────────────────────────────
+   Small uppercase label above the main heading.
+   letter-spacing: wider makes all-caps text more readable.
+─────────────────────────────────────────────────────────────── */
+.auth-eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 2.5px;  /* Wide spacing on uppercase label */
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+
+/* ── Page Title (H1) ──────────────────────────────────────────
+   clamp() sets a responsive font size:
+     min 1.6rem | preferred 3.5vw | max 2.6rem
+   It automatically scales between min and max based on viewport.
+─────────────────────────────────────────────────────────────── */
+.auth-title {
+  font-family: var(--font-head);
+  font-size: clamp(1.6rem, 3.5vw, 2.6rem); /* Responsive font size */
+  font-weight: 800;
+  color: var(--white);
+  line-height: 1.1;
+  margin-bottom: 10px;
+}
+
+/* The gold period at the end of the title (e.g. "Create new account.") */
+.title-dot {
+  color: var(--gold);
+}
+
+
+/* ── Subtitle / secondary line under title ────────────────────*/
+.auth-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+}
+.auth-subtitle a {
+  color: var(--gold);
+  font-weight: 600;
+}
+.auth-subtitle a:hover { color: var(--gold-dark); }
+
+
+/* ── Form element ─────────────────────────────────────────────
+   display: flex + flex-direction: column stacks all form
+   children vertically.
+─────────────────────────────────────────────────────────────── */
+.auth-form {
+  display: flex;
+  flex-direction: column; /* Stack fields vertically */
+  gap: 6px;               /* Small gap between input groups */
+}
+
+
+/* ── Two-column row (First name + Last name) ──────────────────
+   display: grid + grid-template-columns: 1fr 1fr creates two
+   equal-width columns. 1fr = "one fraction of available space".
+   gap adds space between the two columns.
+─────────────────────────────────────────────────────────────── */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two equal columns */
+  gap: 14px;
+}
+
+
+/* ── Input Group (wrapper for label + input + error) ──────────*/
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+
+
+/* ── Label ────────────────────────────────────────────────────*/
+.input-group label {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);  /* Dim grey label text */
+  letter-spacing: 0.5px;
+}
+
+
+/* ── Input Wrapper ────────────────────────────────────────────
+   position: relative allows the icon inside to be positioned
+   absolutely relative to this wrapper, not the whole page.
+─────────────────────────────────────────────────────────────── */
+.input-wrap {
+  position: relative; /* Needed so icon can be abs-positioned inside */
+  display: flex;
+  align-items: center;
+}
+
+
+/* ── Text / Email / Password Input ───────────────────────────
+   width: 100% fills the full column width.
+   padding-right: 44px leaves room for the icon on the right.
+   border: 1px solid transparent starts with invisible border
+   so the layout doesn't shift when border-color changes on focus.
+─────────────────────────────────────────────────────────────── */
+.auth-input {
+  width: 100%;
+  background-color: var(--navy-700); /* Slightly lighter than page bg */
+  border: 1.5px solid var(--border); /* Subtle border */
+  border-radius: 8px;                /* Rounded corners */
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  padding: 13px 44px 13px 16px;     /* Right padding leaves room for icon */
+  outline: none;                     /* Remove default browser outline */
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Focus state: gold border + soft gold glow behind the input */
+.auth-input:focus {
+  border-color: var(--gold);         /* Gold border when typing */
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15); /* Soft glow */
+}
+
+/* Error state: red border to highlight the problem field */
+.auth-input.input-error {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+/* Placeholder text colour */
+.auth-input::placeholder {
+  color: rgba(138, 155, 176, 0.5);  /* Half-transparent muted text */
+}
+
+
+/* ── Input Icon (SVG on the right side of each input) ─────────
+   position: absolute takes the icon out of normal flow.
+   right: 14px positions it 14px from the right edge of .input-wrap.
+   transform: translateY(-50%) + top: 50% = vertically centred.
+   pointer-events: none means clicks pass through to the input.
+─────────────────────────────────────────────────────────────── */
+.input-icon {
+  position: absolute;   /* Float inside .input-wrap */
+  right: 14px;          /* 14px from right edge */
+  top: 50%;
+  transform: translateY(-50%); /* Vertically centre the icon */
+  pointer-events: none; /* Clicks go through to the input behind */
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  line-height: 1;
+}
+.input-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+
+/* ── Eye Toggle Button (password visibility) ──────────────────
+   cursor: pointer shows the hand cursor when hovering.
+   background: none + border: none removes default button styles.
+   This button replaces the static icon for the password field.
+─────────────────────────────────────────────────────────────── */
+.eye-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;       /* No button background */
+  border: none;           /* No button border */
+  cursor: pointer;        /* Hand cursor on hover */
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  padding: 4px;           /* Small clickable area */
+  transition: color 0.2s ease;
+}
+.eye-toggle:hover { color: var(--gold); }
+.eye-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+
+/* ── Field Error Message ──────────────────────────────────────
+   display: none hides this by default.
+   JS adds class 'visible' to show it when validation fails.
+─────────────────────────────────────────────────────────────── */
+.field-error {
+  display: none;          /* Hidden until JS makes it visible */
+  font-size: 0.72rem;
+  color: var(--danger);   /* Red error text */
+  margin-top: 2px;
+}
+.field-error.visible {
+  display: block;         /* Show when JS adds .visible class */
+}
+
+
+/* ── Checkbox row (Remember me / Terms) ───────────────────────*/
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.checkbox-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--gold); /* Colours the checkbox tick gold */
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.checkbox-row label {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: 1.4;
+}
+.checkbox-row label a { font-weight: 600; }
+
+/* Forgot password link aligned to the right */
+.forgot-link {
+  display: block;
+  text-align: right;
+  font-size: 0.8rem;
+  color: var(--gold);
+  font-weight: 600;
+  margin-bottom: 24px;
+  margin-top: -8px;
+}
+
+
+/* ── Button Row ───────────────────────────────────────────────
+   display: flex puts both buttons side by side.
+   gap adds space between them.
+   margin-top: 24px separates the buttons from the last field.
+─────────────────────────────────────────────────────────────── */
+.auth-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap; /* Wrap to next line on very small screens */
+}
+
+
+/* ── Primary Button (gold — main CTA) ────────────────────────
+   flex: 1 makes it stretch to fill remaining space.
+   min-width: 160px prevents it from getting too narrow.
+─────────────────────────────────────────────────────────────── */
+.btn-primary {
+  flex: 1;                    /* Grow to fill available space */
+  min-width: 160px;
+  padding: 13px 24px;
+  background-color: var(--gold);
+  color: #0A1628;             /* Dark navy text on gold button */
+  border: 2px solid var(--gold);
+  border-radius: 50px;        /* Pill shape — matches reference image */
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.25s ease, transform 0.15s ease;
+  text-align: center;
+  white-space: nowrap;
+}
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--gold-dark);
+  border-color: var(--gold-dark);
+  transform: translateY(-2px); /* Subtle lift on hover */
+}
+.btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+
+/* ── Secondary Button (outline — "Back to Home") ──────────────*/
+.btn-secondary {
+  flex: 1;
+  min-width: 130px;
+  padding: 13px 24px;
+  background-color: rgba(255, 255, 255, 0.06); /* Very subtle white fill */
+  color: var(--text-muted);
+  border: 1.5px solid var(--border);
+  border-radius: 50px;        /* Pill shape to match primary */
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  text-align: center;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;      /* Remove underline (it's an <a> tag) */
+}
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.10);
+  color: var(--white);
+}
+
+
+/* ── Alert Banners (success / error at top of form) ───────────
+   aria-live="polite" on these elements (set in HTML) means
+   screen readers will announce the text when it appears.
+─────────────────────────────────────────────────────────────── */
+.auth-alert {
+  display: none;              /* Hidden by default */
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+.auth-alert.visible {
+  display: flex;              /* Show when JS adds .visible */
+}
+.auth-alert svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Success variant — green tint */
+.auth-alert-success {
+  background-color: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  color: #86EFAC; /* Light green — readable on dark bg */
+}
+
+/* Error variant — red tint */
+.auth-alert-error {
+  background-color: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #FCA5A5; /* Light red — readable on dark bg */
+}
+
+/* The text span inside the alert */
+.auth-alert-msg { flex: 1; }
+
+
+/* ── Switch link at the bottom ────────────────────────────────
+   e.g. "Don't have an account? Sign Up"
+─────────────────────────────────────────────────────────────── */
+.auth-switch {
+  margin-top: 28px;
+  font-size: 0.86rem;
+  color: var(--text-muted);
+}
+.auth-switch a {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+
+/* ── Divider line ("or") ──────────────────────────────────────*/
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+.auth-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.auth-divider-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+
+/* ================================================================
+   RESPONSIVE — Mobile Breakpoints
+
+   @media (max-width: 767px) applies only when the screen is
+   767px wide or narrower (phones and small tablets).
+   Everything inside this block overrides the desktop styles above.
+================================================================ */
+@media (max-width: 767px) {
+
+  /* Stack the two panels vertically instead of side by side */
+  .auth-wrapper {
+    flex-direction: column; /* column = top-to-bottom on mobile */
+  }
+
+  /* Image panel moves to the TOP and becomes a fixed-height strip */
+  .auth-right {
+    flex: none;           /* Remove the flex-grow behaviour */
+    height: 200px;        /* Fixed height for the top image strip */
+    order: -1;            /* order: -1 moves this BEFORE .auth-left in DOM */
+  }
+
+  /* Form panel fills full width */
+  .auth-left {
+    flex: none;
+    width: 100%;          /* Full screen width */
+  }
+
+  /* Tighter padding on mobile */
+  .auth-nav {
+    padding: 16px 20px;
+  }
+
+  .auth-form-container {
+    padding: 28px 20px;
+    max-width: 100%;      /* Remove the max-width limit on mobile */
+    justify-content: flex-start; /* Don't centre vertically — just start from top */
+  }
+
+  /* Single-column layout for the name row on mobile */
+  .form-row {
+    grid-template-columns: 1fr; /* One column on mobile */
+  }
+
+  /* Stack buttons vertically on very small screens */
+  .auth-buttons {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    min-width: 100%;
+    flex: none;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 400px) {
+  .auth-nav { padding: 14px 16px; }
+  .auth-form-container { padding: 20px 16px; }
+  .auth-nav-links { gap: 16px; }
+}

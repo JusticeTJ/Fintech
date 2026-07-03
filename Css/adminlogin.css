@@ -1,0 +1,330 @@
+/* ================================================================
+   ADMIN AUTH STYLES — NOVA Finance Admin Console Login
+   ================================================================
+   This file only styles pages/admin-login.html. It's kept separate
+   from css/auth.css (the user login styles) on purpose, so the two
+   flows can be edited independently — but it reuses the same brand
+   colours and fonts so the admin page still feels like part of the
+   same product, not a different site.
+
+   Layout approach: a CSS Grid with two columns that fill the screen.
+   No Bootstrap grid classes are used here — plain HTML/CSS/JS only,
+   per the requirement for this specific page.
+   ================================================================ */
+
+
+/* ----------------------------------------------------------------
+   1. DESIGN TOKENS (CSS Custom Properties)
+   ----------------------------------------------------------------
+   These are just named variables. Writing var(--gold) everywhere
+   instead of typing #C9A84C means that if the brand colour ever
+   changes, it only has to be updated in this one place.
+
+   NOTE FOR ROMAN: if css/style.css already defines variables with
+   different names for these same colours, swap the values below
+   to reference those instead, so there's one single source of
+   truth. These are written standalone here since I don't have
+   that file's exact variable names in front of me.
+------------------------------------------------------------------- */
+:root {
+  --navy:       #0A1628; /* primary brand colour — page background + dark panel */
+  --navy-soft:  #122238; /* slightly lighter than --navy, used for input fields so they read against the dark panel */
+  --gold:       #C9A84C; /* accent brand colour — buttons, icons, the heading "period" */
+  --gold-soft:  rgba(201, 168, 76, 0.15); /* gold at low opacity, used for the faint grid lines and rings */
+  --white:      #FFFFFF;
+  --text-muted: rgba(255, 255, 255, 0.65); /* softer text on the dark panel, e.g. subtext and labels */
+  --error-red:  #E06666;
+
+  --font-heading: "Sora", sans-serif;   /* used for the page heading, matches the rest of the site */
+  --font-body:    "Figtree", sans-serif; /* used for everything else: labels, inputs, buttons, footnotes */
+}
+
+
+/* ----------------------------------------------------------------
+   2. RESET / BASE
+   ----------------------------------------------------------------
+   Browsers each ship slightly different default margins and
+   sizing rules. This removes that inconsistency so the layout
+   below behaves the same way everywhere.
+------------------------------------------------------------------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* padding and border are now counted INSIDE an element's width, instead of added on top of it */
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--navy);
+  min-height: 100vh;
+}
+
+
+/* ----------------------------------------------------------------
+   3. PAGE LAYOUT — the two-panel split screen
+   ----------------------------------------------------------------
+   display: grid with two equal "1fr" columns splits the full
+   width of the screen into two even halves automatically — no
+   manual percentage math needed.
+------------------------------------------------------------------- */
+.admin-auth-wrapper {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+/* On tablets and phones, two side-by-side panels feel cramped, so
+   we collapse to a single column and hide the decorative panel
+   entirely (see section 4) — the form gets the full screen instead. */
+@media (max-width: 900px) {
+  .admin-auth-wrapper {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ----------------------------------------------------------------
+   4. LEFT PANEL — decorative visual side
+   ----------------------------------------------------------------
+   This is the panel that makes the admin page visually distinct
+   from the user login at a glance (where the equivalent panel is
+   on the RIGHT, holding a photo). It carries no real information,
+   which is why it's marked aria-hidden in the HTML.
+------------------------------------------------------------------- */
+.admin-auth-visual {
+  position: relative; /* lets the grid/rings inside be positioned relative to this panel, not the whole page */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: linear-gradient(160deg, var(--navy) 0%, #060d18 100%);
+  overflow: hidden; /* the rings below are deliberately oversized and would otherwise cause scrollbars */
+}
+
+@media (max-width: 900px) {
+  .admin-auth-visual {
+    display: none; /* nothing essential is lost — it's purely decorative */
+  }
+}
+
+/* A faint grid pattern, drawn with two repeating gradients instead
+   of an image file. This keeps the page self-contained, with no
+   extra image asset to source or manage. */
+.visual-grid {
+  position: absolute;
+  inset: 0; /* shorthand for top/right/bottom/left: 0 — stretches to fill the parent panel */
+  background-image:
+    linear-gradient(var(--gold-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--gold-soft) 1px, transparent 1px);
+  background-size: 48px 48px; /* size of one grid square */
+  opacity: 0.4;
+}
+
+/* The concentric rings echo the same motif used on the user auth
+   pages, but as a single static ring with two pseudo-element
+   "echoes" rather than several animated ones — calmer and more
+   "operational" than "welcoming", which fits an admin screen. */
+.visual-rings {
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border: 1px solid var(--gold-soft);
+  border-radius: 50%; /* turns the square box into a circle */
+}
+
+.visual-rings::before,
+.visual-rings::after {
+  content: ""; /* required for pseudo-elements to render at all, even though it's empty */
+  position: absolute;
+  inset: -60px; /* expands this ring outward beyond its parent's edges on all four sides */
+  border: 1px solid var(--gold-soft);
+  border-radius: 50%;
+}
+
+.visual-rings::after {
+  inset: -120px; /* the outermost ring, expanded further still */
+}
+
+.visual-icon {
+  position: relative;
+  z-index: 1; /* sits above the grid/rings, which are absolutely positioned behind it */
+  font-size: 42px;
+  color: var(--gold);
+}
+
+.visual-caption {
+  position: relative;
+  z-index: 1;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+  max-width: 280px;
+}
+
+
+/* ----------------------------------------------------------------
+   5. RIGHT PANEL — the form side
+   ----------------------------------------------------------------
+------------------------------------------------------------------- */
+.admin-auth-form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--navy);
+  padding: 40px 24px;
+}
+
+.form-inner {
+  width: 100%;
+  max-width: 380px; /* keeps the form a comfortable width to read/use even on a very wide monitor */
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-decoration: none;
+  margin-bottom: 32px;
+}
+
+.back-link:hover {
+  color: var(--white);
+}
+
+.form-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1.5px; /* spaces the small uppercase label out, a common way to make tiny text still feel deliberate */
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.form-heading {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+
+/* The site-wide "gold period" signature: the final character of a
+   heading is styled in the accent colour instead of plain white. */
+.gold-period {
+  color: var(--gold);
+}
+
+.form-subtext {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 32px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-bottom: 6px;
+}
+
+/* Wraps an input so an icon can sit visually inside the field,
+   instead of as a separate element floating next to it. */
+.input-with-icon {
+  position: relative; /* gives the icon and toggle button below something to position themselves against */
+  display: flex;
+  align-items: center;
+}
+
+.input-with-icon i {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  pointer-events: none; /* lets a click "pass through" the icon and land on the input underneath it */
+}
+
+.input-with-icon input {
+  width: 100%;
+  padding: 12px 14px 12px 40px; /* extra left padding makes room for the icon so text doesn't overlap it */
+  background-color: var(--navy-soft);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px; /* rounded, but not a full pill — pill shape is reserved for the button, to tell them apart */
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+}
+
+.input-with-icon input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.input-with-icon input:focus {
+  outline: none;
+  border-color: var(--gold); /* the gold border is the only focus indicator — kept visible for keyboard users */
+}
+
+/* The show/hide password button sits inside the field, on the right. */
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.95rem;
+  padding: 4px;
+}
+
+.toggle-password:hover {
+  color: var(--white);
+}
+
+.form-error {
+  color: var(--error-red);
+  font-size: 0.8rem;
+  margin: -8px 0 16px;
+  display: none; /* hidden by default; js/admin-auth.js adds .visible when there's something to show */
+}
+
+.form-error.visible {
+  display: block;
+}
+
+/* The pill-shaped button matches the user-facing pages, so the
+   product still feels like one system even though this page is
+   otherwise styled to look visually distinct from it. */
+.btn-pill {
+  width: 100%;
+  padding: 13px;
+  background-color: var(--gold);
+  color: var(--navy);
+  border: none;
+  border-radius: 999px; /* a radius this large on a short element rounds it into a full pill/capsule shape */
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.btn-pill:hover {
+  opacity: 0.9;
+}
+
+.btn-pill:disabled {
+  opacity: 0.6;
+  cursor: not-allowed; /* used while the form is "submitting", so it can't be double-clicked */
+}
+
+.form-footnote {
+  margin-top: 24px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-align: center;
+}
