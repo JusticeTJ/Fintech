@@ -682,9 +682,9 @@ h1, h2, h3, h4, h5, h6 {
    ERROR: url('/images/...') looks for images from domain root (e.g., localhost/images/...)
    FIX: url('images/...') uses relative path from current file location
    This ensures images load correctly whether on localhost or live server */
-.slide-1-bg { background-image: url('/images/hero-bg-1-min.jpg'); }
-.slide-2-bg { background-image: url('/images/hero-bg-2-min.jpg'); }
-.slide-3-bg { background-image: url('/images/456b54ba7211e6114eaa3550cc2cbda8.jpg'); }
+.slide-1-bg { background-image: url('../images/hero-bg-1-min.jpg'); }
+.slide-2-bg { background-image: url('../images/hero-bg-2-min.jpg'); }
+.slide-3-bg { background-image: url('../images/456b54ba7211e6114eaa3550cc2cbda8.jpg'); }
 
 /* Dark overlay on top of each background image.
    Without this, white text would be unreadable on photos.

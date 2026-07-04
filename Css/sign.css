@@ -142,12 +142,12 @@ a:hover { color: var(--gold-dark); }
 
 /* Signup page uses hero-bg-1 */
 .auth-right--signup {
-  background-image: url('/images/business/business-img-3-min.jpg');
+  background-image: url('../images/business/business-img-3-min.jpg');
 }
 
 /* Login page uses hero-bg-2 */
 .auth-right--login {
-  background-image: url('/images/business/business-img-4-min.jpg');
+  background-image: url('../images/business/business-img-4-min.jpg');
 }
 
 
